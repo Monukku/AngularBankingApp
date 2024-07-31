@@ -1,0 +1,2 @@
+# AngularBankingApp
+Modularized Angular app
