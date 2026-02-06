@@ -1,0 +1,17 @@
+<div class="card-list">
+    <div class="card-card" *ngFor="let card of cards">
+      <mat-card>
+        <mat-card-title>{{ card.name }}</mat-card-title>
+        <mat-card-content>
+          <p>Card Number: {{ card.number }}</p>
+          <p>Expiration Date: {{ card.expirationDate }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="viewCard(card.id)">View</button>
+          <button mat-button (click)="editCard(card.id)">Edit</button>
+          <button mat-button (click)="deleteCard(card.id)">Delete</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+  

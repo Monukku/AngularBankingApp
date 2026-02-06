@@ -1,0 +1,19 @@
+.loan-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  
+    .loan-card {
+      width: 300px;
+      margin: 10px;
+  
+      mat-card {
+        padding: 20px;
+        text-align: center;
+        mat-card-title {
+          font-size: 1.5em;
+        }
+      }
+    }
+  }
+  

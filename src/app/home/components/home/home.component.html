@@ -1,0 +1,113 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <button mat-button [matMenuTriggerFor]="accountsMenu">
+      Accounts <mat-icon>account_balance</mat-icon>
+    </button>
+    <mat-menu #accountsMenu="matMenu">
+      <button mat-menu-item [routerLink]="['/accounts/account-management']">
+        Account Management
+      </button>
+      <button mat-menu-item [routerLink]="['/accounts/account-summary']">
+        Account Summary
+      </button>
+    </mat-menu>
+
+    <button mat-button [matMenuTriggerFor]="loansMenu">
+      Loans<mat-icon class="indian-rupee-icon">₹</mat-icon>
+    </button>
+    <mat-menu #loansMenu="matMenu">
+      <button mat-menu-item [routerLink]="['/loans/loan-create']">
+        Apply for Loan
+      </button>
+      <button mat-menu-item [routerLink]="['/loans/loan-status']">
+        Loan Status
+      </button>
+    </mat-menu>
+
+    <button mat-button [matMenuTriggerFor]="cardsMenu">
+      Cards <mat-icon>credit_card</mat-icon>
+    </button>
+    <mat-menu #cardsMenu="matMenu">
+      <button mat-menu-item [routerLink]="['/cards/card-management']">
+        Card Management
+      </button>
+      <button mat-menu-item [routerLink]="['/cards/card-summary']">
+        Card Summary
+      </button>
+    </mat-menu>
+
+    <button mat-button [matMenuTriggerFor]="transactionsMenu">
+      Transactions <mat-icon>history</mat-icon>
+    </button>
+    <mat-menu #transactionsMenu="matMenu">
+      <button
+        mat-menu-item
+        [routerLink]="['/transactions/transaction-history']"
+      >
+        Transaction History
+      </button>
+      <button
+        mat-menu-item
+        [routerLink]="['/transactions/transaction-summary']"
+      >
+        Transaction Summary
+      </button>
+    </mat-menu>
+
+    <button mat-button [matMenuTriggerFor]="settingsMenu">
+      Settings <mat-icon>settings</mat-icon>
+    </button>
+    <mat-menu #settingsMenu="matMenu">
+      <button mat-menu-item [routerLink]="['/profile/user-profile']">
+        Profile
+      </button>
+      <button mat-menu-item [routerLink]="['/preferences']">Preferences</button>
+    </mat-menu>
+
+    <button mat-button [matMenuTriggerFor]="moreMenu">
+      More <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #moreMenu="matMenu">
+      <button mat-menu-item [routerLink]="['/help']">Help</button>
+      <button mat-menu-item [routerLink]="['/contact']">Contact</button>
+    </mat-menu>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div class="home-content">
+  <section class="hero-section">
+    <p>
+      Your trusted partner for all your financial needs. Explore our services
+      and manage your accounts with ease.
+    </p>
+    <button mat-raised-button color="primary" [routerLink]="['/get-started']">
+      Get Started
+    </button>
+  </section>
+
+  <section class="features">
+    <div class="feature-item">
+      <mat-icon>account_balance</mat-icon>
+      <h2>Account Management</h2>
+      <p>
+        Manage your accounts effortlessly with our comprehensive tools and
+        features.
+      </p>
+    </div>
+    <div class="feature-item">
+      <mat-icon>attach_money</mat-icon>
+      <h2>Loans</h2>
+      <p>Apply for loans with competitive rates and flexible terms.</p>
+    </div>
+    <div class="feature-item">
+      <mat-icon>credit_card</mat-icon>
+      <h2>Cards</h2>
+      <p>Explore our range of credit and debit cards tailored to your needs.</p>
+    </div>
+    <div class="feature-item">
+      <mat-icon>history</mat-icon>
+      <h2>Transactions</h2>
+      <p>Track your transactions and view detailed statements with ease.</p>
+    </div>
+  </section>
+</div>

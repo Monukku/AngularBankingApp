@@ -1,0 +1,22 @@
+<!-- src/app/components/manage-beneficiaries/manage-beneficiaries.component.html -->
+<div class="manage-beneficiaries-container">
+  <div class="manage-beneficiaries">
+    <h2>Manage Beneficiaries</h2>
+    <ul>
+      <li *ngFor="let beneficiary of beneficiaries">{{ beneficiary.name }} ({{ beneficiary.accountNumber }})</li>
+    </ul>
+    <form (ngSubmit)="addBeneficiary(newBeneficiary)">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput id="name" [(ngModel)]="newBeneficiary.name" name="name" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Account Number</mat-label>
+        <input matInput id="accountNumber" [(ngModel)]="newBeneficiary.accountNumber" name="accountNumber" required>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit">Add Beneficiary</button>
+    </form>
+  </div>
+</div>

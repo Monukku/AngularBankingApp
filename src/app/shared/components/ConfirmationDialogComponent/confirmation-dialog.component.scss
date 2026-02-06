@@ -1,0 +1,92 @@
+// Define color variables for easy theme management
+$primary-color: #6200ea; // Deep purple
+$accent-color: #03dac6; // Teal
+$text-color: #ffffff; // Text color white
+$background-color: black; // Dark background
+$button-hover-color: lighten($accent-color, 10%);
+$error-color: #cf6679; // Light red for error
+$box-shadow-color: rgba(0, 0, 0, 0.3);
+
+:host {
+  display: block;
+  font-family: "Roboto", sans-serif;
+}
+
+.dialog-container {
+  background-color: $background-color;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px $box-shadow-color;
+  padding: 20px;
+  color: $text-color;
+
+  .dialog-header {
+    background-color: darken($background-color, 10%);
+    padding: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    text-align: center;
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: $accent-color;
+    }
+  }
+
+  .dialog-content {
+    padding: 20px;
+    text-align: center;
+
+    p {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-top: 1px solid lighten($background-color, 10%);
+    background-color: darken($background-color, 5%);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+
+    button {
+      width: 120px;
+      padding: 10px;
+      font-size: 16px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      border-radius: 4px;
+
+      &:first-child {
+        background-color: $error-color;
+        color: $text-color;
+
+        &:hover {
+          background-color: darken($error-color, 10%);
+          transform: translateY(-2px);
+        }
+      }
+
+      &:last-child {
+        background-color: $accent-color;
+        color: $text-color;
+
+        &:hover {
+          background-color: $button-hover-color;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
+
+::ng-deep .mat-dialog-container {
+  width: 100%;
+  max-width: 400px; // Ensure the dialog box doesn't become too wide
+  background-color: $background-color; // Ensure the background color is consistent
+  border-radius: 8px;
+  padding: 0; // Remove any default padding
+}

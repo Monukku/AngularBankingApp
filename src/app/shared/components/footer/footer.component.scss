@@ -1,0 +1,35 @@
+/* footer.component.scss */
+footer {
+    background-color: #333; /* Dark background for the footer */
+    color: #fff; /* White text color */
+    text-align: center;
+    padding: 20px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+  
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  
+    .social-links {
+      margin-top: 10px;
+  
+      a {
+        color: #5cb3c9; /* White color for icons */
+        margin: 0 10px;
+        text-decoration: none;
+        font-size: 20px;
+  
+        &:hover {
+          color: #f01c10; /* Light blue color on hover */
+        }
+      }
+  
+      i {
+        font-size: 20px;
+      }
+    }
+  }
+  

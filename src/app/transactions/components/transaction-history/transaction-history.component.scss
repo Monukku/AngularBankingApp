@@ -1,0 +1,58 @@
+/* src/app/components/transaction-history/transaction-history.component.scss */
+
+.transaction-history {
+    width: 100%;
+    max-width: 800px; /* Adjust max-width as per your design requirements */
+    margin: 20px auto; /* Add margin to create space around the component and center align horizontally */
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #ffffff; /* White background */
+    overflow-x: auto; /* Enable horizontal scroll if needed */
+  }
+  
+  h2 {
+    text-align: center;
+    font-size: 1.8em;
+    color: #3c8bd0; /* Blue color for the heading */
+    margin-bottom: 20px; /* Space below the heading */
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse; /* Ensure table borders collapse */
+    margin-top: 20px; /* Space above the table */
+  }
+  
+  th, td {
+    padding: 12px; /* Padding for table cells */
+    text-align: left; /* Align text to the left within cells */
+  }
+  
+  th {
+    background-color: #f0f0f0; /* Light gray background for table headers */
+  }
+  
+  tr {
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+  }
+  
+  tr:hover {
+    background-color: #f9f9f9; /* Light background color on hover */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .transaction-history {
+      padding: 10px;
+      box-shadow: none;
+      border-radius: 0;
+      margin: 0;
+    }
+  
+    h2 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+  }
+  

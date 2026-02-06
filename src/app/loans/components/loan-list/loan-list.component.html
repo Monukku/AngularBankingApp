@@ -1,0 +1,17 @@
+<div class="loan-list">
+    <div class="loan-card" *ngFor="let loan of loans">
+      <mat-card>
+        <mat-card-title>{{ loan.name }}</mat-card-title>
+        <mat-card-content>
+          <p>Amount: {{ loan.amount }}</p>
+          <p>Interest Rate: {{ loan.interestRate }}%</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="viewLoan(loan.id)">View</button>
+          <button mat-button (click)="editLoan(loan.id)">Edit</button>
+          <button mat-button (click)="deleteLoan(loan.id)">Delete</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+  

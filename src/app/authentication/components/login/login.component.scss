@@ -1,0 +1,152 @@
+// Define color variables for easy theme management
+$primary-color: #1976d2;
+$secondary-color: #ff4081;
+$text-color: #333333;
+$error-color: #f44336;
+$button-hover-color: darken($primary-color, 10%);
+$font-family: "Roboto", sans-serif;
+$box-shadow-color: rgba(0, 0, 0, 0.2);
+
+// Global styles
+body {
+  margin: 0;
+  font-family: $font-family;
+  background-color: #f0f0f0;
+}
+
+// Login container styles
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(
+    to bottom right,
+    #000509,
+    #0066cc
+  ); // Page background color as blue gradient
+  color: #fff;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+// Login card styles
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: #09090975; // Form card background color as black
+  padding: 40px 30px;
+  box-shadow: 0 4px 8px $box-shadow-color;
+  border-radius: 12px;
+  animation: slideIn 1s ease-in-out;
+
+  @media (max-width: 480px) {
+    padding: 30px 20px;
+  }
+}
+
+// Card header styles
+mat-card-header {
+  text-align: center;
+  color: $primary-color;
+  margin-bottom: 20px;
+}
+
+// Card title styles
+mat-card-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+// Form field styles
+mat-form-field {
+  width: 100%;
+  margin-bottom: 25px;
+
+  .mat-input-element {
+    color: $text-color;
+    font-size: 16px;
+    background-color: #f0f4f8; // Light blue background for input fields
+    border-radius: 8px;
+    padding: 10px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+
+    &:hover {
+      background-color: #e6ecf0; // Darker blue background on hover
+    }
+
+    &:focus {
+      background-color: #e0e7ee; // Even darker blue background when focused
+    }
+  }
+
+  .mat-form-field-label {
+    color: $primary-color;
+    font-weight: 500;
+  }
+
+  .mat-error {
+    color: $error-color;
+    font-size: 14px;
+  }
+}
+
+// Login button styles
+.login-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    background-color: $primary-color;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: $button-hover-color;
+    }
+  }
+}
+
+// Alternative actions (e.g., links) styles
+.alternative-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+  color: $primary-color;
+
+  a {
+    color: $primary-color;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+
+    &:hover {
+      color: $secondary-color;
+      text-decoration: underline;
+    }
+  }
+}
+
+// Fade-in animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Slide-in animation
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

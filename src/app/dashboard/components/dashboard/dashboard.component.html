@@ -1,0 +1,26 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav mode="side" opened class="sidenav">
+    <mat-toolbar>Navigation</mat-toolbar>
+    <mat-nav-list>
+      <mat-list-item *ngFor="let item of navItems">{{ item }}</mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">Dashboard</mat-toolbar>
+    <div class="content">
+      <mat-grid-list cols="2" rowHeight="2:1" gutterSize="16px">
+        <mat-grid-tile *ngFor="let card of cards">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>{{ card.title }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ card.content }}</p>
+            </mat-card-content>
+          </mat-card>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

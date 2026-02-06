@@ -1,0 +1,25 @@
+.sidenav-container {
+  height: 100vh;
+}
+
+.sidenav {
+  width: 200px;
+}
+
+.mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.content {
+  padding: 16px;
+}
+
+.mat-grid-tile {
+  transition: transform 0.3s;
+}
+
+.mat-grid-tile:hover {
+  transform: scale(1.05);
+}

@@ -1,0 +1,254 @@
+<div class="container">
+  <div class="header">
+    <h2>Account Management</h2>
+    <div class="action-buttons">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="showUpdateForm()"
+        *ngIf="
+          account &&
+          !showUpdateAccountForm &&
+          !showCreateAccountForm &&
+          !showCheckAccountForm
+        "
+      >
+        Update Account
+      </button>
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="deleteAccount()"
+        *ngIf="
+          account &&
+          !showUpdateAccountForm &&
+          !showCreateAccountForm &&
+          !showCheckAccountForm
+        "
+      >
+        Delete Account
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        class="create-button"
+        (click)="showCreateForm()"
+        *ngIf="
+          !account &&
+          !showUpdateAccountForm &&
+          !showCreateAccountForm &&
+          !showCheckAccountForm
+        "
+      >
+        Create New Account
+      </button>
+      <button
+        mat-raised-button
+        color="accent"
+        class="check-button"
+        (click)="showCheckForm()"
+        *ngIf="
+          !account &&
+          !showUpdateAccountForm &&
+          !showCreateAccountForm &&
+          !showCheckAccountForm
+        "
+      >
+        Having an account? Click Here.
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div
+      class="intro-section"
+      *ngIf="
+        !showCreateAccountForm &&
+        !account &&
+        !showUpdateAccountForm &&
+        !showCheckAccountForm
+      "
+    >
+      <h3>Welcome to Our Account Management System</h3>
+      <p>
+        Explore our services and benefits. Lorem ipsum dolor sit amet,
+        consectetur adipiscing elit. Nullam ultricies tincidunt massa, a aliquet
+        odio scelerisque vel.
+      </p>
+      <p>
+        For more information about our services, visit
+        <a href="#">www.rewabank.com</a>
+      </p>
+    </div>
+
+    <mat-card class="card" *ngIf="account && !showUpdateAccountForm">
+      <mat-card-title>Account Details</mat-card-title>
+      <mat-divider></mat-divider>
+      <mat-card-content class="card-content">
+        <div class="detail-item"><strong>Name:</strong> {{ account.name }}</div>
+        <div class="detail-item">
+          <strong>Email:</strong> {{ account.email }}
+        </div>
+        <div class="detail-item">
+          <strong>Mobile Number:</strong> {{ account.mobileNumber }}
+        </div>
+        <div class="detail-item">
+          <strong>Account Number:</strong>
+          {{ account.accountsDto.accountNumber }}
+        </div>
+        <div class="detail-item">
+          <strong>Branch Address:</strong>
+          {{ account.accountsDto.branchAddress }}
+        </div>
+        <div class="detail-item">
+          <strong>Account Type:</strong> {{ account.accountsDto.accountType }}
+        </div>
+        <div class="detail-item">
+          <strong>Account Category:</strong>
+          {{ account.accountsDto.accountCategory }}
+        </div>
+        <div class="detail-item">
+          <strong>Account Status:</strong>
+          {{ account.accountsDto.accountStatus }}
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card create-form" *ngIf="showCreateAccountForm">
+      <mat-card-title>Create New Account</mat-card-title>
+      <mat-divider></mat-divider>
+      <mat-card-content class="card-content">
+        <form [formGroup]="accountForm" (ngSubmit)="createNewAccount()">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" required />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Select Account Type</mat-label>
+            <mat-select formControlName="accountType" required>
+              <mat-option *ngFor="let type of accountTypes" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Mobile Number</mat-label>
+            <input
+              matInput
+              formControlName="mobileNumber"
+              type="tel"
+              required
+            />
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="submit-button"
+          >
+            Create Account
+          </button>
+          <h1></h1>
+          <button
+            mat-raised-button
+            color="accent"
+            class="check-form-button"
+            (click)="showCheckForm()"
+            *ngIf="
+              !account &&
+              !showUpdateAccountForm &&
+              showCreateAccountForm &&
+              !showCheckAccountForm
+            "
+          >
+            Having an account? Click Here.
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card update-form" *ngIf="showUpdateAccountForm">
+      <mat-card-title>Update Account details</mat-card-title>
+      <mat-divider></mat-divider>
+      <mat-card-content class="card-content">
+        <form [formGroup]="accountForm" (ngSubmit)="updateAccount()">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Mobile Number</mat-label>
+            <input matInput formControlName="mobileNumber" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Account Number</mat-label>
+            <input matInput formControlName="accountNumber" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Branch Address</mat-label>
+            <input matInput formControlName="branchAddress" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Account Type</mat-label>
+            <input matInput formControlName="accountType" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Account Category</mat-label>
+            <input matInput formControlName="accountCategory" />
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Account Status</mat-label>
+            <input matInput formControlName="accountStatus" />
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="submit-button"
+          >
+            Update Account
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card check-form" *ngIf="showCheckAccountForm">
+      <mat-card-title>Check Existing Account</mat-card-title>
+      <mat-divider></mat-divider>
+      <mat-card-content class="card-content">
+        <form
+          [formGroup]="checkAccountForm"
+          (ngSubmit)="checkExistingAccount()"
+        >
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Mobile Number</mat-label>
+            <input
+              matInput
+              formControlName="mobileNumber"
+              type="tel"
+              required
+            />
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="submit-button"
+          >
+            Check Existing Account
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

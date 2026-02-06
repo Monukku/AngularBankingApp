@@ -1,0 +1,21 @@
+<header class="app-header">
+  <div class="welcome-message">
+    <p>Welcome to rewabank App!</p>
+  </div>
+  <div class="auth-buttons">
+    <button
+      class="login-btn"
+      *ngIf="!(authenticated$ | async)"
+      (click)="onLogin()"
+    >
+      Login
+    </button>
+    <button
+      class="logout-btn"
+      *ngIf="authenticated$ | async"
+      (click)="onLogout()"
+    >
+      Logout
+    </button>
+  </div>
+</header>

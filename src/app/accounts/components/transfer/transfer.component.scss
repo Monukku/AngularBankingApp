@@ -1,0 +1,47 @@
+/* src/app/components/transfer-funds/transfer-funds.component.scss */
+.transfer-funds-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to bottom right, #000509,  #0066cc); /* Page background color as blue gradient */
+    padding: 20px;
+  }
+  
+  .transfer-funds {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgb(254, 254, 254);
+    border-radius: 8px;
+    background-color: #050113; /* White background */
+  }
+  
+  h2 {
+    text-align: center;
+    font-size: 1.8em;
+    color: #3c8bd0; /* Blue color for the heading */
+    margin-bottom: 20px; /* Space below the heading */
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 20px; /* Space between form fields */
+  }
+  
+  button[type="submit"] {
+    width: 100%;
+    margin-top: 20px; /* Space above the button */
+    background-color: #3c8bd0; /* Blue button background */
+    color: #ffffff; /* White button text */
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #2b6ca3; /* Darker blue on hover */
+  }
+  

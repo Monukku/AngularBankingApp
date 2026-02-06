@@ -1,0 +1,90 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Banking Login</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form
+        (ngSubmit)="login()"
+        #loginForm="ngForm"
+        autocomplete="off"
+        aria-label="Login Form"
+      >
+        <mat-form-field appearance="fill">
+          <mat-label>Username</mat-label>
+          <input
+            matInput
+            [(ngModel)]="username"
+            name="username"
+            required
+            minlength="4"
+            maxlength="20"
+            #usernameInput="ngModel"
+            aria-label="Username"
+          />
+          <mat-error
+            *ngIf="
+              usernameInput.invalid &&
+              (usernameInput.dirty || usernameInput.touched)
+            "
+          >
+            <span *ngIf="usernameInput.errors?.['required']">
+              Username is required
+            </span>
+            <span *ngIf="usernameInput.errors?.['minlength']">
+              Username must be at least 4 characters long
+            </span>
+            <span *ngIf="usernameInput.errors?.['maxlength']">
+              Username cannot exceed 20 characters
+            </span>
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [(ngModel)]="password"
+            name="password"
+            type="password"
+            required
+            minlength="5"
+            #passwordInput="ngModel"
+            aria-label="Password"
+          />
+          <mat-error
+            *ngIf="
+              passwordInput.invalid &&
+              (passwordInput.dirty || passwordInput.touched)
+            "
+          >
+            <span *ngIf="passwordInput.errors?.['required']">
+              Password is required
+            </span>
+            <span *ngIf="passwordInput.errors?.['minlength']">
+              Password must be at least 5 characters long
+            </span>
+          </mat-error>
+        </mat-form-field>
+
+        <div class="login-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="loginForm.invalid"
+            aria-label="Login Button"
+          >
+            Login
+          </button>
+        </div>
+      </form>
+      <div class="alternative-actions">
+        <a routerLink="/auth/forgot-password" aria-label="Forgot Password">
+          Forgot Password?
+        </a>
+        <a [routerLink]="['/auth/register']" aria-label="Sign Up"> Sign Up </a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,24 @@
+<!-- src/app/components/transfer-funds/transfer-funds.component.html -->
+<div class="transfer-funds-container">
+  <mat-card class="transfer-funds">
+    <h2>Transfer Funds</h2>
+    <form (ngSubmit)="transfer()">
+      <mat-form-field appearance="fill">
+        <mat-label>From Account</mat-label>
+        <input matInput id="fromAccount" [(ngModel)]="fromAccount" name="fromAccount" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>To Account</mat-label>
+        <input matInput id="toAccount" [(ngModel)]="toAccount" name="toAccount" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Amount</mat-label>
+        <input matInput type="number" id="amount" [(ngModel)]="amount" name="amount" required>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit">Transfer</button>
+    </form>
+  </mat-card>
+</div>

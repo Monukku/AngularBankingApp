@@ -1,0 +1,55 @@
+ <div class="user-profile-container">
+  <mat-card class="profile-card">
+    <h2>User Profile</h2>
+    <form [formGroup]="userDetailsForm" (ngSubmit)="saveUserDetails()">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email">
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone">
+      </mat-form-field>
+   
+      <mat-form-field appearance="fill">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="address">
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Account Number</mat-label>
+        <input matInput formControlName="accountNumber">
+      </mat-form-field>
+      <div class="file-input">
+        <input type="file" formControlName="profilePicture">
+        <label>Choose Profile Picture</label>
+      </div>
+      <button mat-raised-button color="primary" type="submit">Save</button>
+    </form>
+  </mat-card>
+
+  <mat-card class="password-card">
+    <h2>Change Password</h2>
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <mat-form-field appearance="fill">
+        <mat-label>Current Password</mat-label>
+        <input matInput formControlName="currentPassword" type="password">
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>New Password</mat-label>
+        <input matInput formControlName="newPassword" type="password">
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Confirm New Password</mat-label>
+        <input matInput formControlName="confirmPassword" type="password">
+      </mat-form-field>
+      <button mat-raised-button color="warn" type="submit">Change Password</button>
+    </form>
+  </mat-card>
+</div>
+
+
+

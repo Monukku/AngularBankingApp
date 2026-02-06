@@ -1,0 +1,53 @@
+<div class="recurring-payments-container">
+  <h2>Recurring Payments</h2>
+  <form #recurringForm="ngForm" (ngSubmit)="addRecurringPayment()">
+    <div>
+      <label for="payee">Payee</label>
+      <input id="payee" name="payee" [(ngModel)]="newPayment.payee" required />
+    </div>
+    <div>
+      <label for="amount">Amount</label>
+      <input id="amount" name="amount" type="number" [(ngModel)]="newPayment.amount" required min="1" />
+    </div>
+    <div>
+      <label for="frequency">Frequency</label>
+      <select id="frequency" name="frequency" [(ngModel)]="newPayment.frequency" required>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+    <div>
+      <label for="startDate">Start Date</label>
+      <input id="startDate" name="startDate" type="date" [(ngModel)]="newPayment.startDate" required />
+    </div>
+    <button type="submit" [disabled]="recurringForm.invalid">Add Payment</button>
+  </form>
+
+  <hr />
+
+  <h3>Scheduled Recurring Payments</h3>
+  <table *ngIf="recurringPayments.length > 0">
+    <thead>
+      <tr>
+        <th>Payee</th>
+        <th>Amount</th>
+        <th>Frequency</th>
+        <th>Start Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let payment of recurringPayments; let i = index">
+        <td>{{ payment.payee }}</td>
+        <td>{{ payment.amount | currency }}</td>
+        <td>{{ payment.frequency }}</td>
+        <td>{{ payment.startDate | date }}</td>
+        <td>
+          <button (click)="editPayment(i)">Edit</button>
+          <button (click)="deletePayment(i)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="recurringPayments.length === 0">No recurring

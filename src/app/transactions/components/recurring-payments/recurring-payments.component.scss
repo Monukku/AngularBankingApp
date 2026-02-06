@@ -1,0 +1,110 @@
+.recurring-payments-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+  h2, h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #2d3e50;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      label {
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+      }
+      input, select {
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+    }
+
+    button[type="submit"] {
+      align-self: flex-end;
+      padding: 0.6rem 1.2rem;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      &:disabled {
+        background: #b0b0b0;
+        cursor: not-allowed;
+      }
+      &:hover:not(:disabled) {
+        background: #1565c0;
+      }
+    }
+  }
+
+  hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background: #f5f5f5;
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    button {
+      margin-right: 0.5rem;
+      padding: 0.3rem 0.8rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: #e0e0e0;
+      color: #333;
+      transition: background 0.2s;
+      &:hover {
+        background: #ffc107;
+      }
+      &:last-child {
+        background: #f44336;
+        color: #fff;
+        &:hover {
+          background: #d32f2f;
+        }
+      }
+    }
+  }
+
+  p {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+
+  }
+}

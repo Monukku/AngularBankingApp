@@ -1,0 +1,50 @@
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #116fda; // Dark background color
+  color: #fff; // White text color
+  padding: 10px 20px;
+  border-bottom: 2px solid #007bff; // Blue accent line
+
+  .welcome-message {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .auth-buttons {
+    display: flex;
+    gap: 10px;
+
+    button {
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    .login-btn {
+      background-color: #007bff; // Blue color
+      color: #fff;
+
+      &:hover {
+        background-color: #0056b3; // Darker blue on hover
+      }
+    }
+
+    .logout-btn {
+      background-color: #dc3545; // Red color
+      color: #fff;
+
+      &:hover {
+        background-color: #c82333; // Darker red on hover
+      }
+    }
+  }
+}

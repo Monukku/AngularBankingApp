@@ -1,0 +1,168 @@
+// Define color variables for easy theme management
+$primary-color: #0066cc; // Primary color for form labels and focus states
+$text-color: #fff; // Main text color (white for better contrast against black background)
+$error-color: #d32f2f; // Error color for form errors
+$input-text-color: #007bff; // Blue color for input text when typing
+
+.registration-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #000509, #0066cc); // Page background color as blue gradient
+  padding: 40px 20px;
+
+  @media (max-width: 768px) {
+    padding: 20px 10px;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    color: $text-color; // White text for the heading
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 6px rgba(18, 17, 17, 0.96);
+    text-align: center;
+  }
+
+  .registration-form {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 1s ease-in-out;
+    background-color: rgba(9, 9, 9, 0.46); // Updated form card background color
+    box-shadow: 0 4px 8px rgb(253, 252, 252);
+
+    @media (max-width: 600px) {
+      padding: 30px;
+    }
+
+    .form-field {
+      margin-bottom: 20px;
+
+      mat-form-field {
+        width: 100%;
+
+        .mat-form-field-flex {
+          background-color: #333; // Dark background for input fields
+          border-radius: 8px;
+          padding: 10px;
+          transition: background-color 0.3s, box-shadow 0.3s;
+
+          &:hover {
+            background-color: #444; // Slightly lighter on hover
+          }
+
+          &:focus-within {
+            background-color: #555; // Even lighter when focused
+          }
+
+          // Input text color
+          .mat-input-element {
+            color: $input-text-color; // Blue color for input text when typing
+          }
+        }
+
+        .mat-form-field-label {
+          color: $primary-color;
+          font-weight: 500; // Semi-bold weight for labels
+        }
+
+        .mat-input-element {
+          font-size: 16px; // Font size for input text
+
+          // Change placeholder color for better visibility against dark background
+          &::placeholder {
+            color: lighten($input-text-color, 40%);
+            opacity: 1; // Make sure it's fully opaque
+          }
+        }
+
+        .mat-error {
+          font-size: 14px; // Font size for error messages
+          color: $error-color; // Error color for messages
+        }
+
+        .mat-focused .mat-form-field-flex {
+          box-shadow: 0 0 8px rgba(0, 102, 204, 0.5);
+        }
+
+        .mat-hint {
+          font-size: 0.75rem;
+          color: #bbb; // Light grey hint text color
+        }
+
+        .mat-form-field-label-wrapper {
+          transition: color 0.3s;
+        }
+
+        &:hover .mat-form-field-label-wrapper {
+          color: darken($primary-color, 10%);
+        }
+      }
+    }
+
+    .register-button {
+      background-color: $primary-color;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 50px;
+      transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+
+      &:hover {
+        background-color: darken($primary-color, 10%);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      &:disabled {
+        background-color: #bbb;
+        cursor: not-allowed;
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 8px rgba(0, 102, 204, 0.5);
+      }
+    }
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
