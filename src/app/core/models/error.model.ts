@@ -5,7 +5,7 @@
  */
 export class AppError extends Error {
   constructor(
-    public message: string,
+    override message: string,
     public code: string = 'UNKNOWN_ERROR',
     public statusCode?: number,
     public originalError?: any
@@ -22,7 +22,7 @@ export class AppError extends Error {
 export class HttpError extends AppError {
   constructor(
     message: string,
-    public statusCode: number,
+    override statusCode: number,
     code: string = 'HTTP_ERROR',
     originalError?: any
   ) {
