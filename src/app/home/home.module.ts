@@ -7,7 +7,6 @@ import { CustomerFeedbackComponent } from './components/customer-feedback/custom
 import { HomeRoutingModule } from './home-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
-import { KeycloakAuthService } from '../authentication/services/KeyCloakAuthService';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
@@ -23,6 +22,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     RecentTransactionsComponent,
     CustomerFeedbackComponent,
   ],
-  providers: [KeycloakService, KeycloakAuthService],
+  providers: [KeycloakService],
 })
 export class HomeModule {}

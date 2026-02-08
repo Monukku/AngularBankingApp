@@ -1,69 +1,100 @@
-// import { Injectable } from '@angular/core';
-// import { Actions, createEffect, ofType } from '@ngrx/effects';
-// import { map } from 'rxjs/operators';
-// import * as AuthActions from '../actions/auth.actions';
-// import { KeycloakAuthService } from '../../authentication/services/KeyCloakAuthService';
-
-// @Injectable()
-// export class AuthEffects {
-//   constructor(
-//     private actions$: Actions,
-//     private keycloakAuthService: KeycloakAuthService
-//   ) {}
-
-//   login$ = createEffect(() =>
-//     this.actions$.pipe(
-//       ofType(AuthActions.login),
-//       map(() => {
-//         this.keycloakAuthService.login();
-//         return AuthActions.setAuthenticated({ authenticated: true });
-//       })
-//     )
-//   );
-
-//   logout$ = createEffect(() =>
-//     this.actions$.pipe(
-//       ofType(AuthActions.logout),
-//       map(() => {
-//         this.keycloakAuthService.logout();
-//         return AuthActions.setAuthenticated({ authenticated: false });
-//       })
-//     )
-//   );
-// }
-
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import * as AuthActions from '../actions/auth.actions';
-import { KeycloakAuthService } from '../../authentication/services/KeyCloakAuthService';
+import { AuthService } from '../../authentication/services/auth.service';
+import { LoggerService } from '../../core/services/logger.service';
 
+/**
+ * Auth Effects - Handle side effects for authentication
+ * Manages login, logout, token refresh, and user loading
+ */
 @Injectable()
 export class AuthEffects {
-  constructor(
-    private actions$: Actions,
-    private keycloakAuthService: KeycloakAuthService
-  ) {}
-
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
-      switchMap(() => {
-        return this.keycloakAuthService.login().then(() => {
-          return AuthActions.setAuthenticated({ authenticated: true });
-        });
-      })
+      switchMap(() =>
+        from(this.authService.login()).pipe(
+          switchMap(() => from(this.authService.loadUserProfile())),
+          map((user) => AuthActions.loginSuccess({ user })),
+          catchError((error) => {
+            this.logger.error('Login effect failed', error);
+            return of(
+              AuthActions.loginFailure({
+                error: error.message || 'Login failed',
+              })
+            );
+          })
+        )
+      )
     )
   );
 
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.logout),
-      switchMap(() => {
-        return this.keycloakAuthService.logout().then(() => {
-          return AuthActions.setAuthenticated({ authenticated: false });
-        });
-      })
+      switchMap(() =>
+        from(this.authService.logout()).pipe(
+          map(() => AuthActions.logoutSuccess()),
+          catchError((error) => {
+            this.logger.error('Logout effect failed', error);
+            return of(
+              AuthActions.logoutFailure({
+                error: error.message || 'Logout failed',
+              })
+            );
+          })
+        )
+      )
     )
   );
+
+  loadUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.loadUser),
+      switchMap(() =>
+        from(this.authService.loadUserProfile()).pipe(
+          map((user) => AuthActions.loadUserSuccess({ user })),
+          catchError((error) => {
+            this.logger.error('Load user effect failed', error);
+            return of(
+              AuthActions.loadUserFailure({
+                error: error.message || 'Failed to load user',
+              })
+            );
+          })
+        )
+      )
+    )
+  );
+
+  refreshToken$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.refreshToken),
+      switchMap(() =>
+        from(this.authService.getToken()).pipe(
+          map((token) => AuthActions.refreshTokenSuccess({ token })),
+          catchError((error) => {
+            this.logger.error('Token refresh effect failed', error);
+            return of(
+              AuthActions.refreshTokenFailure({
+                error: error.message || 'Token refresh failed',
+              })
+            );
+          })
+        )
+      )
+    )
+  );
+
+  constructor(
+    private actions$: Actions,
+    private authService: AuthService,
+    private logger: LoggerService
+  ) {}
 }
+
+// Import required for type safety
+import { from } from 'rxjs';

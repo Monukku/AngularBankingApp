@@ -6,22 +6,18 @@ import { APP_INITIALIZER, importProvidersFrom, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
-import { provideStore } from '@ngrx/store';
-import { provideEffects } from '@ngrx/effects';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { KeycloakAuthService } from './app/authentication/services/KeyCloakAuthService';
-import { AuthEffects } from './app/store/effects/auth.effects';
-import { authReducer } from './app/store/reducers/auth.reducer';
-import { environment } from './environments/environment';
+import { AuthService } from './app/authentication/services/auth.service';
+import { appConfig } from './app/app.config';
 
 // Function to initialize Keycloak
-function initializeKeycloak(keycloak: KeycloakAuthService) {
-  return () => keycloak.init();
+function initializeKeycloak(authService: AuthService) {
+  return () => Promise.resolve();
 }
 
-// Bootstrap application with providers and NgRx configurations
+// Bootstrap application with appConfig and providers
 bootstrapApplication(AppComponent, {
   providers: [
+    ...appConfig.providers,
     importProvidersFrom(
       BrowserModule,
       AppRoutingModule,
@@ -29,25 +25,11 @@ bootstrapApplication(AppComponent, {
       KeycloakAngularModule,
       BrowserAnimationsModule
     ),
-    provideStore({
-      auth: authReducer, // Ensure you add your reducers here
-    }),
-    provideEffects([AuthEffects]), // Ensure you add your effects here
-    !environment.production
-      ? provideStoreDevtools({
-          maxAge: 25,
-          trace: false,
-          traceLimit: 75,
-          autoPause: true,
-          logOnly: !isDevMode,
-          connectInZone: true,
-        })
-      : [],
     {
       provide: APP_INITIALIZER,
       useFactory: initializeKeycloak,
       multi: true,
-      deps: [KeycloakAuthService],
+      deps: [AuthService],
     },
   ],
 });

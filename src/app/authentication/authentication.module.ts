@@ -7,10 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthenticationRoutingModule } from './authentication-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
-import { Store, StoreModule } from '@ngrx/store';
-import { authReducer } from '../store/reducers/auth.reducer';
-import { EffectsModule } from '@ngrx/effects';
-import { AuthEffects } from '../store/effects/auth.effects';
 @NgModule({
   declarations: [],
   imports: [
@@ -23,9 +19,7 @@ import { AuthEffects } from '../store/effects/auth.effects';
     MatButtonModule,
     AuthenticationRoutingModule,
     KeycloakAngularModule,
-    StoreModule.forRoot(authReducer),
-    EffectsModule.forRoot([AuthEffects]),
   ],
-  providers: [KeycloakService, Store],
+  providers: [KeycloakService],
 })
 export class AuthenticationModule {}

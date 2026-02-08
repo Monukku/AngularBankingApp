@@ -17,8 +17,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../authentication/services/auth.service';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
-import { KeycloakAuthService } from '../authentication/services/KeyCloakAuthService';
-import { Store } from '@ngrx/store';
 
 @NgModule({
   declarations: [
@@ -54,6 +52,6 @@ import { Store } from '@ngrx/store';
     KeycloakAngularModule,
     ThemeModule,
   ],
-  providers: [AuthService, KeycloakService, KeycloakAuthService, Store],
+  providers: [AuthService, KeycloakService],
 })
 export class SharedModule {}
