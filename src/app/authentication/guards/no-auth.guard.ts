@@ -13,7 +13,7 @@ export class NoAuthGuard implements CanActivate {
   async canActivate(): Promise<boolean> {
     const isLoggedIn = await this.keycloakService.isLoggedIn();
     if (isLoggedIn) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
       return false;
     } else {
       return true;

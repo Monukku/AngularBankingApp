@@ -8,7 +8,7 @@ import { AuthGuard } from '../authentication/guards/auth.guard';
 import { RoleGuard } from '../authentication/guards/role.guard';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 
-const routes: Routes = [
+export const DASHBOARD_ROUTES: Routes = [
       { path: '', redirectTo: 'user-dashboard', pathMatch: 'full' },
       { path: 'user-dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
       { path: 'summary', component: SummaryComponent, canActivate: [AuthGuard] },
@@ -17,9 +17,3 @@ const routes: Routes = [
       { path: 'customer-feedback', component: CustomerFeedbackComponent, canActivate: [AuthGuard] }
 
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class DashboardRoutingModule { }

@@ -15,8 +15,15 @@ import { GlobalErrorHandler } from './core/handlers/global-error.handler';
 import { authReducer } from './store/reducers/auth.reducer';
 import { AuthEffects } from './store/effects/auth.effects';
 
+import { APP_INITIALIZER } from '@angular/core';
+import { AuthService } from './authentication/services/auth.service';
+
+
 export const appConfig: ApplicationConfig = {
   providers: [
+
+    
+
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideClientHydration(),

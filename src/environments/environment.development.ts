@@ -4,6 +4,7 @@ import { keycloakConfig } from './keycloakConfig';
  * Development Environment Configuration
  * Used during local development and testing
  */
+
 export const environment = {
   production: false,
   environment: 'development',

@@ -10,7 +10,6 @@ import { HomeComponent } from '../../../home/components/home/home.component';
   standalone: true,
   imports: [
     HomeComponent,
-    
     CommonModule,
     MatCardModule,
     MatButtonModule,

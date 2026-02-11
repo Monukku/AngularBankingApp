@@ -66,12 +66,7 @@ export class AuthService {
     }
   }
 
-  /**
-   * Check if user is logged in
-   */
-  public isLoggedIn(): boolean {
-    return this.keycloakService.isLoggedIn();
-  }
+  
 
   /**
    * Load user profile from Keycloak
@@ -83,14 +78,31 @@ export class AuthService {
   /**
    * Initiate Keycloak login
    */
-  public login(): Promise<void> {
-    return this.keycloakService.login().then(() => {
-      this.isAuthenticatedSubject.next(true);
-      this.store.dispatch(AuthActions.setAuthenticated({ authenticated: true }));
-      this.logger.debug('User logged in successfully');
-    });
-  }
+  // public login(): Promise<void> {
+  //   return this.keycloakService.login().then(() => {
+  //     this.isAuthenticatedSubject.next(true);
+  //     this.store.dispatch(AuthActions.setAuthenticated({ authenticated: true }));
+  //     this.logger.debug('User logged in successfully');
+  //   });
+  // }
 
+  public login(): Promise<void> {
+  return this.keycloakService.login({
+    redirectUri: window.location.origin + '/dashboard'
+  }).then(() => {
+    this.isAuthenticatedSubject.next(true);
+    this.store.dispatch(AuthActions.setAuthenticated({ authenticated: true }));
+    this.logger.debug('User logged in successfully');
+  });
+}
+
+
+    /**
+   * Check if user is logged in
+   */
+  public async isLoggedIn(): Promise<boolean> {
+  return await this.keycloakService.isLoggedIn();
+}
   /**
    * Logout user
    */

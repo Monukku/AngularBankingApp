@@ -1,7 +1,5 @@
 # Quick Error Handling Reference
 
-## 🚀 Quick Start
-
 ### 1. Import in Your Service
 ```typescript
 import { ErrorHandlerService } from '../../core/services/error-handler.service';

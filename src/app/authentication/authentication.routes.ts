@@ -6,7 +6,7 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { NoAuthGuard } from './guards/no-auth.guard';
 
-const routes: Routes = [
+export const AUTHENTICATION_ROUTES: Routes = [
   {
     path: 'login',
     component: LoginComponent,
@@ -28,9 +28,3 @@ const routes: Routes = [
     canActivate: [NoAuthGuard], // Only accessible if not logged in
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class AuthenticationRoutingModule {}

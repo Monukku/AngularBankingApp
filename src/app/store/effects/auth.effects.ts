@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import * as AuthActions from '../actions/auth.actions';
 import { AuthService } from '../../authentication/services/auth.service';
 import { LoggerService } from '../../core/services/logger.service';
+import { Router } from '@angular/router';
 
 /**
  * Auth Effects - Handle side effects for authentication
@@ -89,10 +90,24 @@ export class AuthEffects {
     )
   );
 
+
+  loginSuccessNavigate$ = createEffect(
+  () =>
+    this.actions$.pipe(
+      ofType(AuthActions.loginSuccess),
+      tap(() => {
+        this.router.navigate(['/dashboard']);
+      })
+    ),
+  { dispatch: false }
+);
+
+
   constructor(
     private actions$: Actions,
     private authService: AuthService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private router: Router
   ) {}
 }
 

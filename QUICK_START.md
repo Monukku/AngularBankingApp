@@ -1,13 +1,11 @@
 # Quick Start Guide
-
-## 🚀 5-Minute Setup
+## 5-Minute Setup
 
 ### 1. Install Dependencies
 ```bash
 cd banking-app
 npm install
 ```
-
 ### 2. Start Development Server
 ```bash
 npm start
@@ -70,7 +68,7 @@ export const environment = {
 
 ### Login Flow
 1. User enters credentials on login page
-2. Keycloak authenticates user
+2. Keycloak OR (authServer) authenticates user
 3. JWT token stored in browser
 4. Token automatically added to all API requests
 5. Token refreshes automatically before expiry
@@ -451,7 +449,3 @@ ng build --configuration production && http-server dist/banking-app/
 
 **Version**: 1.0.0
 **Last Updated**: February 7, 2026
-
----
-
-**Ready to develop? Type `npm start` and get coding! 🚀**

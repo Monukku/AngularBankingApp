@@ -5,73 +5,65 @@ import { NotFoundComponent } from './shared/components/not-found/not-found.compo
 import { HomeComponent } from './home/components/home/home.component';
 
 export const routes: Routes = [
+
   {
-    path: '',
-    redirectTo: '/home',
-    pathMatch: 'full',
-  },
+  path: '',
+  redirectTo: 'home',
+  pathMatch: 'full'
+},
+{
+  path: 'home',
+  component: HomeComponent,
+  canActivate: [AuthGuard]
+},
   {
     path: 'auth',
     canActivate: [NoAuthGuard],
-    loadChildren: () =>
-      import('./authentication/authentication.module').then(
-        (m) => m.AuthenticationModule
-      ),
-  },
-  {
-    path: 'home',
-    component: HomeComponent,
-    canActivate: [AuthGuard],
+    loadChildren: () =>import('./authentication/authentication.routes').then((m) => m.AUTHENTICATION_ROUTES),
   },
   {
     path: 'dashboard',
     canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./dashboard/dashboard.module').then((m) => m.DashboardModule),
+    loadChildren: () => import('./dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
   },
   {
     path: 'profile',
     canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./user-profile/user-profile.module').then(
-        (m) => m.UserProfileModule
-      ),
+    loadChildren: () => import('./user-profile/user-profile.routes').then((m) => m.USER_PROFILE_ROUTES),
   },
   {
     path: 'transactions',
     canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./transactions/transactions.module').then(
-        (m) => m.TransactionsModule
-      ),
+    loadChildren: () => import('./transactions/transactions.routes').then((m) => m.TRANSACTIONS_ROUTES),
   },
   {
     path: 'accounts',
     canActivate: [AuthGuard],
     data: { roles: ['ACCOUNTS'] },
-    loadChildren: () =>
-      import('./accounts/accounts.module').then((m) => m.AccountsModule),
+    loadChildren: () => import('./accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
   },
   {
     path: 'loans',
     canActivate: [AuthGuard],
     data: { roles: ['LOANS'] },
-    loadChildren: () =>
-      import('./loans/loans.module').then((m) => m.LoansModule),
+    loadChildren: () =>import('./loans/loans.routes').then((m) => m.LOANS_ROUTES),
   },
   {
     path: 'cards',
     canActivate: [AuthGuard],
     data: { roles: ['CARDS'] },
-    loadChildren: () =>
-      import('./cards/cards.module').then((m) => m.CardsModule),
+    loadChildren: () => import('./cards/cards.routes').then((m) => m.CARDS_ROUTES),
   },
+
+  // ⭐ Always last
+  // Wildcard route MUST ALWAYS be LAST
   {
     path: '404',
-    component: NotFoundComponent,
+    component: NotFoundComponent
   },
+
   {
     path: '**',
-    redirectTo: '/404',
-  },
+    redirectTo: '404'
+  }
 ];

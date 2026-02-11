@@ -7,15 +7,9 @@ import { RecurringPaymentsComponent } from './components/recurring-payments/recu
 import { AuthGuard } from '../authentication/guards/auth.guard';
 import { RoleGuard } from '../authentication/guards/role.guard';
 
-const routes: Routes = [
+export const TRANSACTIONS_ROUTES: Routes = [
   { path: 'list', component: TransactionListComponent, canActivate: [AuthGuard]},
   { path: 'transfer-funds', component: TransferFundsComponent, canActivate: [AuthGuard]},
   { path: 'details/:id', component: TransactionDetailsComponent, canActivate: [AuthGuard]},
   { path: 'recurring', component: RecurringPaymentsComponent, canActivate: [AuthGuard]}
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class TransactionsRoutingModule { }

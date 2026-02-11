@@ -1,8 +1,8 @@
 # Banking App - Complete Project Analysis
 
 ## 📊 Executive Summary
-This is a **modern Angular 18 banking application** with a modular architecture, SSR support, NgRx state management, and Keycloak authentication. Overall, it's well-structured but has areas that need improvement.
-
+This is a **modern Angular 18 banking application** with a modular architecture, SSR support,
+NgRx state management, and Keycloak authentication. Overall, it's well-structured but has areas that need improvement.
 ---
 
 ## ✅ Strengths
