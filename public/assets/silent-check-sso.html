@@ -1,10 +1,23 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Silent Check SSO</title>
 </head>
 <body>
     <script type="text/javascript">
+        parent.postMessage(location.href, location.origin);
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Silent SSO Check</title>
+</head>
+<body>
+    <script>
         parent.postMessage(location.href, location.origin);
     </script>
 </body>
