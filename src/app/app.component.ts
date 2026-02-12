@@ -95,7 +95,9 @@ import { HeaderComponent } from './shared/components/header/header.component';
 })
 export class AppComponent implements OnInit {
   title = 'banking-app';
+
   isAuthenticated$: Observable<boolean>;
+  
   private platformId = inject(PLATFORM_ID);
 
   constructor(

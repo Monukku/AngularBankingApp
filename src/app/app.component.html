@@ -1,20 +1,20 @@
-<!-- app.component.html -->
 <div class="app-container">
-  <!-- ✅ Header always visible -->
-  <app-header></app-header>
+  <!-- ✅ Header only when authenticated -->
+  <app-header *ngIf="isAuthenticated$ | async"></app-header>
 
-  <div class="main-content">
-    <!-- ✅ Sidebar only visible when authenticated -->
+  <div class="main-content" [class.authenticated]="isAuthenticated$ | async">
+    <!-- ✅ Sidebar only when authenticated -->
     <app-sidebar *ngIf="isAuthenticated$ | async"></app-sidebar>
 
-    <div class="content-area">
+    <!-- ✅ Content area adjusts based on auth state -->
+    <div class="content-area" [class.full-width]="!(isAuthenticated$ | async)">
       <router-outlet></router-outlet>
     </div>
   </div>
 
-  <!-- ✅ Footer always visible -->
-  <app-footer></app-footer>
+  <!-- ✅ Footer only when authenticated -->
+  <app-footer *ngIf="isAuthenticated$ | async"></app-footer>
 
-  <!-- Notifications -->
+  <!-- ✅ Notification always available for error messages -->
   <app-notification></app-notification>
 </div>

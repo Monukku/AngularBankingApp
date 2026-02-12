@@ -1,58 +1,28 @@
-<!-- <header class="app-header">
-  <div class="welcome-message">
-    <p>Welcome to rewabank App!</p>
-  </div>
-  <div class="auth-buttons">
-    <button
-      class="login-btn"
-      *ngIf="!(authenticated$ | async)"
-      (click)="onLogin()"
-    >
-      Login
-    </button>
-    <button
-      class="logout-btn"
-      *ngIf="authenticated$ | async"
-      (click)="onLogout()"
-    >
-      Logout
-    </button>
-  </div>
-</header> -->
-
-
 <mat-toolbar color="primary" class="header-toolbar">
   <div class="header-container">
     <!-- Logo/Brand -->
     <div class="brand">
-      <a routerLink="/" class="brand-link">
+      <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()" *ngIf="isAuthenticated$ | async">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <a routerLink="/home" class="brand-link">
         <mat-icon>account_balance</mat-icon>
         <span class="brand-name">Banking App</span>
       </a>
     </div>
 
-    <!-- Spacer -->
     <span class="spacer"></span>
 
-    <!-- Navigation (only show when authenticated) -->
-    <nav class="nav-links" *ngIf="isAuthenticated$ | async">
-      <a mat-button routerLink="/dashboard" routerLinkActive="active">
-        <mat-icon>dashboard</mat-icon>
-        Dashboard
-      </a>
-      <a mat-button routerLink="/accounts" routerLinkActive="active">
-        <mat-icon>account_balance_wallet</mat-icon>
-        Accounts
-      </a>
-      <a mat-button routerLink="/transactions" routerLinkActive="active">
-        <mat-icon>receipt</mat-icon>
-        Transactions
-      </a>
-    </nav>
+    <!-- Quick Actions (optional - only important ones) -->
+    <div class="quick-actions" *ngIf="isAuthenticated$ | async">
+      <button mat-icon-button matTooltip="Notifications">
+        <mat-icon [matBadge]="3" matBadgeColor="warn">notifications</mat-icon>
+      </button>
+    </div>
 
-    <!-- Auth Buttons -->
+    <!-- Auth Section -->
     <div class="auth-section">
-      <!-- ✅ Show LOGIN button when NOT authenticated -->
+      <!-- Login button when NOT authenticated -->
       <button
         mat-raised-button
         color="accent"
@@ -64,7 +34,7 @@
         Login
       </button>
 
-      <!-- ✅ Show user menu when authenticated -->
+      <!-- User menu when authenticated -->
       <div *ngIf="isAuthenticated$ | async" class="user-menu">
         <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
           <mat-icon>account_circle</mat-icon>
@@ -73,6 +43,11 @@
         </button>
 
         <mat-menu #userMenu="matMenu">
+          <div class="menu-user-info">
+            <p class="menu-username">{{ (currentUser$ | async)?.username }}</p>
+            <p class="menu-email">{{ (currentUser$ | async)?.email }}</p>
+          </div>
+          <mat-divider></mat-divider>
           <button mat-menu-item routerLink="/profile">
             <mat-icon>person</mat-icon>
             <span>Profile</span>
@@ -82,8 +57,7 @@
             <span>Settings</span>
           </button>
           <mat-divider></mat-divider>
-          <!-- ✅ LOGOUT button -->
-          <button mat-menu-item (click)="logout()">
+          <button mat-menu-item (click)="logout()" class="logout-menu-item">
             <mat-icon>logout</mat-icon>
             <span>Logout</span>
           </button>
