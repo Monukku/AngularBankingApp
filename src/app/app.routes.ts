@@ -70,10 +70,10 @@
 
 
 import { Routes } from '@angular/router';
-import { AuthGuard } from './authentication/guards/auth.guard';
+import { AuthGuard } from './core/guards/auth.guard';
 
 import { NotFoundComponent } from './shared/components/not-found/not-found.component';
-import { HomeComponent } from './home/components/home/home.component';
+import { HomeComponent } from './features/home/components/home/home.component';
 
 export const routes: Routes = [
   
@@ -87,26 +87,18 @@ export const routes: Routes = [
     component: HomeComponent,
     canActivate: [AuthGuard],
   },
-  // ✅ REMOVE auth routes - Keycloak handles login
-  // {
-  //   path: 'auth',
-  //   canActivate: [NoAuthGuard],
-  //   loadChildren: () =>
-  //     import('./authentication/authentication.routes').then(
-  //       (m) => m.AUTHENTICATION_ROUTES
-  //     ),
-  // },
+  
   {
     path: 'dashboard',
     canActivate: [AuthGuard],
     loadChildren: () =>
-      import('./dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+      import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
   },
   {
     path: 'profile',
     canActivate: [AuthGuard],
     loadChildren: () =>
-      import('./user-profile/user-profile.routes').then(
+      import('./features/user-profile/user-profile.routes').then(
         (m) => m.USER_PROFILE_ROUTES
       ),
   },
@@ -114,7 +106,7 @@ export const routes: Routes = [
     path: 'transactions',
     canActivate: [AuthGuard],
     loadChildren: () =>
-      import('./transactions/transactions.routes').then(
+      import('./features/transactions/transactions.routes').then(
         (m) => m.TRANSACTIONS_ROUTES
       ),
   },
@@ -123,21 +115,21 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { roles: ['ACCOUNTS'] },
     loadChildren: () =>
-      import('./accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
+      import('./features/accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
   },
   {
     path: 'loans',
     canActivate: [AuthGuard],
     data: { roles: ['LOANS'] },
     loadChildren: () =>
-      import('./loans/loans.routes').then((m) => m.LOANS_ROUTES),
+      import('./features/loans/loans.routes').then((m) => m.LOANS_ROUTES),
   },
   {
     path: 'cards',
     canActivate: [AuthGuard],
     data: { roles: ['CARDS'] },
     loadChildren: () =>
-      import('./cards/cards.routes').then((m) => m.CARDS_ROUTES),
+      import('./features/cards/cards.routes').then((m) => m.CARDS_ROUTES),
   },
   // ✅ Add unauthorized route
   {

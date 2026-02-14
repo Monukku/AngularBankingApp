@@ -70,12 +70,11 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { KeycloakService } from 'keycloak-angular';
-import * as AuthActions from './store/actions/auth.actions';
-import { selectIsAuthenticated } from './store/selectors/auth.selectors';
+import * as AuthActions from './store/auth/auth.actions';
+import { selectIsAuthenticated } from './store/auth/auth.selectors';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NotificationComponent } from './shared/components/notification/notification.component';
-import { SharedModule } from './shared/shared.module';
 import { HeaderComponent } from './shared/components/header/header.component';
 
 @Component({
@@ -87,8 +86,7 @@ import { HeaderComponent } from './shared/components/header/header.component';
     HeaderComponent,
     SidebarComponent,
     FooterComponent,
-    NotificationComponent,
-    SharedModule,
+    NotificationComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

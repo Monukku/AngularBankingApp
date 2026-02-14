@@ -12,12 +12,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { GlobalErrorHandler } from './core/handlers/global-error.handler';
-import { authReducer } from './store/reducers/auth.reducer';
-import { AuthEffects } from './store/effects/auth.effects';
-
-import { APP_INITIALIZER } from '@angular/core';
-import { AuthService } from './authentication/services/auth.service';
-
+import { authReducer } from './store/auth/auth.reducer';
+import { AuthEffects } from './store/auth/auth.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [

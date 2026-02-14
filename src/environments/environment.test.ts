@@ -1,3 +1,5 @@
+import { keycloakConfig } from "./keycloak-config";
+
 /**
  * Test Environment Configuration
  * Used for running unit tests
@@ -8,9 +10,7 @@ export const environment = {
   apiBaseUrl: 'http://localhost:8811',
   apiUrl: 'http://localhost:8811/rewabank',
   keycloak: {
-    url: 'http://localhost:7070/auth',
-    realm: 'rewabank-realm',
-    clientId: 'angular-client',
+    keycloakConfig,
     credentials: {
       secret: 'test-secret',
     },

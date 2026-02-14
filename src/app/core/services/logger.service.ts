@@ -2,65 +2,63 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoggerService {
-  private logLevel: LogLevel = environment.production ? LogLevel.WARN : LogLevel.DEBUG;
+  private readonly level = environment.logging.level;
+  private readonly enableConsole = environment.logging.enableConsole;
 
-  constructor() {}
+  debug(message: string, ...args: any[]): void {
+    this.log(LogLevel.DEBUG, message, args);
+  }
 
-  /**
-   * Log debug messages
-   */
-  debug(message: string, data?: any): void {
-    if (this.logLevel <= LogLevel.DEBUG) {
-      console.debug(`[DEBUG] ${message}`, data);
+  info(message: string, ...args: any[]): void {
+    this.log(LogLevel.INFO, message, args);
+  }
+
+  warn(message: string, ...args: any[]): void {
+    this.log(LogLevel.WARN, message, args);
+  }
+
+  error(message: string, ...args: any[]): void {
+    this.log(LogLevel.ERROR, message, args);
+  }
+
+  private log(level: LogLevel, message: string, args: any[]): void {
+    if (!this.shouldLog(level)) return;
+
+    if (!this.enableConsole && !environment.production) return;
+
+    const timestamp = new Date().toISOString();
+    const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
+
+    switch (level) {
+      case LogLevel.DEBUG:
+        console.log(prefix, message, ...args);
+        break;
+      case LogLevel.INFO:
+        console.info(prefix, message, ...args);
+        break;
+      case LogLevel.WARN:
+        console.warn(prefix, message, ...args);
+        break;
+      case LogLevel.ERROR:
+        console.error(prefix, message, ...args);
+        break;
     }
   }
 
-  /**
-   * Log info messages
-   */
-  info(message: string, data?: any): void {
-    if (this.logLevel <= LogLevel.INFO) {
-      console.info(`[INFO] ${message}`, data);
-    }
-  }
-
-  /**
-   * Log warning messages
-   */
-  warn(message: string, data?: any): void {
-    if (this.logLevel <= LogLevel.WARN) {
-      console.warn(`[WARN] ${message}`, data);
-    }
-  }
-
-  /**
-   * Log error messages
-   */
-  error(message: string, error?: any): void {
-    if (this.logLevel <= LogLevel.ERROR) {
-      console.error(`[ERROR] ${message}`, error);
-    }
-    // In production, you might want to send errors to a logging service
-    if (environment.production) {
-      this.reportErrorToServer(message, error);
-    }
-  }
-
-  /**
-   * Report error to server (for production monitoring)
-   */
-  private reportErrorToServer(message: string, error: any): void {
-    // TODO: Implement sending errors to a logging service like Sentry, LogRocket, etc.
-    // This would be implemented when you have a logging backend
+  private shouldLog(level: LogLevel): boolean {
+    const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
+    const currentLevelIndex = levels.indexOf(this.level as LogLevel);
+    const messageLevelIndex = levels.indexOf(level);
+    return messageLevelIndex >= currentLevelIndex;
   }
 }
