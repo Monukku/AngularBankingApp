@@ -27,27 +27,34 @@
   <hr />
 
   <h3>Scheduled Recurring Payments</h3>
-  <table *ngIf="recurringPayments.length > 0">
-    <thead>
-      <tr>
-        <th>Payee</th>
-        <th>Amount</th>
-        <th>Frequency</th>
-        <th>Start Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let payment of recurringPayments; let i = index">
-        <td>{{ payment.payee }}</td>
-        <td>{{ payment.amount | currency }}</td>
-        <td>{{ payment.frequency }}</td>
-        <td>{{ payment.startDate | date }}</td>
-        <td>
-          <button (click)="editPayment(i)">Edit</button>
-          <button (click)="deletePayment(i)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <p *ngIf="recurringPayments.length === 0">No recurring
+  @if (recurringPayments.length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Payee</th>
+          <th>Amount</th>
+          <th>Frequency</th>
+          <th>Start Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (payment of recurringPayments; track $index) {
+          <tr>
+            <td>{{ payment.payee }}</td>
+            <td>{{ payment.amount | currency }}</td>
+            <td>{{ payment.frequency }}</td>
+            <td>{{ payment.startDate | date }}</td>
+            <td>
+              <button (click)="editPayment($index)">Edit</button>
+              <button (click)="deletePayment($index)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+  @if (recurringPayments.length === 0) {
+    <p>No recurring payments scheduled.</p>
+    }
+  </div>

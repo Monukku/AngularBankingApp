@@ -3,7 +3,9 @@
   <div class="manage-beneficiaries">
     <h2>Manage Beneficiaries</h2>
     <ul>
-      <li *ngFor="let beneficiary of beneficiaries">{{ beneficiary.name }} ({{ beneficiary.accountNumber }})</li>
+      @for (beneficiary of beneficiaries; track beneficiary.beneficiaryId) {
+        <li>{{ beneficiary.name }} ({{ beneficiary.accountNumber }})</li>
+      }
     </ul>
     <form (ngSubmit)="addBeneficiary(newBeneficiary)">
       <mat-form-field appearance="fill">

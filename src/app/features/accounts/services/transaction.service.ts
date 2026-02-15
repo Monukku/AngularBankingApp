@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -14,11 +14,8 @@ import { catchError, tap } from 'rxjs/operators';
 })
 export class TransactionService {
   private apiUrl = environment.api.baseUrl;
-
-  constructor(
-    private http: HttpClient,
-    private logger: LoggerService
-  ) { }
+  private http = inject(HttpClient);
+  private logger = inject(LoggerService);
 
   /**
    * Get transaction history with validation

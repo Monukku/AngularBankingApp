@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { Account } from '../../../shared/models/account.model';
+import { Account } from '../models/account.model';
 import { AuthService } from '../../../core/services/auth.service';
-import { AccountDetails } from '../../../shared/models/accounts-details.model';
+import { AccountDetails } from '../models/accounts-details.model';
 import { LoggerService } from '../../../core/services/logger.service';
 
 /**
@@ -17,18 +17,15 @@ import { LoggerService } from '../../../core/services/logger.service';
 })
 export class AccountService {
   private apiUrl = environment.api.baseUrl;
-
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService,
-    private logger: LoggerService
-  ) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private logger = inject(LoggerService);
 
   /**
    * Create a new account with validation
    */
   createAccount(
-    accountData: Account,
+    accountData: AccountDetails,
     accountType: string
   ): Observable<Account> {
     // Validate input parameters
@@ -107,7 +104,7 @@ export class AccountService {
    */
   updateAccount(
     mobileNumber: string,
-    updatedData: Account
+    updatedData: AccountDetails
   ): Observable<any> {
     // Validate inputs
     if (!mobileNumber || mobileNumber.trim().length === 0) {

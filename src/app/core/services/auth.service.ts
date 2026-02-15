@@ -7,6 +7,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../store/auth/auth.actions';
 import { LoggerService } from './logger.service';
+import { UserProfile } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -14,15 +15,16 @@ import { LoggerService } from './logger.service';
 export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  
+  // ✅ All dependencies now use inject() pattern
   private platformId = inject(PLATFORM_ID);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private keycloakService = inject(KeycloakService);
+  private store = inject(Store);
+  private logger = inject(LoggerService);
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private keycloakService: KeycloakService,
-    private store: Store,
-    private logger: LoggerService
-  ) {
+  constructor() {
     // Only sync state in browser
     if (isPlatformBrowser(this.platformId)) {
       this.syncAuthState();
@@ -36,7 +38,7 @@ export class AuthService {
       this.store.dispatch(AuthActions.setAuthenticated({ authenticated }));
 
       if (authenticated) {
-        const user = await this.keycloakService.loadUserProfile();
+        const user = (await this.keycloakService.loadUserProfile()) as UserProfile;
         this.store.dispatch(AuthActions.loginSuccess({ user }));
         this.logger.debug('User authenticated', { username: user.username });
       }
@@ -47,8 +49,8 @@ export class AuthService {
     }
   }
 
-  public loadUserProfile(): Promise<any> {
-    return this.keycloakService.loadUserProfile();
+  public loadUserProfile(): Promise<UserProfile> {
+    return this.keycloakService.loadUserProfile() as Promise<UserProfile>;
   }
 
   // ✅ Login redirects to /home

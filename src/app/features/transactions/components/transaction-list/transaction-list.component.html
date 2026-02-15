@@ -1,7 +1,9 @@
 <!-- transaction-list.component.html -->
-<div *ngFor="let transaction of transactions">
+@for (transaction of transactions; track trackByTransactionId($index, transaction)) {
+  <div>
     <p>{{ transaction.id }}</p>
     <p>{{ transaction.amount }}</p>
     <p>{{ transaction.date }}</p>
   </div>
+}
   

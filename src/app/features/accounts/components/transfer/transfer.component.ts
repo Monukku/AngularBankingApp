@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TransactionService } from '../../services/transaction.service';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -19,7 +19,8 @@ import { FormsModule } from '@angular/forms';
     FormsModule
   ],
   templateUrl: './transfer.component.html',
-  styleUrl: './transfer.component.scss'
+  styleUrl: './transfer.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
 export class TransferFundsComponent {

@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
+import { Loan, LoanDetails, ApplyLoanRequest, LoanListResponse } from '../models/loan.model';
 
 /**
  * Loan Service - Manages loan operations with input validation
@@ -14,19 +15,16 @@ import { LoggerService } from '../../../core/services/logger.service';
 })
 export class LoanService {
   private apiUrl = `${environment.api.baseUrl}/loans`;
-
-  constructor(
-    private http: HttpClient,
-    private logger: LoggerService
-  ) { }
+  private http = inject(HttpClient);
+  private logger = inject(LoggerService);
 
   /**
    * Get all loans for the user
    */
-  getLoans(): Observable<any[]> {
+  getLoans(): Observable<LoanListResponse> {
     this.logger.debug('Fetching all loans');
 
-    return this.http.get<any[]>(this.apiUrl)
+    return this.http.get<LoanListResponse>(this.apiUrl)
       .pipe(
         tap(() => {
           this.logger.debug('Loans fetched successfully');
@@ -38,7 +36,7 @@ export class LoanService {
   /**
    * Get a specific loan by ID with validation
    */
-  getLoan(id: string): Observable<any> {
+  getLoan(id: string): Observable<LoanDetails> {
     // Validate loan ID
     if (!id || id.trim().length === 0) {
       this.logger.error('Loan ID is required');
@@ -52,7 +50,7 @@ export class LoanService {
 
     this.logger.debug('Fetching loan', { id });
 
-    return this.http.get<any>(`${this.apiUrl}/${id}`)
+    return this.http.get<LoanDetails>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
           this.logger.debug('Loan fetched successfully', { id });
@@ -64,7 +62,7 @@ export class LoanService {
   /**
    * Create a new loan with validation
    */
-  createLoan(loan: any): Observable<any> {
+  createLoan(loan: ApplyLoanRequest): Observable<LoanDetails> {
     // Validate loan object
     if (!loan) {
       this.logger.error('Loan data is required');
@@ -77,56 +75,50 @@ export class LoanService {
       return throwError(() => new Error('Loan type is required'));
     }
 
-    if (loan.principalAmount === undefined || loan.principalAmount === null) {
-      this.logger.error('Principal amount is required');
-      return throwError(() => new Error('Principal amount is required'));
+    if (loan.requestedAmount === undefined || loan.requestedAmount === null) {
+      this.logger.error('Loan amount is required');
+      return throwError(() => new Error('Loan amount is required'));
     }
 
-    if (loan.tenure === undefined || loan.tenure === null) {
+    if (loan.tenureMonths === undefined || loan.tenureMonths === null) {
       this.logger.error('Loan tenure is required');
       return throwError(() => new Error('Loan tenure (in months) is required'));
     }
 
     // Validate principal amount
-    if (typeof loan.principalAmount !== 'number' || loan.principalAmount <= 0) {
-      this.logger.error('Invalid principal amount', { principalAmount: loan.principalAmount });
-      return throwError(() => new Error('Principal amount must be greater than zero'));
+    if (typeof loan.requestedAmount !== 'number' || loan.requestedAmount <= 0) {
+      this.logger.error('Invalid loan amount', { requestedAmount: loan.requestedAmount });
+      return throwError(() => new Error('Loan amount must be greater than zero'));
     }
 
-    if (loan.principalAmount > 10000000) {
-      this.logger.error('Principal amount exceeds maximum limit');
-      return throwError(() => new Error('Principal amount cannot exceed 10,000,000'));
+    if (loan.requestedAmount > 10000000) {
+      this.logger.error('Loan amount exceeds maximum limit');
+      return throwError(() => new Error('Loan amount cannot exceed 10,000,000'));
     }
 
     // Validate tenure (in months)
-    if (!Number.isInteger(loan.tenure) || loan.tenure < 1 || loan.tenure > 360) {
-      this.logger.error('Invalid tenure', { tenure: loan.tenure });
+    if (!Number.isInteger(loan.tenureMonths) || loan.tenureMonths < 1 || loan.tenureMonths > 360) {
+      this.logger.error('Invalid tenure', { tenureMonths: loan.tenureMonths });
       return throwError(() => new Error('Loan tenure must be between 1 and 360 months'));
     }
 
-    // Validate interest rate if provided
-    if (loan.interestRate !== undefined && (loan.interestRate < 0 || loan.interestRate > 50)) {
-      this.logger.error('Invalid interest rate', { interestRate: loan.interestRate });
-      return throwError(() => new Error('Interest rate must be between 0 and 50%'));
-    }
-
     // Validate loan type
-    const validLoanTypes = ['home', 'auto', 'personal', 'education', 'business'];
-    if (!validLoanTypes.includes(loan.loanType.toLowerCase())) {
+    const validLoanTypes = ['PERSONAL', 'HOME', 'AUTO', 'EDUCATION', 'BUSINESS', 'GOLD'];
+    if (!validLoanTypes.includes(loan.loanType.toUpperCase())) {
       this.logger.error('Invalid loan type', { loanType: loan.loanType });
       return throwError(() => new Error(`Loan type must be one of: ${validLoanTypes.join(', ')}`));
     }
 
     this.logger.debug('Creating new loan', {
       loanType: loan.loanType,
-      principalAmount: loan.principalAmount,
-      tenure: loan.tenure,
+      requestedAmount: loan.requestedAmount,
+      tenureMonths: loan.tenureMonths,
     });
 
-    return this.http.post<any>(this.apiUrl, loan)
+    return this.http.post<LoanDetails>(this.apiUrl, loan)
       .pipe(
         tap((response) => {
-          this.logger.debug('Loan created successfully', { loanId: response.id });
+          this.logger.debug('Loan created successfully', { loanId: response.loanId });
         }),
         catchError((error) => this.handleError(error))
       );
@@ -135,7 +127,7 @@ export class LoanService {
   /**
    * Update a loan with validation
    */
-  updateLoan(id: string, loan: any): Observable<any> {
+  updateLoan(id: string, loan: Partial<LoanDetails>): Observable<LoanDetails> {
     // Validate loan ID
     if (!id || id.trim().length === 0) {
       this.logger.error('Loan ID is required for update');
@@ -147,25 +139,25 @@ export class LoanService {
       return throwError(() => new Error('Loan data is required'));
     }
 
-    // Validate principal amount if provided
-    if (loan.principalAmount !== undefined && loan.principalAmount !== null) {
-      if (typeof loan.principalAmount !== 'number' || loan.principalAmount <= 0) {
-        this.logger.error('Invalid principal amount', { principalAmount: loan.principalAmount });
-        return throwError(() => new Error('Principal amount must be greater than zero'));
+    // Validate loan amount if provided
+    if (loan.disbursedAmount !== undefined && loan.disbursedAmount !== null) {
+      if (typeof loan.disbursedAmount !== 'number' || loan.disbursedAmount <= 0) {
+        this.logger.error('Invalid loan amount', { disbursedAmount: loan.disbursedAmount });
+        return throwError(() => new Error('Loan amount must be greater than zero'));
       }
     }
 
     // Validate tenure if provided
-    if (loan.tenure !== undefined && loan.tenure !== null) {
-      if (!Number.isInteger(loan.tenure) || loan.tenure < 1 || loan.tenure > 360) {
-        this.logger.error('Invalid tenure', { tenure: loan.tenure });
+    if (loan.tenureMonths !== undefined && loan.tenureMonths !== null) {
+      if (!Number.isInteger(loan.tenureMonths) || loan.tenureMonths < 1 || loan.tenureMonths > 360) {
+        this.logger.error('Invalid tenure', { tenureMonths: loan.tenureMonths });
         return throwError(() => new Error('Tenure must be between 1 and 360 months'));
       }
     }
 
     this.logger.debug('Updating loan', { id });
 
-    return this.http.put<any>(`${this.apiUrl}/${id}`, loan)
+    return this.http.put<LoanDetails>(`${this.apiUrl}/${id}`, loan)
       .pipe(
         tap(() => {
           this.logger.debug('Loan updated successfully', { id });
@@ -177,7 +169,7 @@ export class LoanService {
   /**
    * Delete a loan with validation
    */
-  deleteLoan(id: string): Observable<any> {
+  deleteLoan(id: string): Observable<void> {
     // Validate loan ID
     if (!id || id.trim().length === 0) {
       this.logger.error('Loan ID is required for deletion');
@@ -186,7 +178,7 @@ export class LoanService {
 
     this.logger.debug('Deleting loan', { id });
 
-    return this.http.delete<any>(`${this.apiUrl}/${id}`)
+    return this.http.delete<void>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
           this.logger.debug('Loan deleted successfully', { id });

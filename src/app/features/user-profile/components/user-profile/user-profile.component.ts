@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserProfileService } from '../../services/user-profile.service';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-user-profile',
@@ -20,16 +21,18 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ],
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.scss']
+  styleUrls: ['./user-profile.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserProfileComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private userProfileService = inject(UserProfileService);
+  private destroyRef = inject(DestroyRef);
+
   userDetailsForm: FormGroup;
   passwordForm: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private userProfileService: UserProfileService
-  ) {
+  constructor() {
     this.userDetailsForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -51,14 +54,18 @@ export class UserProfileComponent implements OnInit {
   }
 
   loadUserDetails(): void {
-    this.userProfileService.getUserDetails().subscribe(details => {
-      this.userDetailsForm.patchValue(details);
-    });
+    this.userProfileService.getUserDetails()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(details => {
+        this.userDetailsForm.patchValue(details);
+      });
   }
 
   saveUserDetails(): void {
     if (this.userDetailsForm.valid) {
-      this.userProfileService.updateUserDetails(this.userDetailsForm.value).subscribe();
+      this.userProfileService.updateUserDetails(this.userDetailsForm.value)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe();
     }
   }
 
@@ -66,7 +73,9 @@ export class UserProfileComponent implements OnInit {
     if (this.passwordForm.valid) {
       const passwordData = this.passwordForm.value;
       if (passwordData.newPassword === passwordData.confirmPassword) {
-        this.userProfileService.changePassword(passwordData).subscribe();
+        this.userProfileService.changePassword(passwordData)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe();
       } else {
         alert('New password and confirm password do not match');
       }

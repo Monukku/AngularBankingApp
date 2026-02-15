@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 export enum NotificationType {
@@ -13,8 +13,7 @@ export enum NotificationType {
 })
 export class NotificationService {
   private readonly defaultDuration = 3000;
-
-  constructor(private snackBar: MatSnackBar) {}
+  private snackBar = inject(MatSnackBar);
 
   success(message: string, duration?: number): void {
     this.show(message, NotificationType.SUCCESS, duration);

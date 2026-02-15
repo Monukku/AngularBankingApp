@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TransactionService } from '../../services/transaction.service';
-import { Transaction } from '../../../../shared/models/transaction.model';
+import { Transaction } from '../../models/transaction.model'; 
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,14 +9,23 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule], // Include CommonModule here
   templateUrl: './transaction-details.component.html',
-  styleUrls: ['./transaction-details.component.scss']
+  styleUrls: ['./transaction-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionDetailsComponent implements OnInit {
   transaction: Transaction = {
     id: '2',
     amount: 0,
-    date: ''
+    date: '',
+    accountNumber: '',
+    description: '',
+    createdAt: '',
+    updatedAt: '',
+    category: undefined,
+    transactionType: 'TRANSFER',
+    transactionStatus: 'PENDING'
   };
+       
 
   constructor(private route: ActivatedRoute, private transactionService: TransactionService) { }
 

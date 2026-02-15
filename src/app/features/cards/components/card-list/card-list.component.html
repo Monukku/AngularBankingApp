@@ -1,5 +1,6 @@
 <div class="card-list">
-    <div class="card-card" *ngFor="let card of cards">
+  @for (card of cards; track trackByCardId($index, card)) {
+    <div class="card-card">
       <mat-card>
         <mat-card-title>{{ card.name }}</mat-card-title>
         <mat-card-content>
@@ -13,5 +14,6 @@
         </mat-card-actions>
       </mat-card>
     </div>
-  </div>
+  }
+</div>
   

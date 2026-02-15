@@ -12,7 +12,7 @@
 // }
 
 // recurring-payments.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RecurringPayment } from '../../models/RecurringPayment';
@@ -22,7 +22,8 @@ import { RecurringPayment } from '../../models/RecurringPayment';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './recurring-payments.component.html',
-  styleUrl: './recurring-payments.component.scss'
+  styleUrl: './recurring-payments.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecurringPaymentsComponent implements OnInit {
   recurringPayments: RecurringPayment[] = [];

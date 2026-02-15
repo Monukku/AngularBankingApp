@@ -1,9 +1,10 @@
 import { createReducer, on } from '@ngrx/store';
 import * as AuthActions from './auth.actions';
+import { UserProfile } from '../../core/models/user.model';
 
 export interface AuthState {
   authenticated: boolean;
-  user: any | null;
+  user: UserProfile | null;
   token: string | null;
   loading: boolean;
   error: string | null;

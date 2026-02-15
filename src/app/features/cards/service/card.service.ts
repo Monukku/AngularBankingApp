@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment'; 
 import { LoggerService } from '../../../core/services/logger.service'; 
+import { Card, CardDetails } from '../models/card.model';
 
 /**
  * Card Service - Manages card operations with input validation
@@ -14,11 +15,8 @@ import { LoggerService } from '../../../core/services/logger.service';
 })
 export class CardService {
   private apiUrl = `${environment.api.baseUrl}/cards`;
-
-  constructor(
-    private http: HttpClient,
-    private logger: LoggerService
-  ) { }
+  private http = inject(HttpClient);
+  private logger = inject(LoggerService);
 
   /**
    * Get all cards for the user

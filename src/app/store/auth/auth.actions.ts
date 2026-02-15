@@ -1,11 +1,12 @@
 // # Global state (auth only)
 import { createAction, props } from '@ngrx/store';
+import { UserProfile } from '../../core/models/user.model';
 
 // Login actions
 export const login = createAction('[Auth] Login');
 export const loginSuccess = createAction(
   '[Auth] Login Success',
-  props<{ user: any }>()
+  props<{ user: UserProfile }>()
 );
 export const loginFailure = createAction(
   '[Auth] Login Failure',
@@ -30,7 +31,7 @@ export const setAuthenticated = createAction(
 export const loadUser = createAction('[Auth] Load User');
 export const loadUserSuccess = createAction(
   '[Auth] Load User Success',
-  props<{ user: any }>()
+  props<{ user: UserProfile }>()
 );
 export const loadUserFailure = createAction(
   '[Auth] Load User Failure',

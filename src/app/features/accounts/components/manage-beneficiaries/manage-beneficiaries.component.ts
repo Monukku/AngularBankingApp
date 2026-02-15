@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { BeneficiaryService } from '../../services/beneficiary.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Beneficiary } from '../../../../shared/models/beneficiary.model';
+import { Beneficiary } from '../../models/beneficiary.model';
 
 @Component({
   selector: 'app-manage-beneficiaries',
@@ -16,11 +16,20 @@ import { Beneficiary } from '../../../../shared/models/beneficiary.model';
     MatInputModule
   ],
   templateUrl: './manage-beneficiaries.component.html',
-  styleUrl: './manage-beneficiaries.component.scss'
+  styleUrl: './manage-beneficiaries.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageBeneficiariesComponent implements OnInit {
   beneficiaries: Beneficiary[] = [];
-  newBeneficiary: Beneficiary = { name: '', accountNumber: '' }; // Initialize with empty strings
+  newBeneficiary: Beneficiary = {
+    beneficiaryId: '',
+    name: '',
+    accountNumber: '',
+    accountHolderName: '',
+    beneficiaryType: 'EXTERNAL',
+    verificationStatus: 'PENDING',
+    createdAt: new Date()
+  };
 
   constructor(private beneficiaryService: BeneficiaryService) { }
 

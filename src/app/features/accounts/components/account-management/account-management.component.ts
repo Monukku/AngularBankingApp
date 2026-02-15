@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -37,6 +37,7 @@ import { MatSelect } from '@angular/material/select';
   ],
   templateUrl: './account-management.component.html',
   styleUrls: ['./account-management.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccountManagementComponent implements OnInit {
   accountForm: FormGroup;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { TransactionService } from '../../../accounts/services/transaction.service';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -9,6 +9,7 @@ import { MatTableModule } from '@angular/material/table';
   imports: [MatTableModule, CommonModule],
   templateUrl: './transaction-history.component.html',
   styleUrls: ['./transaction-history.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionHistoryComponent implements OnInit {
   transactionHistory: any[] = [];

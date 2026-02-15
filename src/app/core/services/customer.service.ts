@@ -1,18 +1,17 @@
 // src/app/core/services/customer.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Customer } from '../../shared/models/customer.model';
+import { Customer } from '../models/customer.model';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
-  private apiUrl = `${environment.apiUrl}/customers`;
-
-  constructor(private http: HttpClient) {}
+  private apiUrl = `${environment.api.baseUrl}/customers`;
+  private http = inject(HttpClient);
 
   getCustomers(): Observable<Customer[]> {
     return this.http.get<Customer[]>(this.apiUrl);

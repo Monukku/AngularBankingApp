@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { LoggerService } from './logger.service';
@@ -26,12 +26,13 @@ export interface ErrorNotification {
   providedIn: 'root'
 })
 export class ErrorHandlerService {
+  private injector = inject(Injector);
   private logger: LoggerService;
   private router: Router;
   private errorHistory: ErrorNotification[] = [];
   private maxErrorHistory = 50;
 
-  constructor(private injector: Injector) {
+  constructor() {
     // Delayed injection to avoid circular dependencies
     this.logger = this.injector.get(LoggerService);
     this.router = this.injector.get(Router);
