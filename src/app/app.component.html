@@ -1,20 +1,22 @@
-<div class="app-container">
-  <!-- ✅ Header only when authenticated -->
-  <app-header *ngIf="isAuthenticated$ | async"></app-header>
+<div class="app-container" [class.authenticated]="isAuthenticated$ | async">
+  <!-- Header -->
+  <app-header *ngIf="isAuthenticated$ | async" class="app-header"></app-header>
 
-  <div class="main-content" [class.authenticated]="isAuthenticated$ | async">
-    <!-- ✅ Sidebar only when authenticated -->
-    <app-sidebar *ngIf="isAuthenticated$ | async"></app-sidebar>
+  <div class="main-wrapper" [class.authenticated]="isAuthenticated$ | async">
+    <!-- Sidebar -->
+    <app-sidebar *ngIf="isAuthenticated$ | async" class="app-sidebar"></app-sidebar>
 
-    <!-- ✅ Content area adjusts based on auth state -->
-    <div class="content-area" [class.full-width]="!(isAuthenticated$ | async)">
-      <router-outlet></router-outlet>
+    <!-- Content Area -->
+    <div class="content-wrapper">
+      <div class="content-area" [class.full-width]="!(isAuthenticated$ | async)">
+        <router-outlet></router-outlet>
+      </div>
+      
+      <!-- Footer -->
+      <app-footer *ngIf="isAuthenticated$ | async" class="app-footer"></app-footer>
     </div>
   </div>
 
-  <!-- ✅ Footer only when authenticated -->
-  <app-footer *ngIf="isAuthenticated$ | async"></app-footer>
-
-  <!-- ✅ Notification always available for error messages -->
-  <app-notification></app-notification>
+  <!-- Global Notification -->
+  <app-notification class="app-notification"></app-notification>
 </div>

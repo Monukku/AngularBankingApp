@@ -1,47 +1,75 @@
 
 
-    <!-- sidebar.component.html -->
-<div class="sidebar" *ngIf="isAuthenticated$ | async">
-  <div class="user-info">
-    <mat-icon class="user-avatar">account_circle</mat-icon>
-    <div class="user-details">
-      <p class="username">{{ (currentUser$ | async)?.username }}</p>
-      <p class="email">{{ (currentUser$ | async)?.email }}</p>
+    <div class="sidebar-container" *ngIf="isAuthenticated$ | async">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+  </div>
+
+  <!-- User Section -->
+  <div class="user-section">
+    <div class="user-avatar">
+      <div class="avatar-circle">
+        {{ (currentUser$ | async)?.username?.[0]?.toUpperCase() || 'U' }}
+      </div>
+    </div>
+    <div class="user-info">
+      <p class="username">{{ (currentUser$ | async)?.username || 'User' }}</p>
+      <p class="email">{{ (currentUser$ | async)?.email || 'email@example.com' }}</p>
     </div>
   </div>
 
-  <mat-nav-list>
-    <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
-      <mat-icon>dashboard</mat-icon>
-      <span>Dashboard</span>
-    </a>
-    <a mat-list-item routerLink="/accounts" routerLinkActive="active">
-      <mat-icon>account_balance_wallet</mat-icon>
-      <span>Accounts</span>
-    </a>
-    <a mat-list-item routerLink="/transactions" routerLinkActive="active">
-      <mat-icon>receipt</mat-icon>
-      <span>Transactions</span>
-    </a>
-    <a mat-list-item routerLink="/cards" routerLinkActive="active">
-      <mat-icon>credit_card</mat-icon>
-      <span>Cards</span>
-    </a>
-    <a mat-list-item routerLink="/loans" routerLinkActive="active">
-      <mat-icon>account_balance</mat-icon>
-      <span>Loans</span>
-    </a>
-    <a mat-list-item routerLink="/profile" routerLinkActive="active">
-      <mat-icon>person</mat-icon>
-      <span>Profile</span>
-    </a>
+  <!-- Navigation Menu -->
+  <nav class="nav-menu">
+    <div class="nav-section">
+      <div class="section-title">Main</div>
+      
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">dashboard</mat-icon>
+        <span class="nav-label">Dashboard</span>
+        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
 
-    <mat-divider></mat-divider>
+      <a routerLink="/accounts" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
+        <span class="nav-label">Accounts</span>
+        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
 
-    <!-- ✅ Logout button -->
-    <a mat-list-item (click)="logout()" class="logout-item">
+      <a routerLink="/transactions" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">receipt</mat-icon>
+        <span class="nav-label">Transactions</span>
+        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Services</div>
+      
+      <a routerLink="/cards" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">credit_card</mat-icon>
+        <span class="nav-label">Cards</span>
+        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
+
+      <a routerLink="/loans" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">account_balance</mat-icon>
+        <span class="nav-label">Loans</span>
+        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
+
+      <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">person</mat-icon>
+        <span class="nav-label">Profile</span>
+        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="logout()" mat-button>
       <mat-icon>logout</mat-icon>
       <span>Logout</span>
-    </a>
-  </mat-nav-list>
+    </button>
+  </div>
 </div>

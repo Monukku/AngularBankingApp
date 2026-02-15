@@ -1,1 +1,133 @@
-<p>summary works!</p>
+<div class="summary-container">
+  <!-- Account Summary Card -->
+  @if (accountSummary) {
+    <mat-card class="summary-card account-summary">
+      <mat-card-header>
+        <mat-card-title>Account Summary</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="balance-section">
+          <p class="balance-label">Total Balance</p>
+          <h2 class="balance-amount">
+            {{ formatCurrency(accountSummary.totalBalance, accountSummary.currency) }}
+          </h2>
+        </div>
+
+        <mat-divider class="divider"></mat-divider>
+
+        <div class="account-details">
+          <div class="detail-item">
+            <span class="label">Account Number</span>
+            <span class="value">{{ accountSummary.accountNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Account Type</span>
+            <span class="value">{{ accountSummary.accountType }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Status</span>
+            <span 
+              class="value status" 
+              [style.color]="getStatusColor(accountSummary.accountStatus)"
+            >
+              {{ accountSummary.accountStatus }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Category</span>
+            <span class="value">{{ accountSummary.accountCategory }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Financial Overview Card -->
+  @if (financialOverview) {
+    <mat-card class="summary-card financial-overview">
+      <mat-card-header>
+        <mat-card-title>Financial Overview</mat-card-title>
+        <mat-card-subtitle>{{ formatPeriod(financialOverview.period) }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="overview-grid">
+          <div class="overview-item income">
+            <mat-icon>trending_up</mat-icon>
+            <div class="overview-details">
+              <span class="label">Total Income</span>
+              <span class="value">
+                {{ formatCurrency(financialOverview.totalIncome, financialOverview.currency) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="overview-item expense">
+            <mat-icon>trending_down</mat-icon>
+            <div class="overview-details">
+              <span class="label">Total Expenses</span>
+              <span class="value">
+                {{ formatCurrency(financialOverview.totalExpenses, financialOverview.currency) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="overview-item net">
+            <mat-icon>
+              {{ financialOverview.netChange >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+            </mat-icon>
+            <div class="overview-details">
+              <span class="label">Net Change</span>
+              <span class="value" [class]="getChangeStatus(financialOverview.netChange)">
+                {{ formatCurrency(financialOverview.netChange, financialOverview.currency) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="overview-item percentage">
+            <mat-icon>percent</mat-icon>
+            <div class="overview-details">
+              <span class="label">Change %</span>
+              <span class="value" [class]="getChangeStatus(financialOverview.percentageChange)">
+                {{ getPercentageChange(financialOverview.percentageChange) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Health Score Card -->
+  @if (healthScore) {
+    <mat-card class="summary-card health-score">
+      <mat-card-header>
+        <mat-card-title>Account Health</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="health-main">
+          <div class="score-circle" [style.backgroundColor]="getHealthScoreColor(healthScore.level)">
+            <span class="score-number">{{ healthScore.score }}</span>
+            <span class="score-label">/100</span>
+          </div>
+
+          <div class="health-level">
+            <p class="level" [style.color]="getHealthScoreColor(healthScore.level)">
+              {{ healthScore.level }}
+            </p>
+          </div>
+        </div>
+
+        <mat-divider class="divider"></mat-divider>
+
+        <div class="health-factors">
+          @for (recommend of healthScore.recommendations; track recommend) {
+            <div class="recommendation">
+              <mat-icon>info</mat-icon>
+              <span>{{ recommend }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

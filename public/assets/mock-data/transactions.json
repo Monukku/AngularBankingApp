@@ -1,0 +1,69 @@
+[
+  {
+    "id": "1",
+    "invoice": "INV.00092323",
+    "name": "Figma Pro Plan",
+    "category": "Design Tools",
+    "date": "2023-11-11",
+    "amount": -64.00,
+    "status": "Completed",
+    "logo": "assets/logos/figma.png",
+    "type": "debit"
+  },
+  {
+    "id": "2",
+    "invoice": "INV.00092324",
+    "name": "Internal Payment",
+    "category": "Transfer",
+    "email": "billing@gmail.com",
+    "date": "2023-11-11",
+    "amount": 200.00,
+    "status": "On Progress",
+    "logo": "assets/logos/mastercard.png",
+    "type": "credit"
+  },
+  {
+    "id": "3",
+    "invoice": "INV.00092325",
+    "name": "Dribbble Premium",
+    "category": "Design Tools",
+    "date": "2023-11-11",
+    "amount": -84.00,
+    "status": "Completed",
+    "logo": "assets/logos/dribbble.png",
+    "type": "debit"
+  },
+  {
+    "id": "4",
+    "invoice": "INV.00092326",
+    "name": "YouTube Premium",
+    "category": "Entertainment",
+    "date": "2023-11-11",
+    "amount": -84.00,
+    "status": "Completed",
+    "logo": "assets/logos/youtube.png",
+    "type": "debit"
+  },
+  {
+    "id": "5",
+    "invoice": "INV.00092327",
+    "name": "Netflix Subscription",
+    "category": "Entertainment",
+    "date": "2023-11-10",
+    "amount": -15.99,
+    "status": "Completed",
+    "logo": "assets/logos/netflix.png",
+    "type": "debit"
+  },
+  {
+    "id": "6",
+    "invoice": "INV.00092328",
+    "name": "Salary Deposit",
+    "category": "Income",
+    "date": "2023-11-09",
+    "amount": 5000.00,
+    "status": "Completed",
+    "logo": "assets/logos/bank.png",
+    "type": "credit"
+  }
+]

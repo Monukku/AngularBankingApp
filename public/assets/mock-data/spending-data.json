@@ -1,0 +1,20 @@
+{
+  "total": 17254,
+  "changePercentage": 23,
+  "isPositive": true,
+  "period": "Last 30 days",
+  "chartData": [
+    { "month": "Jan", "value": 1800 },
+    { "month": "Feb", "value": 1900 },
+    { "month": "Mar", "value": 1850 },
+    { "month": "Apr", "value": 2000 },
+    { "month": "May", "value": 2100 },
+    { "month": "Jun", "value": 2050 },
+    { "month": "Jul", "value": 2000 },
+    { "month": "Aug", "value": 2100 },
+    { "month": "Sep", "value": 2000 },
+    { "month": "Oct", "value": 2050 },
+    { "month": "Nov", "value": 2100 },
+    { "month": "Dec", "value": 2276 }
+  ]
+}

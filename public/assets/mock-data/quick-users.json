@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "name": "Transfer Manual",
+    "amount": "",
+    "avatar": "assets/avatars/transfer.png",
+    "accountNumber": ""
+  },
+  {
+    "id": "2",
+    "name": "Watson Parker",
+    "amount": "63535",
+    "avatar": "assets/avatars/watson.jpg",
+    "accountNumber": "****1234"
+  },
+  {
+    "id": "3",
+    "name": "Nathan Brooks",
+    "amount": "47647",
+    "avatar": "assets/avatars/nathan.jpg",
+    "accountNumber": "****5678"
+  },
+  {
+    "id": "4",
+    "name": "Angelina Rose",
+    "amount": "65318",
+    "avatar": "assets/avatars/angelina.jpg",
+    "accountNumber": "****9012"
+  },
+  {
+    "id": "5",
+    "name": "Thomas Fletcher",
+    "amount": "26400",
+    "avatar": "assets/avatars/thomas.jpg",
+    "accountNumber": "****3456"
+  },
+  {
+    "id": "6",
+    "name": "Robert Chen",
+    "amount": "38810",
+    "avatar": "assets/avatars/robert.jpg",
+    "accountNumber": "****7890"
+  }
+]

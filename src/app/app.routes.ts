@@ -2,21 +2,22 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { NotFoundComponent } from './shared/components/not-found/not-found.component';
-import { HomeComponent } from './features/home/components/home/home.component';
+
 
 export const routes: Routes = [
   
+
   {
     path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
+    redirectTo: '/dashboard',
+    pathMatch: 'full'
   },
   {
-    path: 'home',
-    component: HomeComponent,
+    path: 'dashboard',
     canActivate: [authGuard],
-  },
-  
+    loadComponent: () => 
+      import('./features/dashboard/components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+  },  
   {
     path: 'dashboard',
     canActivate: [authGuard],

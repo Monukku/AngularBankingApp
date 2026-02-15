@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
 import { Loan, LoanDetails, ApplyLoanRequest, LoanListResponse } from '../models/loan.model';
@@ -18,20 +18,33 @@ export class LoanService {
   private apiUrl = `${environment.api.baseUrl}/loans`;
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
+  private loansCache$: Observable<LoanListResponse> | null = null;
 
   /**
-   * Get all loans for the user
+   * Get all loans for the user with caching via shareReplay
+   * Multiple subscribers will share the same request result
    */
   getLoans(): Observable<LoanListResponse> {
-    this.logger.debug('Fetching all loans');
+    if (!this.loansCache$) {
+      this.logger.debug('Fetching all loans');
 
-    return this.http.get<LoanListResponse>(this.apiUrl)
-      .pipe(
-        tap(() => {
-          this.logger.debug('Loans fetched successfully');
-        }),
-        catchError((error) => this.handleError(error))
-      );
+      this.loansCache$ = this.http.get<LoanListResponse>(this.apiUrl)
+        .pipe(
+          tap(() => {
+            this.logger.debug('Loans fetched successfully');
+          }),
+          catchError((error) => this.handleError(error)),
+          shareReplay(1) // Cache and share among all subscribers
+        );
+    }
+    return this.loansCache$;
+  }
+
+  /**
+   * Clear the cache when loans are modified
+   */
+  invalidateLoansCache(): void {
+    this.loansCache$ = null;
   }
 
   /**
@@ -120,6 +133,7 @@ export class LoanService {
       .pipe(
         tap((response) => {
           this.logger.debug('Loan created successfully', { loanId: response.loanId });
+          this.invalidateLoansCache(); // Invalidate cache on creation
         }),
         catchError((error) => this.handleError(error))
       );
@@ -162,6 +176,7 @@ export class LoanService {
       .pipe(
         tap(() => {
           this.logger.debug('Loan updated successfully', { id });
+          this.invalidateLoansCache(); // Invalidate cache on update
         }),
         catchError((error) => this.handleError(error))
       );
@@ -183,6 +198,7 @@ export class LoanService {
       .pipe(
         tap(() => {
           this.logger.debug('Loan deleted successfully', { id });
+          this.invalidateLoansCache(); // Invalidate cache on deletion
         }),
         catchError((error) => this.handleError(error))
       );

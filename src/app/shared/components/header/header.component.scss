@@ -1,52 +1,84 @@
-.header-toolbar {
+// Variables
+$primary-color: #6366f1;
+$primary-dark: #4f46e5;
+$secondary-color: #8b5cf6;
+$bg-white: #ffffff;
+$text-primary: #111827;
+$text-secondary: #6b7280;
+$text-tertiary: #9ca3af;
+$border-color: #e5e7eb;
+$danger-color: #ef4444;
+$warning-color: #f59e0b;
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+.app-header {
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.header-container {
+  background: $bg-white;
+  border-bottom: 1px solid $border-color;
+  box-shadow: $shadow-sm;
+  height: 72px;
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 100%;
-  padding: 0 16px;
-  gap: 16px;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0 24px;
+    gap: 24px;
+  }
 }
 
-.brand {
+// Header Left Section
+.header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  min-width: max-content;
 
   .menu-toggle {
-    display: none; // Show on mobile
+    display: none;
+    color: $text-primary;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba($primary-color, 0.08);
+      color: $primary-color;
+    }
 
     @media (max-width: 768px) {
       display: inline-flex;
     }
   }
 
-  .brand-link {
+  .logo,
+  .logo-auth {
     display: flex;
     align-items: center;
+    gap: 10px;
     text-decoration: none;
-    color: inherit;
-    gap: 8px;
+    color: $text-primary;
+    transition: transform 0.3s ease;
 
     &:hover {
-      opacity: 0.8;
+      transform: translateY(-2px);
     }
 
-    mat-icon {
+    .logo-icon {
+      color: $primary-color;
       font-size: 28px;
       width: 28px;
       height: 28px;
     }
 
-    .brand-name {
-      font-size: 20px;
-      font-weight: 500;
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
 
       @media (max-width: 480px) {
         display: none;
@@ -55,69 +87,427 @@
   }
 }
 
-.spacer {
-  flex: 1 1 auto;
-}
-
-.quick-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.auth-section {
+// Header Center Section
+.header-center {
   display: flex;
   align-items: center;
+  flex: 1;
+  max-width: 400px;
 
-  .login-button {
-    mat-icon {
-      margin-right: 4px;
-    }
+  @media (max-width: 1024px) {
+    max-width: 300px;
   }
 
-  .user-menu {
-    .user-button {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+  @media (max-width: 768px) {
+    display: none;
+  }
 
-      .username {
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 100%;
 
-        @media (max-width: 480px) {
-          display: none;
-        }
+    &:focus-within {
+      background: $bg-white;
+      border-color: $primary-color;
+      box-shadow: $shadow-sm;
+    }
+
+    .search-icon {
+      color: $text-tertiary;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      color: $text-primary;
+
+      &::placeholder {
+        color: $text-tertiary;
       }
     }
   }
 }
 
-// Menu styles
-::ng-deep {
-  .menu-user-info {
-    padding: 12px 16px;
-    background-color: #f5f5f5;
+// Spacer
+.spacer {
+  flex: 1 1 auto;
+}
 
-    .menu-username {
-      font-weight: 600;
-      margin: 0 0 4px 0;
-      font-size: 14px;
+// Header Right Section
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: max-content;
+}
+
+// Buttons
+.notification-btn,
+.theme-toggle-btn,
+.menu-toggle {
+  color: $text-secondary;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba($primary-color, 0.08);
+    color: $primary-color;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.login-btn {
+  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  color: white;
+  font-weight: 600;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 16px;
+    font-size: 12px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+// User Menu
+.user-avatar-header {
+  display: flex;
+  align-items: center;
+
+  .avatar-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: #ffffff;
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+    box-shadow: $shadow-sm;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: $shadow-md;
+    }
+  }
+}
+
+// User Menu
+.user-menu-wrapper {
+  display: flex;
+  align-items: center;
+
+  .user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    color: $text-primary;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+
+    &:hover {
+      background: rgba($primary-color, 0.08);
+      color: $primary-color;
     }
 
-    .menu-email {
-      margin: 0;
-      font-size: 12px;
-      color: #666;
+    &:active {
+      transform: scale(0.98);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #ffffff;
+      background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+      box-shadow: $shadow-sm;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+
+    .dropdown-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $text-secondary;
+      transition: transform 0.3s ease;
+    }
+
+    &[aria-expanded='true'] .dropdown-icon {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// Menu Dropdown Styles
+::ng-deep {
+  .user-menu-dropdown {
+    .mat-mdc-menu-content {
+      padding: 8px 0 !important;
+    }
+
+    .menu-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+      color: white;
+
+      .menu-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        flex-shrink: 0;
+      }
+
+      .menu-info {
+        flex: 1;
+
+        .menu-username {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 600;
+          color: white;
+        }
+
+        .menu-email {
+          margin: 4px 0 0 0;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.9);
+        }
+      }
+    }
+
+    .mat-mdc-menu-item {
+      font-size: 14px;
+      height: auto;
+      padding: 10px 16px;
+      color: $text-primary;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba($primary-color, 0.08);
+        color: $primary-color;
+
+        mat-icon {
+          color: $primary-color;
+        }
+      }
+
+      mat-icon {
+        margin-right: 12px;
+        color: $text-secondary;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      &.logout-menu-item {
+        color: $danger-color;
+
+        &:hover {
+          background: rgba($danger-color, 0.08);
+          color: $danger-color;
+
+          mat-icon {
+            color: $danger-color;
+          }
+        }
+      }
+    }
+
+    .mat-divider {
+      margin: 4px 0;
+      background: $border-color;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .header-content {
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .logo-text,
+  .logo-auth .logo-text {
+    font-size: 16px;
+  }
+
+  .user-menu-btn:not(:hover) .user-name {
+    max-width: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    height: 64px;
+  }
+
+  .header-content {
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .logo-text,
+  .logo-auth .logo-text {
+    font-size: 14px;
+  }
+
+  .header-center {
+    display: none;
+  }
+
+  .user-menu-btn .user-name {
+    display: none;
+  }
+
+  .theme-toggle-btn {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    height: 56px;
+  }
+
+  .header-content {
+    padding: 0 8px;
+    gap: 8px;
+  }
+
+  .logo-icon {
+    font-size: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .notification-btn {
+    ::ng-deep {
+      .mat-badge-content {
+        font-size: 10px;
+      }
     }
   }
 
-  .logout-menu-item {
-    color: #e74c3c;
+  .user-menu-btn .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}
 
-    mat-icon {
-      color: #e74c3c;
+// Theme Support
+@media (prefers-reduced-motion: reduce) {
+  .app-header,
+  .user-menu-btn,
+  .notification-btn,
+  .theme-toggle-btn,
+  .menu-toggle,
+  .logo,
+  .logo-auth {
+    transition: none;
+  }
+}
+
+// Dark mode support (optional)
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: #1f2937;
+    border-bottom-color: #374151;
+  }
+
+  .header-center .search-box {
+    background: #374151;
+    border-color: #4b5563;
+
+    &:focus-within {
+      background: #1f2937;
+      border-color: $primary-color;
+    }
+
+    .search-icon {
+      color: #9ca3af;
+    }
+
+    .search-input {
+      color: #e5e7eb;
+
+      &::placeholder {
+        color: #9ca3af;
+      }
     }
   }
 }

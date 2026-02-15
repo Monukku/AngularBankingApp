@@ -33,6 +33,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class HeaderComponent implements OnInit {
   isAuthenticated$: Observable<boolean>;
   currentUser$: Observable<any>;
+  notificationCount = 3;
 
   @Output() sidebarToggle = new EventEmitter<void>();
 

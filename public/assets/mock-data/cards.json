@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "cardHolder": "Thomas Fletcher",
+    "cardNumber": "1253543235213090",
+    "expiryMonth": "09",
+    "expiryYear": "24",
+    "cvv": "341",
+    "brand": "VISA",
+    "type": "Credit",
+    "balance": 8500,
+    "limit": 15000
+  },
+  {
+    "id": "2",
+    "cardHolder": "Thomas Fletcher",
+    "cardNumber": "4532987612345678",
+    "expiryMonth": "12",
+    "expiryYear": "25",
+    "cvv": "567",
+    "brand": "Mastercard",
+    "type": "Debit",
+    "balance": 12350,
+    "limit": 20000
+  }
+]

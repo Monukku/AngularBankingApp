@@ -129,6 +129,7 @@ export class CardService {
       .pipe(
         tap((response) => {
           this.logger.debug('Card created successfully', { cardId: response.id });
+          this.invalidateCardsCache(); // Invalidate cache on creation
         }),
         catchError((error) => this.handleError(error))
       );
@@ -167,6 +168,7 @@ export class CardService {
       .pipe(
         tap(() => {
           this.logger.debug('Card updated successfully', { id });
+          this.invalidateCardsCache(); // Invalidate cache on update
         }),
         catchError((error) => this.handleError(error))
       );
@@ -188,6 +190,7 @@ export class CardService {
       .pipe(
         tap(() => {
           this.logger.debug('Card deleted successfully', { id });
+          this.invalidateCardsCache(); // Invalidate cache on deletion
         }),
         catchError((error) => this.handleError(error))
       );

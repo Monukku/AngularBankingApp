@@ -1,62 +1,110 @@
-<mat-toolbar color="primary" class="header-toolbar">
-  <div class="header-container">
-    <!-- Logo/Brand -->
-    <div class="brand">
-      <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()" *ngIf="isAuthenticated$ | async">
+<header class="app-header">
+  <div class="header-content">
+    <!-- Left Section: Menu Toggle & Logo -->
+    <div class="header-left">
+      <button 
+        mat-icon-button 
+        class="menu-toggle" 
+        (click)="toggleSidebar()"
+        *ngIf="isAuthenticated$ | async"
+        matTooltip="Toggle Menu"
+      >
         <mat-icon>menu</mat-icon>
       </button>
-      <a routerLink="/home" class="brand-link">
-        <mat-icon>account_balance</mat-icon>
-        <span class="brand-name">Banking App</span>
+
+      <a routerLink="/dashboard" class="logo" *ngIf="isAuthenticated$ | async">
+        <mat-icon class="logo-icon">account_balance</mat-icon>
+        <span class="logo-text">Rewa Bank</span>
       </a>
+
+      <a routerLink="/home" class="logo-auth" *ngIf="!(isAuthenticated$ | async)">
+        <mat-icon class="logo-icon">account_balance</mat-icon>
+        <span class="logo-text">Rewa Bank</span>
+      </a>
+    </div>
+
+    <!-- Center Section: Search (optional) -->
+    <div class="header-center" *ngIf="isAuthenticated$ | async">
+      <div class="search-box">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" placeholder="Search transactions..." class="search-input" />
+      </div>
     </div>
 
     <span class="spacer"></span>
 
-    <!-- Quick Actions (optional - only important ones) -->
-    <div class="quick-actions" *ngIf="isAuthenticated$ | async">
-      <button mat-icon-button matTooltip="Notifications">
-        <mat-icon [matBadge]="3" matBadgeColor="warn">notifications</mat-icon>
+    <!-- Right Section: Notifications & User Menu -->
+    <div class="header-right">
+      <!-- Notifications -->
+      <button 
+        mat-icon-button 
+        class="notification-btn"
+        matTooltip="Notifications"
+        *ngIf="isAuthenticated$ | async"
+      >
+        <mat-icon [matBadge]="notificationCount" matBadgeColor="warn" matBadgeSize="small">
+          notifications
+        </mat-icon>
       </button>
-    </div>
 
-    <!-- Auth Section -->
-    <div class="auth-section">
-      <!-- Login button when NOT authenticated -->
+      <!-- Theme Toggle (optional) -->
+      <button 
+        mat-icon-button 
+        class="theme-toggle-btn"
+        matTooltip="Toggle Theme"
+        *ngIf="isAuthenticated$ | async"
+      >
+        <mat-icon>brightness_7</mat-icon>
+      </button>
+
+      <!-- Login Button (Not authenticated) -->
       <button
         mat-raised-button
-        color="accent"
+        class="login-btn"
         (click)="login()"
         *ngIf="!(isAuthenticated$ | async)"
-        class="login-button"
       >
         <mat-icon>login</mat-icon>
-        Login
+        Sign In
       </button>
 
-      <!-- User menu when authenticated -->
-      <div *ngIf="isAuthenticated$ | async" class="user-menu">
-        <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
-          <mat-icon>account_circle</mat-icon>
-          <span class="username">{{ (currentUser$ | async)?.username || 'User' }}</span>
-          <mat-icon>arrow_drop_down</mat-icon>
+      <!-- User Menu (Authenticated) -->
+      <div class="user-menu-wrapper" *ngIf="isAuthenticated$ | async">
+        <button 
+          mat-button 
+          [matMenuTriggerFor]="userMenu"
+          class="user-menu-btn"
+        >
+          <div class="user-avatar">
+            {{ (currentUser$ | async)?.username?.[0]?.toUpperCase() || 'U' }}
+          </div>
+          <span class="user-name">{{ (currentUser$ | async)?.username || 'User' }}</span>
+          <mat-icon class="dropdown-icon">expand_more</mat-icon>
         </button>
 
-        <mat-menu #userMenu="matMenu">
-          <div class="menu-user-info">
-            <p class="menu-username">{{ (currentUser$ | async)?.username }}</p>
-            <p class="menu-email">{{ (currentUser$ | async)?.email }}</p>
+        <mat-menu #userMenu="matMenu" class="user-menu-dropdown">
+          <div class="menu-header">
+            <div class="menu-avatar">{{ (currentUser$ | async)?.username?.[0]?.toUpperCase() || 'U' }}</div>
+            <div class="menu-info">
+              <p class="menu-username">{{ (currentUser$ | async)?.username }}</p>
+              <p class="menu-email">{{ (currentUser$ | async)?.email }}</p>
+            </div>
           </div>
+
           <mat-divider></mat-divider>
+
           <button mat-menu-item routerLink="/profile">
             <mat-icon>person</mat-icon>
             <span>Profile</span>
           </button>
+
           <button mat-menu-item routerLink="/settings">
             <mat-icon>settings</mat-icon>
             <span>Settings</span>
           </button>
+
           <mat-divider></mat-divider>
+
           <button mat-menu-item (click)="logout()" class="logout-menu-item">
             <mat-icon>logout</mat-icon>
             <span>Logout</span>
@@ -65,4 +113,4 @@
       </div>
     </div>
   </div>
-</mat-toolbar>
+</header>

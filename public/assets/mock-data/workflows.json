@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "title": "Transactions",
+    "status": "Auto Block",
+    "icon": "⚙️"
+  },
+  {
+    "id": "2",
+    "title": "Create order",
+    "status": "Looks OK",
+    "icon": "📝"
+  },
+  {
+    "id": "3",
+    "title": "Recurring Payments",
+    "status": "Active",
+    "icon": "🔄"
+  }
+]
