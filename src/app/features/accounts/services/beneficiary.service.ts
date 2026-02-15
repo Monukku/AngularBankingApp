@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
 import { catchError, tap } from 'rxjs/operators';
 import { Beneficiary, BeneficiaryDetails, AddBeneficiaryRequest } from '../models/beneficiary.model';
+import { isHttpError } from '../../../core/models/error.model';
 
 /**
  * Beneficiary Service - Manages beneficiary operations with input validation
@@ -29,10 +30,7 @@ export class BeneficiaryService {
         tap(() => {
           this.logger.debug('Beneficiaries fetched successfully');
         }),
-        catchError((error) => {
-          this.logger.error('Failed to fetch beneficiaries', error);
-          return throwError(() => new Error('Failed to fetch beneficiaries'));
-        })
+        catchError((error) => this.handleError(error, 'Failed to fetch beneficiaries'))
       );
   }
 
@@ -85,22 +83,7 @@ export class BeneficiaryService {
             name: beneficiary.name,
           });
         }),
-        catchError((error) => {
-          this.logger.error('Failed to add beneficiary', error);
-          let errorMessage = 'Failed to add beneficiary. Please try again.';
-
-          if (error.status === 400) {
-            errorMessage = 'Invalid beneficiary data. Please check and try again.';
-          } else if (error.status === 401) {
-            errorMessage = 'Unauthorized. Please log in again.';
-          } else if (error.status === 403) {
-            errorMessage = 'You do not have permission to add a beneficiary.';
-          } else if (error.status === 409) {
-            errorMessage = 'This beneficiary already exists.';
-          }
-
-          return throwError(() => new Error(errorMessage));
-        })
+        catchError((error) => this.handleError(error, 'Failed to add beneficiary'))
       );
   }
 
@@ -121,18 +104,60 @@ export class BeneficiaryService {
         tap(() => {
           this.logger.debug('Beneficiary deleted successfully', { beneficiaryId });
         }),
-        catchError((error) => {
-          this.logger.error('Failed to delete beneficiary', error);
-          let errorMessage = 'Failed to delete beneficiary. Please try again.';
-
-          if (error.status === 404) {
-            errorMessage = 'Beneficiary not found.';
-          } else if (error.status === 401) {
-            errorMessage = 'Unauthorized. Please log in again.';
-          }
-
-          return throwError(() => new Error(errorMessage));
-        })
+        catchError((error) => this.handleError(error, 'Failed to delete beneficiary'))
       );
+  }
+
+  /**
+   * Handle errors with type validation and detailed logging
+   */
+  private handleError(error: any, defaultMessage: string): Observable<never> {
+    let errorMessage = defaultMessage;
+
+    // Type guard: Check if it's an HttpErrorResponse with status property
+    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
+      const status = error.status;
+
+      switch (status) {
+        case 400:
+          errorMessage = 'Invalid beneficiary data. Please check and try again.';
+          break;
+        case 401:
+          errorMessage = 'Unauthorized. Please log in again.';
+          break;
+        case 403:
+          errorMessage = 'You do not have permission to perform this action.';
+          break;
+        case 404:
+          errorMessage = 'Beneficiary not found.';
+          break;
+        case 409:
+          errorMessage = 'This beneficiary already exists.';
+          break;
+        case 500:
+          errorMessage = 'Server error. Please try again later.';
+          break;
+        case 0:
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        default:
+          errorMessage = defaultMessage;
+      }
+
+      this.logger.error('Beneficiary service HTTP error', {
+        status,
+        message: error.message,
+        error: error.error,
+      });
+    } else if (error instanceof Error) {
+      // Standard Error object
+      errorMessage = error.message || defaultMessage;
+      this.logger.error('Beneficiary service error', { message: error.message });
+    } else {
+      // Unknown error type
+      this.logger.error('Beneficiary service unknown error', { error });
+    }
+
+    return throwError(() => new Error(errorMessage));
   }
 }

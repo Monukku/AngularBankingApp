@@ -5,6 +5,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
 import { Loan, LoanDetails, ApplyLoanRequest, LoanListResponse } from '../models/loan.model';
+import { isHttpError } from '../../../core/models/error.model';
 
 /**
  * Loan Service - Manages loan operations with input validation
@@ -188,45 +189,57 @@ export class LoanService {
   }
 
   /**
-   * Handle HTTP errors with detailed logging
+   * Handle HTTP errors with detailed logging and type validation
    */
-  private handleError(error: HttpErrorResponse): Observable<never> {
+  private handleError(error: any): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
 
-    switch (error.status) {
-      case 0:
-        errorMessage = 'Network error. Please check your internet connection.';
-        break;
-      case 400:
-        errorMessage = 'Invalid request. Please check the loan data.';
-        break;
-      case 401:
-        errorMessage = 'Unauthorized. Please log in again.';
-        break;
-      case 403:
-        errorMessage = 'You do not have permission to perform this action.';
-        break;
-      case 404:
-        errorMessage = 'Loan not found.';
-        break;
-      case 409:
-        errorMessage = 'Loan already exists.';
-        break;
-      case 500:
-        errorMessage = 'Server error. Please try again later.';
-        break;
-      case 503:
-        errorMessage = 'Service unavailable. Please try again later.';
-        break;
-      default:
-        errorMessage = `Error ${error.status}: ${error.message}`;
-    }
+    // Type guard: Check if it's an HttpErrorResponse with status property
+    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
+      const status = error.status;
+      
+      switch (status) {
+        case 0:
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        case 400:
+          errorMessage = 'Invalid request. Please check the loan data.';
+          break;
+        case 401:
+          errorMessage = 'Unauthorized. Please log in again.';
+          break;
+        case 403:
+          errorMessage = 'You do not have permission to perform this action.';
+          break;
+        case 404:
+          errorMessage = 'Loan not found.';
+          break;
+        case 409:
+          errorMessage = 'Loan already exists.';
+          break;
+        case 500:
+          errorMessage = 'Server error. Please try again later.';
+          break;
+        case 503:
+          errorMessage = 'Service unavailable. Please try again later.';
+          break;
+        default:
+          errorMessage = `Error ${status}: ${error.message || 'Unknown error'}`;
+      }
 
-    this.logger.error('Loan service error', {
-      status: error.status,
-      message: error.message,
-      error: error.error,
-    });
+      this.logger.error('Loan service HTTP error', {
+        status,
+        message: error.message,
+        error: error.error,
+      });
+    } else if (error instanceof Error) {
+      // Standard Error object
+      errorMessage = error.message;
+      this.logger.error('Loan service error', { message: error.message });
+    } else {
+      // Unknown error type
+      this.logger.error('Loan service unknown error', { error });
+    }
 
     return throwError(() => new Error(errorMessage));
   }

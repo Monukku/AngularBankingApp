@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment'; 
 import { LoggerService } from '../../../core/services/logger.service'; 
 import { Card, CardDetails } from '../models/card.model';
+import { isHttpError, isValidationError } from '../../../core/models/error.model';
 
 /**
  * Card Service - Manages card operations with input validation
@@ -17,20 +18,33 @@ export class CardService {
   private apiUrl = `${environment.api.baseUrl}/cards`;
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
+  private cardsCache$: Observable<any[]> | null = null;
 
   /**
-   * Get all cards for the user
+   * Get all cards for the user with caching via shareReplay
+   * Multiple subscribers will share the same request result
    */
   getCards(): Observable<any[]> {
-    this.logger.debug('Fetching all cards');
+    if (!this.cardsCache$) {
+      this.logger.debug('Fetching all cards');
 
-    return this.http.get<any[]>(this.apiUrl)
-      .pipe(
-        tap(() => {
-          this.logger.debug('Cards fetched successfully');
-        }),
-        catchError((error) => this.handleError(error))
-      );
+      this.cardsCache$ = this.http.get<any[]>(this.apiUrl)
+        .pipe(
+          tap(() => {
+            this.logger.debug('Cards fetched successfully');
+          }),
+          catchError((error) => this.handleError(error)),
+          shareReplay(1) // Cache and share among all subscribers
+        );
+    }
+    return this.cardsCache$;
+  }
+
+  /**
+   * Clear the cache when cards are modified
+   */
+  invalidateCardsCache(): void {
+    this.cardsCache$ = null;
   }
 
   /**
@@ -180,45 +194,57 @@ export class CardService {
   }
 
   /**
-   * Handle HTTP errors with detailed logging
+   * Handle HTTP errors with detailed logging and type validation
    */
-  private handleError(error: HttpErrorResponse): Observable<never> {
+  private handleError(error: any): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
 
-    switch (error.status) {
-      case 0:
-        errorMessage = 'Network error. Please check your internet connection.';
-        break;
-      case 400:
-        errorMessage = 'Invalid request. Please check the card data.';
-        break;
-      case 401:
-        errorMessage = 'Unauthorized. Please log in again.';
-        break;
-      case 403:
-        errorMessage = 'You do not have permission to perform this action.';
-        break;
-      case 404:
-        errorMessage = 'Card not found.';
-        break;
-      case 409:
-        errorMessage = 'Card already exists.';
-        break;
-      case 500:
-        errorMessage = 'Server error. Please try again later.';
-        break;
-      case 503:
-        errorMessage = 'Service unavailable. Please try again later.';
-        break;
-      default:
-        errorMessage = `Error ${error.status}: ${error.message}`;
-    }
+    // Type guard: Check if it's an HttpErrorResponse with status property
+    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
+      const status = error.status;
+      
+      switch (status) {
+        case 0:
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        case 400:
+          errorMessage = 'Invalid request. Please check the card data.';
+          break;
+        case 401:
+          errorMessage = 'Unauthorized. Please log in again.';
+          break;
+        case 403:
+          errorMessage = 'You do not have permission to perform this action.';
+          break;
+        case 404:
+          errorMessage = 'Card not found.';
+          break;
+        case 409:
+          errorMessage = 'Card already exists.';
+          break;
+        case 500:
+          errorMessage = 'Server error. Please try again later.';
+          break;
+        case 503:
+          errorMessage = 'Service unavailable. Please try again later.';
+          break;
+        default:
+          errorMessage = `Error ${status}: ${error.message || 'Unknown error'}`;
+      }
 
-    this.logger.error('Card service error', {
-      status: error.status,
-      message: error.message,
-      error: error.error,
-    });
+      this.logger.error('Card service HTTP error', {
+        status,
+        message: error.message,
+        error: error.error,
+      });
+    } else if (error instanceof Error) {
+      // Standard Error object
+      errorMessage = error.message;
+      this.logger.error('Card service error', { message: error.message });
+    } else {
+      // Unknown error type
+      this.logger.error('Card service unknown error', { error });
+    }
 
     return throwError(() => new Error(errorMessage));
   }

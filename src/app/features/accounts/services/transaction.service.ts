@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
 import { catchError, tap } from 'rxjs/operators';
+import { isHttpError } from '../../../core/models/error.model';
 
 /**
  * Transaction Service - Manages financial transactions with input validation
@@ -28,10 +29,7 @@ export class TransactionService {
         tap(() => {
           this.logger.debug('Transaction history fetched successfully');
         }),
-        catchError((error) => {
-          this.logger.error('Failed to fetch transaction history', error);
-          return throwError(() => new Error('Failed to fetch transaction history'));
-        })
+        catchError((error) => this.handleError(error, 'Failed to fetch transaction history'))
       );
   }
 
@@ -94,24 +92,60 @@ export class TransactionService {
             amount,
           });
         }),
-        catchError((error) => {
-          this.logger.error('Fund transfer failed', error);
-          let errorMessage = 'Fund transfer failed. Please try again.';
-
-          if (error.status === 400) {
-            errorMessage = 'Invalid transfer details. Please check and try again.';
-          } else if (error.status === 401) {
-            errorMessage = 'Unauthorized. Please log in again.';
-          } else if (error.status === 403) {
-            errorMessage = 'You do not have permission to perform this transfer.';
-          } else if (error.status === 404) {
-            errorMessage = 'One or both accounts not found.';
-          } else if (error.status === 409) {
-            errorMessage = 'Insufficient funds. Please check your balance.';
-          }
-
-          return throwError(() => new Error(errorMessage));
-        })
+        catchError((error) => this.handleError(error, 'Fund transfer failed'))
       );
+  }
+
+  /**
+   * Handle errors with type validation and detailed logging
+   */
+  private handleError(error: any, defaultMessage: string): Observable<never> {
+    let errorMessage = defaultMessage;
+
+    // Type guard: Check if it's an HttpErrorResponse with status property
+    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
+      const status = error.status;
+
+      switch (status) {
+        case 0:
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        case 400:
+          errorMessage = 'Invalid transfer details. Please check and try again.';
+          break;
+        case 401:
+          errorMessage = 'Unauthorized. Please log in again.';
+          break;
+        case 403:
+          errorMessage = 'You do not have permission to perform this transfer.';
+          break;
+        case 404:
+          errorMessage = 'One or both accounts not found.';
+          break;
+        case 409:
+          errorMessage = 'Insufficient funds. Please check your balance.';
+          break;
+        case 500:
+          errorMessage = 'Server error. Please try again later.';
+          break;
+        default:
+          errorMessage = defaultMessage;
+      }
+
+      this.logger.error('Transaction service HTTP error', {
+        status,
+        message: error.message,
+        error: error.error,
+      });
+    } else if (error instanceof Error) {
+      // Standard Error object
+      errorMessage = error.message || defaultMessage;
+      this.logger.error('Transaction service error', { message: error.message });
+    } else {
+      // Unknown error type
+      this.logger.error('Transaction service unknown error', { error });
+    }
+
+    return throwError(() => new Error(errorMessage));
   }
 }
