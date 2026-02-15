@@ -1,48 +1,22 @@
-// import { Injectable, inject } from '@angular/core';
-// import { CanActivate, Router } from '@angular/router';
-// import { KeycloakService } from 'keycloak-angular';
-
-// @Injectable({
-//   providedIn: 'root'
-// })
-// export class NoAuthGuard implements CanActivate {
-
-//   private keycloakService = inject(KeycloakService);
-//   private router = inject(Router);
-
-//   async canActivate(): Promise<boolean> {
-//     const isLoggedIn = await this.keycloakService.isLoggedIn();
-//     if (isLoggedIn) {
-//       this.router.navigate(['/home']);
-//       return false;
-//     } else {
-//       return true;
-//     }
-//   }
-// }
-
-
-import { Injectable, inject } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class NoAuthGuard implements CanActivate {
-  
-  private keycloakService = inject(KeycloakService);
-  private router = inject(Router);
+/**
+ * Functional No-Auth Guard - Protects unauthenticated routes (login, register)
+ * Redirects already logged-in users to dashboard to prevent accessing auth pages
+ */
+export const noAuthGuard: CanActivateFn = async (): Promise<boolean> => {
+  const keycloakService = inject(KeycloakService);
+  const router = inject(Router);
 
-  async canActivate(): Promise<boolean> {
-    const isLoggedIn = await this.keycloakService.isLoggedIn();
-    if (isLoggedIn) {
-      // ✅ Redirect to dashboard if already logged in
-      this.router.navigate(['/home']);
-      return false;
-
-    }
+  const isLoggedIn = await keycloakService.isLoggedIn();
   
-    return true;
+  if (isLoggedIn) {
+    // ✅ Redirect to dashboard if already logged in
+    router.navigate(['/home']);
+    return false;
   }
-}
+
+  return true;
+};
