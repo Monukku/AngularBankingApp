@@ -23,18 +23,37 @@
       </a>
     </div>
 
-    <!-- Center Section: Search (optional) -->
-    <div class="header-center" *ngIf="isAuthenticated$ | async">
+    <!-- Center Section: Search -->
+    <div class="header-center-search" *ngIf="isAuthenticated$ | async">
       <div class="search-box">
         <mat-icon class="search-icon">search</mat-icon>
         <input type="text" placeholder="Search transactions..." class="search-input" />
       </div>
     </div>
 
-    <span class="spacer"></span>
+    <!-- Spacer to push right section to the end -->
+    <div class="spacer"></div>
 
-    <!-- Right Section: Notifications & User Menu -->
+    <!-- Right Section: Action Buttons & User Menu -->
     <div class="header-right">
+      <!-- Action Buttons (Authenticated) -->
+      <div class="action-buttons" *ngIf="isAuthenticated$ | async">
+        <button mat-button class="action-btn" matTooltip="Create Flow">
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Create Flow</span>
+        </button>
+
+        <button mat-raised-button class="action-btn primary-btn" matTooltip="Add Funds">
+          <mat-icon>add</mat-icon>
+          <span>Add Funds</span>
+        </button>
+
+        <button mat-raised-button class="action-btn secondary-btn" matTooltip="Move Money">
+          <mat-icon>send</mat-icon>
+          <span>Move Money</span>
+        </button>
+      </div>
+
       <!-- Notifications -->
       <button 
         mat-icon-button 
