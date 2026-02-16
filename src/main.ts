@@ -58,7 +58,7 @@ import { appConfig } from './app/app.config';
 import { environment } from './environments/environment';
 
 // ✅ SSR-safe Keycloak initialization
-function initializeKeycloak(keycloak: KeycloakService, platformId: Object) {
+function initializeKeycloak(keycloak: KeycloakService, platformId: object) {
   return () => {
     // Only initialize Keycloak in browser
     if (isPlatformBrowser(platformId)) {

@@ -98,7 +98,7 @@ export class HttpError extends AppError {
 export class ValidationError extends AppError {
   constructor(
     message: string,
-    public fieldErrors: { [key: string]: string[] } = {},
+    public fieldErrors: Record<string, string[]> = {},
     code: string = 'VALIDATION_ERROR',
     context: ErrorContext = {}
   ) {

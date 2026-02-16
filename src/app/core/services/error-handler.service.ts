@@ -95,7 +95,7 @@ export class ErrorHandlerService {
    * Handle validation errors from API responses
    */
   private handleValidationError(error: HttpErrorResponse): ValidationError {
-    let fieldErrors: { [key: string]: string[] } = {};
+    let fieldErrors: Record<string, string[]> = {};
     let message = 'Validation failed. Please check your input.';
 
     // Check if error response contains field-level validation errors
