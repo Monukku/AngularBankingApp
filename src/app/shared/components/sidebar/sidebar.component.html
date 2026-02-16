@@ -1,11 +1,5 @@
-
-
-    <div class="sidebar-container" *ngIf="isAuthenticated$ | async">
-  <!-- Sidebar Header -->
-  <div class="sidebar-header">
-  </div>
-
-  <!-- User Section -->
+<div class="sidebar-container" *ngIf="isAuthenticated$ | async">
+  <!-- User Section - NO WHITE SPACE -->
   <div class="user-section">
     <div class="user-avatar">
       <div class="avatar-circle">
@@ -13,54 +7,75 @@
       </div>
     </div>
     <div class="user-info">
-      <p class="username">{{ (currentUser$ | async)?.username || 'User' }}</p>
-      <p class="email">{{ (currentUser$ | async)?.email || 'email@example.com' }}</p>
+      <p class="username">{{ (currentUser$ | async)?.username || 'User Name' }}</p>
+      <p class="email">{{ (currentUser$ | async)?.email || 'user@rewabank.com' }}</p>
     </div>
   </div>
 
   <!-- Navigation Menu -->
   <nav class="nav-menu">
+    <!-- Main Section -->
     <div class="nav-section">
-      <div class="section-title">Main</div>
+      <div class="section-title">Main Menu</div>
       
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
         <mat-icon class="nav-icon">dashboard</mat-icon>
         <span class="nav-label">Dashboard</span>
-        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
       </a>
 
       <a routerLink="/accounts" routerLinkActive="active" class="nav-item">
         <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
         <span class="nav-label">Accounts</span>
-        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
       </a>
 
       <a routerLink="/transactions" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">receipt</mat-icon>
+        <mat-icon class="nav-icon">receipt_long</mat-icon>
         <span class="nav-label">Transactions</span>
-        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
+
+      <a routerLink="/transfers" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">swap_horiz</mat-icon>
+        <span class="nav-label">Transfers</span>
       </a>
     </div>
 
+    <!-- Services Section -->
     <div class="nav-section">
       <div class="section-title">Services</div>
       
       <a routerLink="/cards" routerLinkActive="active" class="nav-item">
         <mat-icon class="nav-icon">credit_card</mat-icon>
         <span class="nav-label">Cards</span>
-        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
       </a>
 
       <a routerLink="/loans" routerLinkActive="active" class="nav-item">
         <mat-icon class="nav-icon">account_balance</mat-icon>
         <span class="nav-label">Loans</span>
-        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
       </a>
 
+      <a routerLink="/investments" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">trending_up</mat-icon>
+        <span class="nav-label">Investments</span>
+      </a>
+    </div>
+
+    <!-- Account Section -->
+    <div class="nav-section">
+      <div class="section-title">Account</div>
+      
       <a routerLink="/profile" routerLinkActive="active" class="nav-item">
         <mat-icon class="nav-icon">person</mat-icon>
         <span class="nav-label">Profile</span>
-        <mat-icon class="nav-arrow" *ngIf="false">chevron_right</mat-icon>
+      </a>
+
+      <a routerLink="/settings" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">settings</mat-icon>
+        <span class="nav-label">Settings</span>
+      </a>
+
+      <a routerLink="/help" routerLinkActive="active" class="nav-item">
+        <mat-icon class="nav-icon">help_outline</mat-icon>
+        <span class="nav-label">Help & Support</span>
       </a>
     </div>
   </nav>

@@ -1,7 +1,17 @@
-// Variables
+// ============================================
+// COLORFUL INTERACTIVE SIDEBAR
+// Enhanced Design with Perfect Spacing
+// ============================================
+
+// Color Variables
 $primary-color: #6366f1;
 $primary-dark: #4f46e5;
+$primary-light: #818cf8;
 $secondary-color: #8b5cf6;
+$accent-color: #ec4899;
+$accent-orange: #f97316;
+$accent-yellow: #fbbf24;
+$accent-cyan: #06b6d4;
 $bg-light: #f3f4f6;
 $bg-lighter: #f9fafb;
 $bg-white: #ffffff;
@@ -13,15 +23,103 @@ $success-color: #10b981;
 $danger-color: #ef4444;
 $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+// ============================================
+// KEYFRAME ANIMATIONS
+// ============================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes rainbowGradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes floatIcon {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+// ============================================
+// SIDEBAR CONTAINER
+// ============================================
 
 .sidebar-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: $bg-lighter;
+  background: linear-gradient(180deg, 
+    $bg-white 0%, 
+    $bg-lighter 50%, 
+    $bg-light 100%
+  );
   border-right: 1px solid $border-color;
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Colorful background accent
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 240px;
+    background: linear-gradient(180deg,
+      rgba(99, 102, 241, 0.04) 0%,
+      rgba(139, 92, 246, 0.03) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -33,44 +131,70 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: $border-color;
+    background: linear-gradient(180deg, $primary-color, $secondary-color);
     border-radius: 3px;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
 
     &:hover {
-      background: $text-secondary;
+      background: linear-gradient(180deg, $primary-dark, $primary-color);
     }
   }
 }
 
-// Sidebar Header/Logo
+// ============================================
+// SIDEBAR HEADER - NO WHITE SPACE
+// ============================================
+
 .sidebar-header {
-  padding: 24px 20px;
-  border-bottom: 2px solid $border-color;
+  padding: 20px 20px 16px; // Reduced bottom padding
+  border-bottom: 1px solid rgba($primary-color, 0.1);
   background: $bg-white;
   box-shadow: $shadow-sm;
+  position: relative;
+  z-index: 1;
 
   .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px;
+    border-radius: 10px;
+    margin: -8px; // Offset padding for better hit area
 
     &:hover {
       transform: translateY(-2px);
+      background: linear-gradient(135deg,
+        rgba(99, 102, 241, 0.05),
+        rgba(139, 92, 246, 0.05)
+      );
+
+      .logo-icon {
+        animation: gentlePulse 0.6s ease;
+        background: linear-gradient(135deg, $primary-color, $secondary-color);
+      }
+
+      .logo-text {
+        background: linear-gradient(135deg, $primary-color, $secondary-color, $accent-color);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
     }
 
     .logo-icon {
-      color: $primary-color;
+      color: white;
       font-size: 28px;
-      width: 28px;
-      height: 28px;
-      background: rgba($primary-color, 0.1);
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
     }
 
     .logo-text {
@@ -78,146 +202,297 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
       font-weight: 700;
       color: $text-primary;
       letter-spacing: -0.5px;
+      transition: all 0.3s ease;
     }
   }
 }
 
-// User Section
+// ============================================
+// USER SECTION - FIXED SPACING
+// ============================================
+
 .user-section {
-  padding: 24px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 16px; // Consistent padding, no extra white space
+  background: linear-gradient(135deg, 
+    $primary-color 0%, 
+    $secondary-color 50%, 
+    $accent-color 100%
+  );
+  background-size: 200% 200%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: $shadow-sm;
+  gap: 14px;
+  box-shadow: 
+    0 4px 12px rgba(99, 102, 241, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 1;
+  animation: rainbowGradient 8s ease infinite;
+  margin: 0; // NO MARGIN to avoid white space
+  border: none; // NO BORDER to avoid white space
+
+  // Decorative overlay
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.05) 100%
+    );
+    pointer-events: none;
+  }
+
+  // Shimmer effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    animation: shimmer 3s ease infinite;
+  }
 
   .user-avatar {
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 
     .avatar-circle {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.25);
-      border: 2px solid rgba(255, 255, 255, 0.5);
+      border: 3px solid rgba(255, 255, 255, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 20px;
+      font-weight: 700;
       color: #ffffff;
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.08);
+        border-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 
+          0 6px 20px rgba(0, 0, 0, 0.3),
+          inset 0 1px 2px rgba(255, 255, 255, 0.4);
+      }
     }
   }
 
   .user-info {
     flex: 1;
     min-width: 0;
+    position: relative;
+    z-index: 1;
 
     .username {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 600;
+      margin: 0; // NO MARGIN for proper spacing
+      padding: 0; // NO PADDING
+      font-size: 15px;
+      font-weight: 700;
       color: #ffffff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      line-height: 1.2; // Tight line height
     }
 
     .email {
-      margin: 4px 0 0 0;
+      margin: 6px 0 0 0; // Small top margin only
+      padding: 0; // NO PADDING
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      line-height: 1.2; // Tight line height
     }
   }
 }
 
-// Navigation Menu
+// ============================================
+// NAVIGATION MENU - COLORFUL
+// ============================================
+
 .nav-menu {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 20px 8px;
+  gap: 6px;
+  padding: 20px 12px;
   overflow-y: auto;
-  background: $bg-lighter;
+  background: transparent;
+  position: relative;
+  z-index: 1;
 
   .nav-section {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.5s ease-out backwards;
+
+    &:nth-child(1) { animation-delay: 0.1s; }
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.3s; }
 
     .section-title {
       padding: 12px 16px 8px;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: $text-tertiary;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, $primary-color, $secondary-color, $accent-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: rainbowGradient 6s ease infinite;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 14px;
-      margin: 0 4px;
-      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 2px 4px;
+      border-radius: 12px;
       color: $text-primary;
       text-decoration: none;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      background: transparent;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: $bg-white;
       border: 1px solid transparent;
       cursor: pointer;
       font-size: 14px;
       font-weight: 500;
       position: relative;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+      // Gradient hover background
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg,
+          rgba(99, 102, 241, 0.08),
+          rgba(139, 92, 246, 0.08),
+          rgba(236, 72, 153, 0.06)
+        );
+        background-size: 200% 200%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        animation: rainbowGradient 4s ease infinite;
+      }
 
       &:hover {
         background: $bg-white;
-        color: $primary-color;
-        box-shadow: $shadow-sm;
+        transform: translateX(4px);
+        box-shadow: 
+          0 4px 12px rgba(99, 102, 241, 0.15),
+          0 0 0 1px rgba(99, 102, 241, 0.1);
+
+        &::before {
+          opacity: 1;
+        }
 
         .nav-icon {
-          color: $primary-color;
+          background: linear-gradient(135deg, $primary-color, $secondary-color, $accent-color);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          background-size: 200% 200%;
+          animation: floatIcon 1s ease infinite, rainbowGradient 3s ease infinite;
           transform: scale(1.1);
+          filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+        }
+
+        .nav-label {
+          background: linear-gradient(135deg, $primary-color, $secondary-color);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
       }
 
       &.active {
-        background: linear-gradient(135deg, rgba($primary-color, 0.12) 0%, rgba($secondary-color, 0.08) 100%);
-        color: $primary-color;
+        background: linear-gradient(135deg,
+          rgba(99, 102, 241, 0.12),
+          rgba(139, 92, 246, 0.1),
+          rgba(236, 72, 153, 0.08)
+        );
+        background-size: 200% 200%;
         border: 1px solid rgba($primary-color, 0.2);
-        box-shadow: 0 2px 8px rgba($primary-color, 0.1);
+        box-shadow: 
+          0 4px 16px rgba(99, 102, 241, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
         font-weight: 600;
+        animation: rainbowGradient 6s ease infinite;
 
         .nav-icon {
-          color: $primary-color;
+          background: linear-gradient(135deg, $primary-color, $secondary-color, $accent-color);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          background-size: 200% 200%;
+          animation: rainbowGradient 4s ease infinite;
           transform: scale(1.15);
+          filter: drop-shadow(0 2px 6px rgba(99, 102, 241, 0.4));
         }
 
-        &::before {
+        .nav-label {
+          background: linear-gradient(135deg, $primary-color, $secondary-color);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        // Colorful left indicator
+        &::after {
           content: '';
           position: absolute;
           left: 0;
           top: 50%;
           transform: translateY(-50%);
-          width: 3px;
-          height: 24px;
-          border-radius: 0 3px 3px 0;
-          background: linear-gradient(180deg, $primary-color 0%, $secondary-color 100%);
+          width: 4px;
+          height: 28px;
+          border-radius: 0 4px 4px 0;
+          background: linear-gradient(180deg, 
+            $primary-color 0%, 
+            $secondary-color 50%, 
+            $accent-color 100%
+          );
+          background-size: 100% 200%;
+          animation: rainbowGradient 4s ease infinite;
+          box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
         }
       }
 
       .nav-icon {
         flex-shrink: 0;
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
         color: $text-secondary;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 1;
       }
 
       .nav-label {
@@ -226,6 +501,8 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         text-overflow: ellipsis;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
       }
 
       .nav-arrow {
@@ -234,22 +511,32 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
         width: 18px;
         height: 18px;
         color: $text-tertiary;
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
       }
 
       &:active {
-        transform: scale(0.96);
+        transform: scale(0.97) translateX(4px);
       }
     }
   }
 }
 
-// Sidebar Footer
+// ============================================
+// SIDEBAR FOOTER - COLORFUL LOGOUT
+// ============================================
+
 .sidebar-footer {
-  padding: 16px 12px 24px;
-  border-top: 2px solid $border-color;
-  background: $bg-white;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.03);
+  padding: 16px 12px 20px;
+  border-top: 1px solid rgba($primary-color, 0.1);
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(99, 102, 241, 0.02) 100%
+  );
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
+  position: relative;
+  z-index: 1;
 
   .logout-btn {
     width: 100%;
@@ -257,62 +544,128 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 11px 14px;
-    border-radius: 10px;
-    color: $danger-color;
-    background: linear-gradient(135deg, rgba($danger-color, 0.08) 0%, rgba($danger-color, 0.04) 100%);
-    border: 1px solid rgba($danger-color, 0.2);
-    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: white;
+    background: linear-gradient(135deg, 
+      $danger-color 0%, 
+      #f97316 50%,
+      #fbbf24 100%
+    );
+    background-size: 200% 200%;
+    border: none;
+    font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    animation: rainbowGradient 6s ease infinite;
+
+    // Shimmer effect
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
 
     &:hover {
-      background: linear-gradient(135deg, rgba($danger-color, 0.12) 0%, rgba($danger-color, 0.08) 100%);
-      border-color: rgba($danger-color, 0.3);
-      box-shadow: 0 4px 12px rgba($danger-color, 0.15);
       transform: translateY(-2px);
+      box-shadow: 
+        0 6px 20px rgba(239, 68, 68, 0.4),
+        0 0 30px rgba(245, 158, 11, 0.3);
+
+      &::before {
+        left: 100%;
+      }
 
       mat-icon {
-        transform: scale(1.1);
+        transform: scale(1.15);
+        animation: floatIcon 0.6s ease infinite;
       }
     }
 
     &:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
     mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      transition: transform 0.3s ease;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      transition: all 0.3s ease;
+    }
+
+    span {
+      position: relative;
+      z-index: 1;
     }
   }
 }
 
-// Responsive Design
+// ============================================
+// RESPONSIVE DESIGN
+// ============================================
+
 @media (max-width: 1024px) {
   .sidebar-container {
     width: 240px;
   }
 
   .sidebar-header {
-    padding: 20px 16px;
+    padding: 18px 16px 14px;
 
     .logo .logo-text {
       font-size: 16px;
     }
+
+    .logo .logo-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+    }
+  }
+
+  .user-section {
+    padding: 18px 14px;
+    gap: 12px;
+
+    .user-avatar .avatar-circle {
+      width: 48px;
+      height: 48px;
+      font-size: 18px;
+    }
+
+    .user-info {
+      .username {
+        font-size: 14px;
+      }
+
+      .email {
+        font-size: 11px;
+      }
+    }
   }
 
   .nav-menu {
-    padding: 12px 6px;
+    padding: 16px 10px;
 
     .nav-section .nav-item {
       font-size: 13px;
-      padding: 10px 14px;
+      padding: 11px 14px;
     }
   }
 }
@@ -325,30 +678,33 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 280px;
     height: 100vh;
     z-index: 1000;
-    box-shadow: $shadow-md;
+    box-shadow: $shadow-lg;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &.mobile-open {
       left: 0;
+      box-shadow: 
+        0 0 0 100vw rgba(0, 0, 0, 0.4),
+        $shadow-lg;
     }
   }
 }
 
 @media (max-width: 480px) {
   .sidebar-header {
-    padding: 16px 14px;
+    padding: 16px 14px 12px;
 
     .logo {
-      gap: 8px;
+      gap: 10px;
 
       .logo-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+        font-size: 22px;
+        width: 38px;
+        height: 38px;
       }
 
       .logo-text {
-        font-size: 14px;
+        font-size: 15px;
       }
     }
   }
@@ -358,81 +714,144 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     gap: 10px;
 
     .user-avatar .avatar-circle {
-      width: 40px;
-      height: 40px;
-      font-size: 16px;
+      width: 44px;
+      height: 44px;
+      font-size: 17px;
+      border-width: 2px;
     }
 
-    .user-info .username {
-      font-size: 13px;
+    .user-info {
+      .username {
+        font-size: 13px;
+      }
+
+      .email {
+        font-size: 11px;
+        margin-top: 4px;
+      }
     }
   }
 
   .nav-menu {
-    padding: 10px 4px;
+    padding: 14px 8px;
 
     .nav-section {
+      margin-bottom: 12px;
+
       .section-title {
-        padding: 10px 12px 6px;
+        padding: 10px 14px 6px;
         font-size: 10px;
       }
 
       .nav-item {
-        padding: 10px 12px;
-        margin: 0 4px;
-        font-size: 12px;
+        padding: 10px 14px;
+        margin: 2px 2px;
+        font-size: 13px;
+
+        .nav-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
       }
     }
   }
 
   .sidebar-footer {
-    padding: 12px 8px 16px;
+    padding: 12px 10px 16px;
 
     .logout-btn {
-      padding: 8px 10px;
-      font-size: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
     }
   }
 }
 
-// Accessibility
+// ============================================
+// ACCESSIBILITY
+// ============================================
+
 @media (prefers-reduced-motion: reduce) {
-  .sidebar-container,
-  .nav-item,
-  .logo,
-  .logout-btn {
-    transition: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-// Dark mode support (optional)
+// Focus styles
+.nav-item:focus-visible,
+.logout-btn:focus-visible,
+.logo:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}
+
+// ============================================
+// DARK MODE SUPPORT
+// ============================================
+
 @media (prefers-color-scheme: dark) {
   .sidebar-container {
-    background: #1f2937;
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
     border-right-color: #374151;
+
+    &::before {
+      background: linear-gradient(180deg,
+        rgba(99, 102, 241, 0.08) 0%,
+        rgba(139, 92, 246, 0.06) 50%,
+        transparent 100%
+      );
+    }
   }
 
   .sidebar-header {
     border-bottom-color: #374151;
     background: #1f2937;
+
+    .logo:hover {
+      background: linear-gradient(135deg,
+        rgba(99, 102, 241, 0.1),
+        rgba(139, 92, 246, 0.1)
+      );
+    }
   }
 
-  .nav-menu .nav-section .nav-item {
-    color: #e5e7eb;
+  .nav-menu {
+    .nav-section {
+      .nav-item {
+        color: #e5e7eb;
+        background: #374151;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 
-    &:hover {
-      background: rgba(99, 102, 241, 0.1);
-      color: $primary-color;
-    }
+        &:hover {
+          background: #4b5563;
+        }
 
-    &.active {
-      background: rgba(99, 102, 241, 0.15);
-      color: $primary-color;
+        &.active {
+          background: linear-gradient(135deg,
+            rgba(99, 102, 241, 0.2),
+            rgba(139, 92, 246, 0.15),
+            rgba(236, 72, 153, 0.12)
+          );
+        }
+      }
     }
   }
 
   .sidebar-footer {
     border-top-color: #374151;
-    background: #1f2937;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(99, 102, 241, 0.05) 100%
+    );
   }
 }
