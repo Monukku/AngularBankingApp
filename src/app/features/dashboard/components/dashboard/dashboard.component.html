@@ -32,11 +32,7 @@
         <div class="stat-icon-wrap">{{ card.icon }}</div>
         <div class="stat-label">{{ card.label }}</div>
         <div class="stat-value">
-          @if (card.isPercent) {
-            {{ card.value }}%
-          } @else {
-            ${{ card.value | number:'1.0-0' }}
-          }
+          @if (card.isPercent) { {{ card.value }}% } @else { ${{ card.value | number:'1.0-0' }} }
         </div>
         <span class="stat-change" [class.up]="card.isPositive" [class.down]="!card.isPositive">
           {{ card.isPositive ? '↑' : '↓' }} {{ card.changeLabel }}
@@ -51,7 +47,7 @@
     <!-- ══ LEFT SECTION ══ -->
     <div class="left-section">
 
-      <!-- Balance Card -->
+      <!-- Balance Card (EXISTING) -->
       <div class="balance-card">
         <div class="balance-card-inner">
           <div class="balance-left">
@@ -72,18 +68,14 @@
               </button>
             </div>
           </div>
-
           <div class="balance-right">
             <div class="live-indicator">
               <div class="live-dot-sm"></div>
               LIVE
               <div class="waveform">
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
               </div>
             </div>
             <div class="mini-ring-wrap">
@@ -94,48 +86,54 @@
                     <stop offset="100%" stop-color="#06b6d4"/>
                   </linearGradient>
                 </defs>
-                <circle cx="40" cy="40" r="32" fill="none"
-                        stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-                <circle cx="40" cy="40" r="32" fill="none"
-                        stroke="url(#ringGrad)" stroke-width="8"
-                        stroke-linecap="round"
-                        [attr.stroke-dasharray]="201"
+                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="url(#ringGrad)" stroke-width="8"
+                        stroke-linecap="round" [attr.stroke-dasharray]="201"
                         [attr.stroke-dashoffset]="savingsRingOffset()"
-                        transform="rotate(-90 40 40)"
-                        class="ring-progress"/>
-                <text x="40" y="36" text-anchor="middle" fill="white"
-                      font-size="12" font-weight="700">{{ savingsGoalPercent() }}%</text>
-                <text x="40" y="50" text-anchor="middle"
-                      fill="rgba(255,255,255,0.6)" font-size="8">saved</text>
+                        transform="rotate(-90 40 40)" class="ring-progress"/>
+                <text x="40" y="36" text-anchor="middle" fill="white" font-size="12" font-weight="700">{{ savingsGoalPercent() }}%</text>
+                <text x="40" y="50" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">saved</text>
               </svg>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick Transaction -->
+      <!-- Smart Insights (NEW) -->
+      <div class="insights-card">
+        <div class="card-title-row">
+          <h3 class="card-title"><span class="card-title-icon">🧠</span> Smart Insights</h3>
+          <span class="ai-badge">AI Powered</span>
+        </div>
+        <div class="insights-list">
+          @for (insight of smartInsights(); track insight.id) {
+            <div class="insight-item" [attr.data-type]="insight.type">
+              <div class="insight-icon-wrap">{{ insight.icon }}</div>
+              <div class="insight-body">
+                <div class="insight-title">{{ insight.title }}</div>
+                <div class="insight-desc">{{ insight.description }}</div>
+              </div>
+              <span class="insight-tag" [attr.data-type]="insight.type">{{ insight.tag }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Quick Transaction (EXISTING) -->
       <div class="quick-transaction-card">
         <h3 class="card-title">
           <span class="card-title-icon">⚡</span> Quick Transaction
         </h3>
         <div class="users-carousel">
           @for (user of quickUsers(); track user.id) {
-            <div class="user-item"
-                 (click)="onUserClick(user)"
-                 [attr.aria-label]="'Send to ' + user.name"
-                 role="button"
-                 tabindex="0">
+            <div class="user-item" (click)="onUserClick(user)"
+                 [attr.aria-label]="'Send to ' + user.name" role="button" tabindex="0">
               <div class="user-avatar">
-                @if (user.avatar) {
-                  <img [src]="user.avatar" [alt]="user.name" />
-                } @else {
-                  <span>{{ user.name.charAt(0).toUpperCase() }}</span>
-                }
+                @if (user.avatar) { <img [src]="user.avatar" [alt]="user.name" /> }
+                @else { <span>{{ user.name.charAt(0).toUpperCase() }}</span> }
               </div>
               <div class="user-name">{{ user.name.split(' ')[0] }}</div>
-              @if (user.amount) {
-                <div class="user-amount">{{ user.amount }}</div>
-              }
+              @if (user.amount) { <div class="user-amount">{{ user.amount }}</div> }
             </div>
           }
           <button mat-icon-button class="scroll-btn" aria-label="Scroll users right">
@@ -144,10 +142,8 @@
         </div>
       </div>
 
-      <!-- Charts Row -->
+      <!-- Charts Row (EXISTING) -->
       <div class="charts-row">
-
-        <!-- Income Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-info">
@@ -158,9 +154,7 @@
               @if (incomeData(); as income) {
                 <div class="chart-value">
                   ${{ income.total | number:'1.0-0' }}
-                  <span class="change-badge"
-                        [class.positive]="income.isPositive"
-                        [class.negative]="!income.isPositive">
+                  <span class="change-badge" [class.positive]="income.isPositive" [class.negative]="!income.isPositive">
                     <mat-icon>{{ income.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
                     {{ income.changePercentage }}%
                   </span>
@@ -168,27 +162,19 @@
               }
             </div>
             <select class="period-select" (change)="onPeriodChange($event)">
-              <option>Last 30 days</option>
-              <option>Last 60 days</option>
-              <option>Last 90 days</option>
+              <option>Last 30 days</option><option>Last 60 days</option><option>Last 90 days</option>
             </select>
           </div>
           <div class="chart-container" #incomeChartWrap>
             @if (incomeChartData().length) {
-              <ngx-charts-area-chart
-                [view]="chartView()"
-                [results]="incomeChartData()"
-                [xAxis]="showXAxis" [yAxis]="showYAxis"
-                [gradient]="gradient" [legend]="showLegend"
+              <ngx-charts-area-chart [view]="chartView()" [results]="incomeChartData()"
+                [xAxis]="showXAxis" [yAxis]="showYAxis" [gradient]="gradient" [legend]="showLegend"
                 [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
-                [timeline]="timeline" [scheme]="incomeColorScheme"
-                [autoScale]="autoScale" [curve]="curve">
+                [timeline]="timeline" [scheme]="incomeColorScheme" [autoScale]="autoScale" [curve]="curve">
               </ngx-charts-area-chart>
             }
           </div>
         </div>
-
-        <!-- Spending Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-info">
@@ -199,9 +185,7 @@
               @if (spendingData(); as spending) {
                 <div class="chart-value">
                   ${{ spending.total | number:'1.0-0' }}
-                  <span class="change-badge"
-                        [class.positive]="spending.isPositive"
-                        [class.negative]="!spending.isPositive">
+                  <span class="change-badge" [class.positive]="spending.isPositive" [class.negative]="!spending.isPositive">
                     <mat-icon>{{ spending.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
                     {{ spending.changePercentage }}%
                   </span>
@@ -209,154 +193,115 @@
               }
             </div>
             <select class="period-select" (change)="onPeriodChange($event)">
-              <option>Last 30 days</option>
-              <option>Last 60 days</option>
-              <option>Last 90 days</option>
+              <option>Last 30 days</option><option>Last 60 days</option><option>Last 90 days</option>
             </select>
           </div>
           <div class="chart-container" #spendingChartWrap>
             @if (spendingChartData().length) {
-              <ngx-charts-area-chart
-                [view]="chartView()"
-                [results]="spendingChartData()"
-                [xAxis]="showXAxis" [yAxis]="showYAxis"
-                [gradient]="gradient" [legend]="showLegend"
+              <ngx-charts-area-chart [view]="chartView()" [results]="spendingChartData()"
+                [xAxis]="showXAxis" [yAxis]="showYAxis" [gradient]="gradient" [legend]="showLegend"
                 [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
-                [timeline]="timeline" [scheme]="spendingColorScheme"
-                [autoScale]="autoScale" [curve]="curve">
+                [timeline]="timeline" [scheme]="spendingColorScheme" [autoScale]="autoScale" [curve]="curve">
               </ngx-charts-area-chart>
             }
           </div>
         </div>
-
       </div>
 
-      <!-- ═══ Transaction History — native table (no mat-table) ═══ -->
+      <!-- Transaction History (EXISTING — native table) -->
       <div class="transaction-history-card">
         <div class="history-header">
           <div class="card-title-row">
-            <h3 class="card-title">
-              <span class="card-title-icon">🧾</span> Transaction History
-            </h3>
+            <h3 class="card-title"><span class="card-title-icon">🧾</span> Transaction History</h3>
             <span class="history-badge">{{ filteredTransactions().length }} records</span>
           </div>
           <div class="history-controls">
             <div class="search-box">
               <mat-icon>search</mat-icon>
-              <input type="text"
-                     placeholder="Search transactions…"
-                     [value]="searchQuery()"
-                     (input)="onSearchChange($event)" />
+              <input type="text" placeholder="Search transactions…"
+                     [value]="searchQuery()" (input)="onSearchChange($event)" />
             </div>
             <select class="period-select" (change)="onPeriodChange($event)">
-              <option>Last 30 days</option>
-              <option>Last 60 days</option>
-              <option>Last 90 days</option>
+              <option>Last 30 days</option><option>Last 60 days</option><option>Last 90 days</option>
             </select>
-            <button mat-icon-button class="filter-btn" aria-label="Filter transactions">
+            <button mat-icon-button class="filter-btn" aria-label="Filter">
               <mat-icon>filter_list</mat-icon>
             </button>
           </div>
         </div>
-
         <div class="table-wrapper">
           <table class="tx-table">
             <thead>
               <tr>
                 <th class="col-check"><mat-checkbox></mat-checkbox></th>
-                <th>Invoice</th>
-                <th>Transaction</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
+                <th>Invoice</th><th>Transaction</th><th>Date</th><th>Amount</th><th>Status</th>
               </tr>
             </thead>
             <tbody>
               @for (row of filteredTransactions(); track row.invoice) {
                 <tr class="tx-row">
-
                   <td class="col-check"><mat-checkbox></mat-checkbox></td>
-
-                  <td>
-                    <div class="invoice-cell">
-                      <span class="invoice-icon">📄</span>
-                      {{ row.invoice }}
-                    </div>
-                  </td>
-
+                  <td><div class="invoice-cell"><span class="invoice-icon">📄</span>{{ row.invoice }}</div></td>
                   <td>
                     <div class="transaction-cell">
-                      <div class="company-logo">
-                        <img [src]="row.logo" [alt]="row.name" />
-                      </div>
+                      <div class="company-logo"><img [src]="row.logo" [alt]="row.name" /></div>
                       <div class="transaction-details">
                         <div class="transaction-name">{{ row.name }}</div>
                         <div class="transaction-category">{{ row.email || row.category }}</div>
                       </div>
                     </div>
                   </td>
-
                   <td>
                     <div class="date-cell">
                       <span class="date-main">{{ row.date | date:'dd MMM' }}</span>
                       <span class="date-year">{{ row.date | date:'yyyy' }}</span>
                     </div>
                   </td>
-
                   <td [class.negative]="row.amount < 0" [class.positive]="row.amount > 0">
                     <span class="amount-val">
                       {{ row.amount < 0 ? '−' : '+' }}${{ (row.amount < 0 ? row.amount * -1 : row.amount) | number:'1.2-2' }}
                     </span>
                   </td>
-
                   <td>
                     <span class="status-badge"
                           [class.completed]="row.status === 'Completed'"
                           [class.progress]="row.status === 'On Progress'"
-                          [class.pending]="row.status === 'Pending'"
-                          [attr.aria-label]="'Status: ' + row.status">
-                      @if (row.status === 'Completed') { <span aria-hidden="true">✓</span> }
-                      @else if (row.status === 'On Progress') { <span aria-hidden="true">⏳</span> }
-                      @else { <span aria-hidden="true">●</span> }
+                          [class.pending]="row.status === 'Pending'">
+                      @if (row.status === 'Completed') { <span>✓</span> }
+                      @else if (row.status === 'On Progress') { <span>⏳</span> }
+                      @else { <span>●</span> }
                       {{ row.status }}
                     </span>
                   </td>
-
                 </tr>
               }
-
               @if (!filteredTransactions().length) {
-                <tr>
-                  <td colspan="6">
-                    <div class="empty-state">
-                      <div class="empty-icon">🔍</div>
-                      <div class="empty-title">No transactions found</div>
-                      <div class="empty-sub">Try adjusting your search or date filter</div>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colspan="6">
+                  <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">No transactions found</div>
+                    <div class="empty-sub">Try adjusting your search or date filter</div>
+                  </div>
+                </td></tr>
               }
             </tbody>
           </table>
         </div>
       </div>
 
-    </div>
+    </div><!-- /left-section -->
 
     <!-- ══ RIGHT SIDEBAR ══ -->
     <div class="right-sidebar">
 
-      <!-- My Cards -->
+      <!-- My Cards (EXISTING) -->
       <div class="widget-card cards-widget">
         <div class="widget-header">
-          <h4 class="widget-title">
-            <span class="widget-title-icon">💳</span> My Cards
-          </h4>
+          <h4 class="widget-title"><span class="widget-title-icon">💳</span> My Cards</h4>
           <button mat-button class="add-btn" (click)="onAddCard()">
             Add New <mat-icon>add_circle_outline</mat-icon>
           </button>
         </div>
-
         @if (currentCard(); as card) {
           <div class="credit-card">
             <div class="cc-circles"></div>
@@ -367,90 +312,180 @@
             <div class="card-holder">{{ card.cardHolder }}</div>
             <div class="card-number">{{ formatCardNumber(card.cardNumber) }}</div>
             <div class="card-footer">
-              <div>
-                <span class="label">Exp</span>
-                <span class="value">{{ card.expiryMonth }}/{{ card.expiryYear }}</span>
-              </div>
-              <div>
-                <span class="label">CVV</span>
-                <span class="value">•••</span>
-              </div>
+              <div><span class="label">Exp</span><span class="value">{{ card.expiryMonth }}/{{ card.expiryYear }}</span></div>
+              <div><span class="label">CVV</span><span class="value">•••</span></div>
             </div>
             @if (cards().length > 1) {
               <div class="card-navigation">
-                <button mat-icon-button (click)="previousCard()" aria-label="Previous card">
-                  <mat-icon>chevron_left</mat-icon>
-                </button>
+                <button mat-icon-button (click)="previousCard()"><mat-icon>chevron_left</mat-icon></button>
                 <span>{{ selectedCard() + 1 }} / {{ cards().length }}</span>
-                <button mat-icon-button (click)="nextCard()" aria-label="Next card">
-                  <mat-icon>chevron_right</mat-icon>
-                </button>
+                <button mat-icon-button (click)="nextCard()"><mat-icon>chevron_right</mat-icon></button>
               </div>
             }
           </div>
-
           <div class="card-limit-row">
             <span class="card-limit-label">Available limit</span>
-            <span class="card-limit-val">
-              ${{ card.balance | number:'1.0-0' }} / ${{ card.limit | number:'1.0-0' }}
-            </span>
+            <span class="card-limit-val">${{ card.balance | number:'1.0-0' }} / ${{ card.limit | number:'1.0-0' }}</span>
           </div>
-          <div class="limit-track">
-            <div class="limit-fill" [style.width.%]="cardLimitPercent()"></div>
-          </div>
+          <div class="limit-track"><div class="limit-fill" [style.width.%]="cardLimitPercent()"></div></div>
         }
       </div>
 
-      <!-- Conversion Rate -->
+      <!-- Activity Feed (NEW) -->
+      <div class="widget-card activity-widget">
+        <div class="widget-header">
+          <h4 class="widget-title"><span class="widget-title-icon">📡</span> Activity Feed</h4>
+          <div class="live-indicator-sm"><div class="live-dot-sm"></div> LIVE</div>
+        </div>
+        <div class="activity-list">
+          @for (event of activityFeed(); track event.id) {
+            <div class="activity-item">
+              <div class="activity-dot" [attr.data-type]="event.type"></div>
+              <div class="activity-body">
+                <div class="activity-title">{{ event.title }}</div>
+                <div class="activity-time">{{ event.time }}</div>
+              </div>
+              <span class="activity-amount" [class.credit]="event.isCredit" [class.debit]="!event.isCredit">
+                {{ event.isCredit ? '+' : '−' }}${{ event.amount | number:'1.2-2' }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Upcoming Bills (NEW) -->
+      <div class="widget-card bills-widget">
+        <div class="widget-header">
+          <h4 class="widget-title"><span class="widget-title-icon">📅</span> Upcoming Bills</h4>
+          <span class="bills-alert">{{ overdueCount() }} overdue</span>
+        </div>
+        <div class="bills-list">
+          @for (bill of upcomingBills(); track bill.id) {
+            <div class="bill-item" [attr.data-urgency]="bill.urgency">
+              <div class="bill-icon">{{ bill.icon }}</div>
+              <div class="bill-info">
+                <div class="bill-name">{{ bill.name }}</div>
+                <div class="bill-due">Due {{ bill.dueDate | date:'dd MMM' }}</div>
+              </div>
+              <div class="bill-right">
+                <div class="bill-amount">${{ bill.amount | number:'1.0-0' }}</div>
+                <span class="bill-badge" [attr.data-urgency]="bill.urgency">{{ bill.urgency }}</span>
+              </div>
+            </div>
+          }
+        </div>
+        <button mat-button class="upcoming-btn">View All <mat-icon>arrow_forward</mat-icon></button>
+      </div>
+
+      <!-- Recurring Subscriptions (NEW) -->
+      <div class="widget-card subscriptions-widget">
+        <div class="widget-header">
+          <h4 class="widget-title"><span class="widget-title-icon">🔁</span> Subscriptions</h4>
+          <span class="subs-total">${{ subscriptionsTotal() | number:'1.0-0' }}/mo</span>
+        </div>
+        <div class="subs-list">
+          @for (sub of recurringSubscriptions(); track sub.id) {
+            <div class="sub-item">
+              <div class="sub-logo">{{ sub.icon }}</div>
+              <div class="sub-info">
+                <div class="sub-name">{{ sub.name }}</div>
+                <div class="sub-next">Next: {{ sub.nextDate | date:'dd MMM' }}</div>
+              </div>
+              <div class="sub-cost">${{ sub.amount | number:'1.2-2' }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Rewards & Cashback (NEW) -->
+      <div class="widget-card rewards-widget">
+        <div class="widget-header">
+          <h4 class="widget-title"><span class="widget-title-icon">🏆</span> Rewards</h4>
+          <span class="rewards-tier" [attr.data-tier]="rewardsTier()">{{ rewardsTier() }}</span>
+        </div>
+        <div class="rewards-points-row">
+          <span class="rewards-points-val">{{ rewardsPoints() | number:'1.0-0' }}</span>
+          <span class="rewards-points-label">points</span>
+        </div>
+        <div class="rewards-progress-track">
+          <div class="rewards-progress-fill" [style.width.%]="rewardsTierPercent()"></div>
+        </div>
+        <div class="rewards-progress-labels">
+          <span>{{ rewardsTierCurrent() | number:'1.0-0' }}</span>
+          <span>{{ rewardsTierNext() | number:'1.0-0' }} pts to next tier</span>
+        </div>
+        <div class="cashback-row">
+          <div class="cashback-item">
+            <div class="cashback-val">${{ cashbackEarned() | number:'1.2-2' }}</div>
+            <div class="cashback-label">This Month</div>
+          </div>
+          <div class="cashback-divider"></div>
+          <div class="cashback-item">
+            <div class="cashback-val">${{ cashbackTotal() | number:'1.2-2' }}</div>
+            <div class="cashback-label">All Time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security & Logins (NEW) -->
+      <div class="widget-card security-widget">
+        <div class="widget-header">
+          <h4 class="widget-title"><span class="widget-title-icon">🔐</span> Security</h4>
+          <span class="security-badge" [attr.data-level]="securityLevel()">{{ securityLevel() }}</span>
+        </div>
+        <div class="security-list">
+          @for (login of recentLogins(); track login.id) {
+            <div class="security-item">
+              <div class="security-device-icon">{{ login.deviceIcon }}</div>
+              <div class="security-info">
+                <div class="security-device">{{ login.device }}</div>
+                <div class="security-location">{{ login.location }} · {{ login.time }}</div>
+              </div>
+              <span class="security-status" [class.current]="login.isCurrent">
+                {{ login.isCurrent ? 'Now' : '✓' }}
+              </span>
+            </div>
+          }
+        </div>
+        <button mat-button class="upcoming-btn">Manage Devices <mat-icon>arrow_forward</mat-icon></button>
+      </div>
+
+      <!-- Conversion Rate (EXISTING) -->
       <div class="widget-card conversion-widget">
-        <h4 class="widget-title">
-          <span class="widget-title-icon">🔄</span> Conversion Rate
-        </h4>
+        <h4 class="widget-title"><span class="widget-title-icon">🔄</span> Conversion Rate</h4>
         <div class="conversion-form">
           <div class="conversion-row">
             <label>From</label>
             <div class="input-group">
-              <input type="number"
-                     [value]="conversionAmount1()"
-                     (input)="onAmount1Change($event)" />
+              <input type="number" [value]="conversionAmount1()" (input)="onAmount1Change($event)" />
               <select [value]="conversionCurrency1()" (change)="onCurrency1Change($event)">
-                <option value="USD">🇺🇸 USD</option>
-                <option value="EUR">🇪🇺 EUR</option>
-                <option value="GBP">🇬🇧 GBP</option>
+                <option value="USD">🇺🇸 USD</option><option value="EUR">🇪🇺 EUR</option><option value="GBP">🇬🇧 GBP</option>
               </select>
             </div>
           </div>
           <div class="conversion-swap-row">
             <div class="conversion-line"></div>
-            <div class="swap-icon" role="button" aria-label="Swap currencies">⇅</div>
+            <div class="swap-icon" role="button">⇅</div>
             <div class="conversion-line"></div>
           </div>
           <div class="conversion-row">
             <label>To</label>
             <div class="input-group">
-              <input type="number"
-                     [value]="conversionAmount2()"
-                     (input)="onAmount2Change($event)" />
+              <input type="number" [value]="conversionAmount2()" (input)="onAmount2Change($event)" />
               <select [value]="conversionCurrency2()" (change)="onCurrency2Change($event)">
-                <option value="EUR">🇪🇺 EUR</option>
-                <option value="USD">🇺🇸 USD</option>
-                <option value="GBP">🇬🇧 GBP</option>
+                <option value="EUR">🇪🇺 EUR</option><option value="USD">🇺🇸 USD</option><option value="GBP">🇬🇧 GBP</option>
               </select>
             </div>
           </div>
           <button mat-raised-button color="primary" class="convert-btn" (click)="convert()">
             <mat-icon>swap_horiz</mat-icon>
-            Convert {{ conversionAmount1() }} {{ conversionCurrency1() }}
-            = {{ conversionAmount2() | number:'1.2-2' }} {{ conversionCurrency2() }}
+            Convert {{ conversionAmount1() }} {{ conversionCurrency1() }} = {{ conversionAmount2() | number:'1.2-2' }} {{ conversionCurrency2() }}
           </button>
         </div>
-
         <div class="live-rates">
           <div class="live-rates-header">
             <span class="rates-label">Live Rates</span>
-            <div class="live-indicator-sm">
-              <div class="live-dot-sm"></div> LIVE
-            </div>
+            <div class="live-indicator-sm"><div class="live-dot-sm"></div> LIVE</div>
           </div>
           @for (rate of liveRates(); track rate.pair) {
             <div class="rate-row">
@@ -458,32 +493,22 @@
               <span class="rate-pair">{{ rate.pair }}</span>
               <span class="rate-sparkline">{{ rate.sparkline }}</span>
               <span class="rate-val" [class.up]="rate.isUp" [class.down]="!rate.isUp">
-                {{ rate.value }}
-                <small>{{ rate.isUp ? '+' : '' }}{{ rate.change }}%</small>
+                {{ rate.value }}<small>{{ rate.isUp ? '+' : '' }}{{ rate.change }}%</small>
               </span>
             </div>
           }
         </div>
       </div>
 
-      <!-- Workflows + Budget -->
+      <!-- Workflows + Budget (EXISTING) -->
       <div class="widget-card workflows-widget">
         <div class="widget-header">
-          <h4 class="widget-title">
-            <span class="widget-title-icon">⚙️</span> Workflows
-          </h4>
-          <button mat-icon-button class="add-icon-btn" aria-label="Add workflow">
-            <mat-icon>add_circle_outline</mat-icon>
-          </button>
+          <h4 class="widget-title"><span class="widget-title-icon">⚙️</span> Workflows</h4>
+          <button mat-icon-button class="add-icon-btn"><mat-icon>add_circle_outline</mat-icon></button>
         </div>
-
         <div class="workflow-list">
           @for (workflow of workflows(); track workflow.id) {
-            <div class="workflow-item"
-                 (click)="onWorkflowClick(workflow)"
-                 role="button"
-                 tabindex="0"
-                 [attr.aria-label]="workflow.title">
+            <div class="workflow-item" (click)="onWorkflowClick(workflow)" role="button" tabindex="0">
               <div class="workflow-icon">{{ workflow.icon }}</div>
               <div class="workflow-info">
                 <div class="workflow-title">{{ workflow.title }}</div>
@@ -493,7 +518,6 @@
             </div>
           }
         </div>
-
         <div class="budget-tracker">
           <div class="budget-header">
             <span class="budget-label">📊 Budget Tracker</span>
@@ -507,19 +531,15 @@
                 <span>{{ cat.icon }} {{ cat.label }}</span>
                 <span [class.over-budget]="budgetIsOver(cat)">
                   ${{ cat.spent | number:'1.0-0' }} / ${{ cat.limit | number:'1.0-0' }}
-                  @if (budgetIsOver(cat)) { <span aria-label="Over budget">⚠️</span> }
+                  @if (budgetIsOver(cat)) { <span>⚠️</span> }
                 </span>
               </div>
               <div class="progress-track">
-                <div class="progress-fill"
-                     [class]="'progress-fill ' + cat.colorClass"
-                     [style.width.%]="budgetPercent(cat)">
-                </div>
+                <div class="progress-fill" [class]="'progress-fill ' + cat.colorClass" [style.width.%]="budgetPercent(cat)"></div>
               </div>
             </div>
           }
         </div>
-
         @if (accountHealth(); as health) {
           <div class="health-score-row">
             <span class="health-label">🏥 Financial Health</span>
@@ -528,12 +548,213 @@
             </span>
           </div>
         }
-
-        <button mat-button class="upcoming-btn">
-          View Upcoming <mat-icon>arrow_forward</mat-icon>
-        </button>
+        <button mat-button class="upcoming-btn">View Upcoming <mat-icon>arrow_forward</mat-icon></button>
       </div>
 
+    </div><!-- /right-sidebar -->
+  </div><!-- /dashboard-grid -->
+
+  <!-- ═══ ANALYTICS GRID — full-width bottom section ═══ -->
+  <div class="analytics-grid">
+
+    <!-- Monthly Report (NEW) -->
+    <div class="analytics-card monthly-report-card">
+      <div class="analytics-header">
+        <div>
+          <h3 class="analytics-title"><span>📊</span> Monthly Report</h3>
+          <p class="analytics-subtitle">Income vs Expenses — last 6 months</p>
+        </div>
+        <select class="period-select" (change)="onPeriodChange($event)">
+          <option>Last 6 months</option><option>Last 12 months</option><option>This Year</option>
+        </select>
+      </div>
+      <div class="monthly-bars">
+        @for (month of monthlyReport(); track month.label) {
+          <div class="month-col">
+            <div class="month-bars-wrap">
+              <div class="month-bar income-bar" [style.height.%]="month.incomePercent">
+                <span class="bar-tooltip">${{ month.income | number:'1.0-0' }}</span>
+              </div>
+              <div class="month-bar expense-bar" [style.height.%]="month.expensePercent">
+                <span class="bar-tooltip">${{ month.expense | number:'1.0-0' }}</span>
+              </div>
+            </div>
+            <div class="month-label">{{ month.label }}</div>
+          </div>
+        }
+      </div>
+      <div class="monthly-legend">
+        <span class="legend-item"><span class="legend-dot income-dot"></span>Income</span>
+        <span class="legend-item"><span class="legend-dot expense-dot"></span>Expenses</span>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Spending Breakdown Donut (NEW) -->
+    <div class="analytics-card spending-breakdown-card">
+      <div class="analytics-header">
+        <div>
+          <h3 class="analytics-title"><span>🍩</span> Spending Breakdown</h3>
+          <p class="analytics-subtitle">By category this month</p>
+        </div>
+      </div>
+      <div class="breakdown-body">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut-svg">
+            @for (seg of spendingBreakdown(); track seg.label) {
+              <circle class="donut-segment" cx="60" cy="60" r="45"
+                      fill="none" [attr.stroke]="seg.color" stroke-width="18"
+                      [attr.stroke-dasharray]="seg.dashArray"
+                      [attr.stroke-dashoffset]="seg.dashOffset"
+                      transform="rotate(-90 60 60)"/>
+            }
+            <text x="60" y="57" text-anchor="middle" fill="white" font-size="13" font-weight="800">
+              ${{ spendingBreakdownTotal() | number:'1.0-0' }}
+            </text>
+            <text x="60" y="70" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8">total spent</text>
+          </svg>
+        </div>
+        <div class="breakdown-legend">
+          @for (seg of spendingBreakdown(); track seg.label) {
+            <div class="breakdown-item">
+              <span class="breakdown-dot" [style.background]="seg.color"></span>
+              <span class="breakdown-label">{{ seg.label }}</span>
+              <span class="breakdown-pct">{{ seg.percent }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Savings Goals (NEW) -->
+    <div class="analytics-card savings-goals-card">
+      <div class="analytics-header">
+        <div>
+          <h3 class="analytics-title"><span>🎯</span> Savings Goals</h3>
+          <p class="analytics-subtitle">Track your financial targets</p>
+        </div>
+        <button mat-icon-button class="add-icon-btn"><mat-icon>add_circle_outline</mat-icon></button>
+      </div>
+      <div class="goals-list">
+        @for (goal of savingsGoals(); track goal.id) {
+          <div class="goal-item">
+            <div class="goal-header-row">
+              <div class="goal-icon-name">
+                <span class="goal-icon">{{ goal.icon }}</span>
+                <div>
+                  <div class="goal-name">{{ goal.name }}</div>
+                  <div class="goal-deadline">Target: {{ goal.deadline | date:'MMM yyyy' }}</div>
+                </div>
+              </div>
+              <div class="goal-amounts">
+                <span class="goal-saved">${{ goal.saved | number:'1.0-0' }}</span>
+                <span class="goal-target"> / ${{ goal.target | number:'1.0-0' }}</span>
+              </div>
+            </div>
+            <div class="goal-track">
+              <div class="goal-fill" [attr.data-color]="goal.color"
+                   [style.width.%]="(goal.saved / goal.target) * 100"></div>
+            </div>
+            <div class="goal-footer-row">
+              <span class="goal-pct">{{ ((goal.saved / goal.target) * 100) | number:'1.0-0' }}% reached</span>
+              <span class="goal-remaining">${{ (goal.target - goal.saved) | number:'1.0-0' }} to go</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Cash Flow Forecast (NEW) -->
+    <div class="analytics-card cashflow-card">
+      <div class="analytics-header">
+        <div>
+          <h3 class="analytics-title"><span>📈</span> Cash Flow Forecast</h3>
+          <p class="analytics-subtitle">Projected balance — next 30 days</p>
+        </div>
+        <select class="period-select" (change)="onPeriodChange($event)">
+          <option>Next 30 days</option><option>Next 60 days</option><option>Next 90 days</option>
+        </select>
+      </div>
+      <div class="cashflow-chart-wrap" #cashflowChartWrap>
+        @if (cashflowData().length) {
+          <ngx-charts-area-chart
+            [view]="cashflowChartView()"
+            [results]="cashflowData()"
+            [xAxis]="showXAxis" [yAxis]="showYAxis"
+            [gradient]="true" [legend]="false"
+            [showXAxisLabel]="false" [showYAxisLabel]="false"
+            [scheme]="cashflowColorScheme" [autoScale]="true" [curve]="curve">
+          </ngx-charts-area-chart>
+        }
+      </div>
+      <div class="cashflow-summary">
+        @for (point of cashflowSummary(); track point.label) {
+          <div class="cashflow-point">
+            <div class="cashflow-point-val" [class.up]="point.isPositive" [class.down]="!point.isPositive">
+              ${{ point.value | number:'1.0-0' }}
+            </div>
+            <div class="cashflow-point-label">{{ point.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Net Worth (NEW) -->
+    <div class="analytics-card networth-card">
+      <div class="analytics-header">
+        <div>
+          <h3 class="analytics-title"><span>💎</span> Net Worth</h3>
+          <p class="analytics-subtitle">Assets vs Liabilities</p>
+        </div>
+      </div>
+      <div class="networth-hero">
+        <div class="networth-val">${{ netWorth() | number:'1.0-0' }}</div>
+        <div class="networth-change" [class.up]="netWorthChange() > 0" [class.down]="netWorthChange() < 0">
+          {{ netWorthChange() > 0 ? '↑' : '↓' }}
+          ${{ (netWorthChange() < 0 ? netWorthChange() * -1 : netWorthChange()) | number:'1.0-0' }} this month
+        </div>
+      </div>
+      <div class="networth-breakdown">
+        <div class="nw-item">
+          <div class="nw-row">
+            <span class="nw-label">💚 Assets</span>
+            <span class="nw-val assets">${{ totalAssets() | number:'1.0-0' }}</span>
+          </div>
+          <div class="nw-track"><div class="nw-fill assets-fill" [style.width.%]="assetsPercent()"></div></div>
+        </div>
+        <div class="nw-item">
+          <div class="nw-row">
+            <span class="nw-label">🔴 Liabilities</span>
+            <span class="nw-val liabilities">${{ totalLiabilities() | number:'1.0-0' }}</span>
+          </div>
+          <div class="nw-track"><div class="nw-fill liabilities-fill" [style.width.%]="liabilitiesPercent()"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Summary (NEW) -->
+    <div class="analytics-card tax-card">
+      <div class="analytics-header">
+        <div>
+          <h3 class="analytics-title"><span>📋</span> Tax Summary</h3>
+          <p class="analytics-subtitle">Year-to-date overview</p>
+        </div>
+        <span class="tax-year-badge">{{ currentYear() }}</span>
+      </div>
+      <div class="tax-grid">
+        @for (item of taxSummary(); track item.label) {
+          <div class="tax-item" [attr.data-color]="item.color">
+            <div class="tax-item-icon">{{ item.icon }}</div>
+            <div class="tax-item-val">${{ item.value | number:'1.0-0' }}</div>
+            <div class="tax-item-label">{{ item.label }}</div>
+          </div>
+        }
+      </div>
+      <div class="tax-notice">
+        <span class="tax-notice-icon">⚡</span>
+        Estimated tax due: <strong>${{ estimatedTax() | number:'1.0-0' }}</strong>
+      </div>
+    </div>
+
+  </div><!-- /analytics-grid -->
+
+</div><!-- /dashboard-container -->

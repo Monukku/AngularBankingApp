@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import * as shape from 'd3-shape';
 
 // Angular Material
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +18,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import * as shape from 'd3-shape';
 
 // ngx-charts
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -35,6 +35,16 @@ import {
   LiveRate,
   AccountHealthScore,
   BudgetCategory,
+  SmartInsight,
+  ActivityEvent,
+  UpcomingBill,
+  RecurringSubscription,
+  SavingsGoal,
+  MonthlyReportItem,
+  SpendingBreakdownSegment,
+  CashflowPoint,
+  RecentLogin,
+  TaxSummaryItem,
 } from '../../models/dashboard.model';
 
 @Component({
@@ -63,17 +73,18 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private snackBar         = inject(MatSnackBar);
   private destroyRef       = inject(DestroyRef);
 
-  @ViewChild('incomeChartWrap')   incomeChartWrap?: ElementRef<HTMLDivElement>;
-  @ViewChild('spendingChartWrap') spendingChartWrap?: ElementRef<HTMLDivElement>;
+  @ViewChild('incomeChartWrap')    incomeChartWrap?: ElementRef<HTMLDivElement>;
+  @ViewChild('spendingChartWrap')  spendingChartWrap?: ElementRef<HTMLDivElement>;
+  @ViewChild('cashflowChartWrap')  cashflowChartWrap?: ElementRef<HTMLDivElement>;
 
-  // ─── Loading & error ───────────────────────────────────────────
+  // ─── Loading & error ──────────────────────────────────────────
   isLoading = this.dashboardService.isLoading;
   hasError  = signal(false);
 
-  // ─── Chart curve ───────────────────────────────────────────────
+  // ─── Chart curve ──────────────────────────────────────────────
   curve = shape.curveMonotoneX;
 
-  // ─── Data signals ──────────────────────────────────────────────
+  // ─── Existing data signals ────────────────────────────────────
   balanceData   = signal<BalanceData | null>(null);
   quickUsers    = signal<QuickUser[]>([]);
   transactions  = signal<Transaction[]>([]);
@@ -84,7 +95,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   liveRates     = signal<LiveRate[]>([]);
   accountHealth = signal<AccountHealthScore | null>(null);
 
-  // ─── Budget categories — connect to API when endpoint is ready ─
   budgetCategories = signal<BudgetCategory[]>([
     { label: 'Housing',   icon: '🏠', spent: 1840, limit: 2000, colorClass: 'violet'  },
     { label: 'Food',      icon: '🍔', spent: 380,  limit: 600,  colorClass: 'cyan'    },
@@ -92,58 +102,81 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     { label: 'Shopping',  icon: '🛍️', spent: 540,  limit: 500,  colorClass: 'rose'    },
   ]);
 
-  // ─── UI state ──────────────────────────────────────────────────
+  // ─── New widget data signals ──────────────────────────────────
+  smartInsights           = signal<SmartInsight[]>([]);
+  activityFeed            = signal<ActivityEvent[]>([]);
+  upcomingBills           = signal<UpcomingBill[]>([]);
+  recurringSubscriptions  = signal<RecurringSubscription[]>([]);
+  savingsGoals            = signal<SavingsGoal[]>([]);
+  monthlyReport           = signal<MonthlyReportItem[]>([]);
+  spendingBreakdown       = signal<SpendingBreakdownSegment[]>([]);
+  cashflowData            = signal<any[]>([]);
+  cashflowSummaryData     = signal<CashflowPoint[]>([]);
+  recentLogins            = signal<RecentLogin[]>([]);
+  taxSummary              = signal<TaxSummaryItem[]>([]);
+
+  // Rewards
+  rewardsPointsVal   = signal(0);
+  rewardsTierVal     = signal('Gold');
+  rewardsTierPct     = signal(0);
+  rewardsTierCurr    = signal(0);
+  rewardsTierNxt     = signal(15000);
+  cashbackEarnedVal  = signal(0);
+  cashbackTotalVal   = signal(0);
+
+  // Net worth
+  netWorthVal       = signal(0);
+  netWorthChangeVal = signal(0);
+  totalAssetsVal    = signal(0);
+  totalLiabsVal     = signal(0);
+
+  // Tax
+  estimatedTaxVal = signal(0);
+
+  // Security
+  securityLevelVal = signal('Strong');
+
+  // ─── UI state ─────────────────────────────────────────────────
   searchQuery    = signal('');
   selectedPeriod = signal('Last 30 days');
   selectedCard   = signal(0);
   chartView      = signal<[number, number]>([500, 200]);
+  cashflowChartView = signal<[number, number]>([500, 160]);
 
-  // ─── Computed: totals ──────────────────────────────────────────
+  // ─── Computed: existing ───────────────────────────────────────
   totalBalance = computed(() => this.balanceData()?.totalBalance ?? 0);
 
-  // ─── Computed: savings goal — from BalanceData ─────────────────
   savingsGoalPercent = computed(() => this.balanceData()?.savingsGoalPercent ?? 0);
 
-  // ─── Computed: savings ring stroke offset ─────────────────────
-  // SVG circle circumference = 2 * π * r = 2 * π * 32 ≈ 201
   savingsRingOffset = computed(() => {
     const circumference = 201;
     return circumference - (circumference * this.savingsGoalPercent() / 100);
   });
 
-  // ─── Computed: stat cards — fully from signals ─────────────────
   statCards = computed(() => [
     {
-      label: 'Total Balance',
-      icon: '💼',
-      color: 'violet',
+      label: 'Total Balance', icon: '💼', color: 'violet',
       value: this.totalBalance(),
       changeLabel: `${this.balanceData()?.changePercentage ?? 0}% this month`,
       isPositive: (this.balanceData()?.changePercentage ?? 0) >= 0,
       isPercent: false,
     },
     {
-      label: 'Total Spent',
-      icon: '📤',
-      color: 'cyan',
+      label: 'Total Spent', icon: '📤', color: 'cyan',
       value: this.spendingData()?.total ?? 0,
       changeLabel: `${this.spendingData()?.changePercentage ?? 0}% vs last`,
       isPositive: this.spendingData()?.isPositive ?? true,
       isPercent: false,
     },
     {
-      label: 'Total Income',
-      icon: '📥',
-      color: 'emerald',
+      label: 'Total Income', icon: '📥', color: 'emerald',
       value: this.incomeData()?.total ?? 0,
       changeLabel: `${this.incomeData()?.changePercentage ?? 0}% this month`,
       isPositive: this.incomeData()?.isPositive ?? true,
       isPercent: false,
     },
     {
-      label: 'Savings Goal',
-      icon: '🎯',
-      color: 'rose',
+      label: 'Savings Goal', icon: '🎯', color: 'rose',
       value: this.savingsGoalPercent(),
       changeLabel: 'On track',
       isPositive: true,
@@ -151,7 +184,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     },
   ]);
 
-  // ─── Computed: filtered transactions ──────────────────────────
   filteredTransactions = computed(() => {
     const query = this.searchQuery().toLowerCase();
     if (!query) return this.transactions();
@@ -162,20 +194,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     );
   });
 
-  // ─── Computed: current card ────────────────────────────────────
   currentCard = computed(() => {
     const list = this.cards();
     return list[this.selectedCard()] ?? list[0] ?? null;
   });
 
-  // ─── Computed: card limit percentage ──────────────────────────
   cardLimitPercent = computed(() => {
     const card = this.currentCard();
     if (!card?.limit) return 0;
     return Math.min((card.balance / card.limit) * 100, 100);
   });
 
-  // ─── Computed: ngx-charts multi-series format ─────────────────
   incomeChartData = computed(() => {
     const d = this.incomeData();
     if (!d) return [];
@@ -188,7 +217,48 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     return [{ name: 'Spent', series: d.chartData.map(p => ({ name: p.month, value: p.value })) }];
   });
 
-  // ─── Chart display options ─────────────────────────────────────
+  // ─── Computed: new widgets ────────────────────────────────────
+
+  overdueCount = computed(() =>
+    this.upcomingBills().filter(b => b.urgency === 'overdue').length
+  );
+
+  subscriptionsTotal = computed(() =>
+    this.recurringSubscriptions().reduce((sum, s) => sum + s.amount, 0)
+  );
+
+  spendingBreakdownTotal = computed(() =>
+    this.spendingBreakdown().reduce((sum, s) => sum + s.value, 0)
+  );
+
+  cashflowSummary = computed(() => this.cashflowSummaryData());
+
+  netWorth          = computed(() => this.netWorthVal());
+  netWorthChange    = computed(() => this.netWorthChangeVal());
+  totalAssets       = computed(() => this.totalAssetsVal());
+  totalLiabilities  = computed(() => this.totalLiabsVal());
+  assetsPercent     = computed(() => {
+    const total = this.totalAssetsVal() + this.totalLiabsVal();
+    return total ? Math.round((this.totalAssetsVal() / total) * 100) : 0;
+  });
+  liabilitiesPercent = computed(() => {
+    const total = this.totalAssetsVal() + this.totalLiabsVal();
+    return total ? Math.round((this.totalLiabsVal() / total) * 100) : 0;
+  });
+
+  rewardsPoints      = computed(() => this.rewardsPointsVal());
+  rewardsTier        = computed(() => this.rewardsTierVal());
+  rewardsTierPercent = computed(() => this.rewardsTierPct());
+  rewardsTierCurrent = computed(() => this.rewardsTierCurr());
+  rewardsTierNext    = computed(() => this.rewardsTierNxt());
+  cashbackEarned     = computed(() => this.cashbackEarnedVal());
+  cashbackTotal      = computed(() => this.cashbackTotalVal());
+
+  estimatedTax  = computed(() => this.estimatedTaxVal());
+  securityLevel = computed(() => this.securityLevelVal());
+  currentYear   = computed(() => new Date().getFullYear());
+
+  // ─── Chart options (existing) ─────────────────────────────────
   showXAxis      = true;
   showYAxis      = false;
   gradient       = false;
@@ -198,41 +268,43 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   timeline       = false;
   autoScale      = true;
 
-  incomeColorScheme:   any = { domain: ['#10b981', '#059669', '#047857'] };
-  spendingColorScheme: any = { domain: ['#fbbf24', '#f59e0b', '#d97706'] };
+  incomeColorScheme:    any = { domain: ['#10b981', '#059669', '#047857'] };
+  spendingColorScheme:  any = { domain: ['#fbbf24', '#f59e0b', '#d97706'] };
+  cashflowColorScheme:  any = { domain: ['#7c3aed', '#a78bfa', '#06b6d4'] };
 
-  // ─── Table columns ─────────────────────────────────────────────
   displayedColumns = ['select', 'invoice', 'transaction', 'date', 'amount', 'status'];
 
-  // ─── Conversion state ──────────────────────────────────────────
+  // ─── Conversion state (existing) ─────────────────────────────
   conversionAmount1   = signal(238);
   conversionCurrency1 = signal('USD');
   conversionAmount2   = signal(222.13);
   conversionCurrency2 = signal('EUR');
 
-  // ─── Lifecycle ─────────────────────────────────────────────────
+  // ─── Lifecycle ────────────────────────────────────────────────
   ngOnInit(): void {
     this.loadDashboardData();
     this.loadLiveRates();
     this.loadAccountHealth();
+    this.loadNewWidgets();
   }
 
   ngAfterViewInit(): void {
-    // Small timeout ensures layout is painted before measuring
     setTimeout(() => this.recalcChartSize(), 0);
-
     const ro = new ResizeObserver(() => this.recalcChartSize());
     if (this.incomeChartWrap?.nativeElement)   ro.observe(this.incomeChartWrap.nativeElement);
     if (this.spendingChartWrap?.nativeElement) ro.observe(this.spendingChartWrap.nativeElement);
+    if (this.cashflowChartWrap?.nativeElement) ro.observe(this.cashflowChartWrap.nativeElement);
     this.destroyRef.onDestroy(() => ro.disconnect());
   }
 
   private recalcChartSize(): void {
     const el = this.incomeChartWrap?.nativeElement;
     if (el) this.chartView.set([el.offsetWidth || 500, 200]);
+    const cf = this.cashflowChartWrap?.nativeElement;
+    if (cf) this.cashflowChartView.set([cf.offsetWidth || 500, 160]);
   }
 
-  // ─── Data loaders ──────────────────────────────────────────────
+  // ─── Data loaders (existing) ──────────────────────────────────
   loadDashboardData(): void {
     this.hasError.set(false);
     this.dashboardService.getAllDashboardData().pipe(
@@ -273,7 +345,77 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       .subscribe({ next: t => this.transactions.set(t) });
   }
 
-  // ─── Typed event handlers — no $any() ──────────────────────────
+  // ─── New widget loaders ───────────────────────────────────────
+  private loadNewWidgets(): void {
+    this.dashboardService.getSmartInsights()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.smartInsights.set(d));
+
+    this.dashboardService.getActivityFeed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.activityFeed.set(d));
+
+    this.dashboardService.getUpcomingBills()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.upcomingBills.set(d));
+
+    this.dashboardService.getRecurringSubscriptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.recurringSubscriptions.set(d));
+
+    this.dashboardService.getSavingsGoals()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.savingsGoals.set(d));
+
+    this.dashboardService.getMonthlyReport()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.monthlyReport.set(d));
+
+    this.dashboardService.getSpendingBreakdown()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.spendingBreakdown.set(d));
+
+    this.dashboardService.getCashflowData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => {
+        this.cashflowData.set(d.chartData);
+        this.cashflowSummaryData.set(d.summary);
+      });
+
+    this.dashboardService.getNetWorth()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => {
+        this.netWorthVal.set(d.netWorth);
+        this.netWorthChangeVal.set(d.change);
+        this.totalAssetsVal.set(d.assets);
+        this.totalLiabsVal.set(d.liabilities);
+      });
+
+    this.dashboardService.getRecentLogins()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => this.recentLogins.set(d));
+
+    this.dashboardService.getTaxSummary()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => {
+        this.taxSummary.set(d.items);
+        this.estimatedTaxVal.set(d.estimatedTax);
+      });
+
+    this.dashboardService.getRewardsData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(d => {
+        this.rewardsPointsVal.set(d.points);
+        this.rewardsTierVal.set(d.tier);
+        this.rewardsTierPct.set(d.tierPercent);
+        this.rewardsTierCurr.set(d.tierCurrent);
+        this.rewardsTierNxt.set(d.tierNext);
+        this.cashbackEarnedVal.set(d.cashbackMonth);
+        this.cashbackTotalVal.set(d.cashbackTotal);
+      });
+  }
+
+  // ─── Event handlers (existing) ───────────────────────────────
   onSearchChange(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }
@@ -299,7 +441,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.conversionAmount2.set(+(event.target as HTMLInputElement).value);
   }
 
-  // ─── Actions ───────────────────────────────────────────────────
+  // ─── Actions (existing) ──────────────────────────────────────
   onSend(): void    { this.showMessage('Send money feature'); }
   onRequest(): void { this.showMessage('Request money feature'); }
   onTopUp(): void   { this.showMessage('Top-up feature'); }
@@ -329,15 +471,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       .subscribe({
         next: (result) => {
           this.conversionAmount2.set(result.convertedAmount);
-          this.showMessage(
-            `${this.conversionAmount1()} ${result.from} = ${result.convertedAmount} ${result.to}`
-          );
+          this.showMessage(`${this.conversionAmount1()} ${result.from} = ${result.convertedAmount} ${result.to}`);
         },
         error: () => this.showMessage('Conversion failed', 'error'),
       });
   }
 
-  // ─── Template helpers ──────────────────────────────────────────
+  // ─── Template helpers (existing + new) ───────────────────────
   formatCardNumber(cardNumber: string): string {
     return cardNumber.replace(/(\d{4})(?=\d)/g, '$1 ');
   }

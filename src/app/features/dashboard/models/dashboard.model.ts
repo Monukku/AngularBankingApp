@@ -1,3 +1,7 @@
+// dashboard.model.ts — Complete with all existing + new widget models
+
+// ─── Existing models (unchanged) ─────────────────────────────
+
 export interface BalanceData {
   totalBalance: number;
   currency: string;
@@ -117,4 +121,90 @@ export interface DashboardData {
   spending: SpendingData;
   cards: CreditCard[];
   workflows: Workflow[];
+}
+
+// ─── New widget models ────────────────────────────────────────
+
+export interface SmartInsight {
+  id: number;
+  icon: string;
+  type: 'warning' | 'success' | 'info' | 'alert';
+  tag: string;
+  title: string;
+  description: string;
+}
+
+export interface ActivityEvent {
+  id: number;
+  type: 'credit' | 'debit' | 'alert' | 'login';
+  title: string;
+  time: string;
+  amount: number;
+  isCredit: boolean;
+}
+
+export interface UpcomingBill {
+  id: number;
+  icon: string;
+  name: string;
+  dueDate: string;
+  amount: number;
+  urgency: 'overdue' | 'today' | 'upcoming';
+}
+
+export interface RecurringSubscription {
+  id: number;
+  icon: string;
+  name: string;
+  nextDate: string;
+  amount: number;
+}
+
+export interface SavingsGoal {
+  id: number;
+  icon: string;
+  name: string;
+  saved: number;
+  target: number;
+  deadline: string;
+  color: 'violet' | 'cyan' | 'emerald' | 'amber' | 'rose';
+}
+
+export interface MonthlyReportItem {
+  label: string;
+  income: number;
+  expense: number;
+  incomePercent: number;
+  expensePercent: number;
+}
+
+export interface SpendingBreakdownSegment {
+  label: string;
+  value: number;
+  percent: number;
+  color: string;
+  dashArray: string;
+  dashOffset: string;
+}
+
+export interface CashflowPoint {
+  label: string;
+  value: number;
+  isPositive: boolean;
+}
+
+export interface RecentLogin {
+  id: number;
+  deviceIcon: string;
+  device: string;
+  location: string;
+  time: string;
+  isCurrent: boolean;
+}
+
+export interface TaxSummaryItem {
+  icon: string;
+  label: string;
+  value: number;
+  color: 'violet' | 'cyan' | 'emerald' | 'amber';
 }
