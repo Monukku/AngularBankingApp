@@ -2,6 +2,8 @@ export interface BalanceData {
   totalBalance: number;
   currency: string;
   lastUpdated: string;
+  changePercentage: number;
+  savingsGoalPercent: number;
 }
 
 export interface AccountSummary {
@@ -88,6 +90,23 @@ export interface Workflow {
   title: string;
   status: string;
   icon: string;
+}
+
+export interface LiveRate {
+  flag: string;
+  pair: string;
+  sparkline: string;
+  value: number;
+  change: number;
+  isUp: boolean;
+}
+
+export interface BudgetCategory {
+  label: string;
+  icon: string;
+  spent: number;
+  limit: number;
+  colorClass: 'violet' | 'cyan' | 'emerald' | 'rose';
 }
 
 export interface DashboardData {

@@ -120,6 +120,10 @@ $r-lg: 16px;
   from { opacity:0; transform:scale(.8); }
   to   { opacity:1; transform:scale(1); }
 }
+@keyframes shimmerSweep {
+  from { left: -100%; }
+  to   { left: 150%; }
+}
 
 // ─── Shared card ──────────────────────────────────────────────
 %card {
@@ -134,7 +138,6 @@ $r-lg: 16px;
   animation: cardFadeUp .55s cubic-bezier(.22,1,.36,1) both;
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 
-  // Shimmer top edge
   &::after {
     content: '';
     position: absolute;
@@ -152,30 +155,26 @@ $r-lg: 16px;
   }
 }
 
-// ─── Host: fill content-area completely ───────────────────────
+// ─── Host ────────────────────────────────────────────────────
 :host {
   display: block;
-  // This makes the component fill whatever height content-area gives it
   width: 100%;
   min-height: 100%;
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
 }
 
 // ─── Dashboard Container ──────────────────────────────────────
-// Takes full width of content-area. NO fixed height, NO overflow:hidden on the box itself.
-// Background colour fills the space.
 .dashboard-container {
   width: 100%;
   min-height: 100%;
   padding: 24px;
   background: $bg;
   color: $t1;
-  position: relative;   // needed for z-index stacking of children
+  position: relative;
   box-sizing: border-box;
 }
 
-// ─── Ambient Orbs (fixed so they paint behind the whole viewport) ─
-// Using fixed + z-index:0 means they NEVER affect document flow
+// ─── Ambient Orbs ─────────────────────────────────────────────
 .orb {
   position: fixed;
   border-radius: 50%;
@@ -185,7 +184,7 @@ $r-lg: 16px;
 }
 .orb-violet {
   width: 500px; height: 500px;
-  top: -150px; left: 200px;   // offset right to clear app-sidebar (~240-280px wide)
+  top: -150px; left: 200px;
   background: radial-gradient(circle, rgba($violet,.28) 0%, transparent 68%);
   animation: orbDrift1 20s ease-in-out infinite;
 }
@@ -233,6 +232,37 @@ $r-lg: 16px;
   animation: spinnerFade .3s ease both;
   p { font-size: 14px; color: $t2; font-weight: 500; }
   ::ng-deep .mat-mdc-progress-spinner circle { stroke: $violet !important; }
+}
+
+// ─── Error Banner ─────────────────────────────────────────────
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: $r-md;
+  background: rgba($rose, .12);
+  border: 1px solid rgba($rose, .35);
+  color: lighten($rose, 12%);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  animation: cardFadeUp .4s ease both;
+
+  button {
+    color: lighten($rose, 12%) !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    border: 1px solid rgba($rose, .4) !important;
+    border-radius: $r-sm !important;
+    padding: 0 12px !important;
+    height: 30px !important;
+    transition: background .2s !important;
+    &:hover { background: rgba($rose, .2) !important; }
+  }
 }
 
 // ─── Stat Cards Row ───────────────────────────────────────────
@@ -318,7 +348,6 @@ $r-lg: 16px;
   gap: 24px;
   position: relative; z-index: 1;
 
-  // Tighten sidebar at smaller content-area widths
   @media(max-width:1300px) { grid-template-columns: 1fr 280px; gap: 18px; }
   @media(max-width:1024px) { grid-template-columns: 1fr; }
 
@@ -342,7 +371,6 @@ $r-lg: 16px;
   border-color: rgba($violet,.25);
   padding: 28px;
 
-  // Radial tints — decorative only, z-index 0
   &::before {
     content: ''; position: absolute; inset: 0; z-index: 0;
     background:
@@ -512,92 +540,320 @@ $r-lg: 16px;
 .transaction-history-card {
   @extend %card;
   animation-delay: .30s;
+  padding: 24px;
 
-  .history-header { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
-  .card-title-row { display: flex; align-items: center; justify-content: space-between; }
+  .history-header {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .card-title {
-    font-size: 15px; font-weight: 700; color: $t1; margin: 0;
-    font-family: 'Syne','DM Sans',sans-serif;
-    display: flex; align-items: center; gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: $t1;
+    margin: 0;
+    font-family: 'Syne', 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     .card-title-icon { font-size: 17px; }
   }
+
   .history-badge {
-    font-size: 11px; font-weight: 600; padding: 3px 10px;
-    border-radius: 20px; background: rgba($violet,.18); color: $v-light;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba($violet, .18);
+    color: $v-light;
     animation: badgePop .4s ease .35s both;
   }
-  .history-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .search-box {
-    flex: 1; min-width: 180px; display: flex; align-items: center; gap: 9px;
-    padding: 9px 13px; background: $s3; border-radius: $r-md; border: 1px solid $border;
-    transition: border-color .2s, box-shadow .2s;
-    &:focus-within { border-color: $b-hover; box-shadow: 0 0 0 3px rgba($violet,.1); }
-    mat-icon { color: $t3; font-size: 18px; }
-    input { flex: 1; border: none; background: transparent; font-size: 13px; color: $t1; outline: none;
-      &::placeholder { color: $t3; } }
+
+  .history-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
   }
+
+  .search-box {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 13px;
+    background: $s3;
+    border-radius: $r-md;
+    border: 1px solid $border;
+    transition: border-color .2s, box-shadow .2s;
+    &:focus-within {
+      border-color: $b-hover;
+      box-shadow: 0 0 0 3px rgba($violet, .1);
+    }
+    mat-icon { color: $t3; font-size: 18px; }
+    input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: $t1;
+      outline: none;
+      &::placeholder { color: $t3; }
+    }
+  }
+
   .period-select {
-    padding: 9px 10px; border: 1px solid $border; border-radius: $r-md;
-    font-size: 12px; color: $t2; background: $s3;
-    cursor: pointer; font-weight: 500; outline: none; appearance: none;
+    padding: 9px 10px;
+    border: 1px solid $border;
+    border-radius: $r-md;
+    font-size: 12px;
+    color: $t2;
+    background: $s3;
+    cursor: pointer;
+    font-weight: 500;
+    outline: none;
+    appearance: none;
     transition: border-color .2s;
     &:hover { border-color: $b-hover; }
   }
-  .filter-btn { color: $t3 !important; &:hover { color: $v-light !important; } }
+
+  .filter-btn {
+    color: $t3 !important;
+    &:hover { color: $v-light !important; }
+  }
+
+  // ── Table wrapper ──────────────────────────────────────────
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: $r-md;
+    border: 1px solid $border;
+    background: rgba($s1, .6);
+    &::-webkit-scrollbar { height: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: rgba($violet, .3); border-radius: 2px; }
+  }
 
   .transactions-table {
     width: 100%;
+
     ::ng-deep {
-      .mat-mdc-header-row,.mat-mdc-row { background: transparent !important; }
+
+      // ── Header row ────────────────────────────────────────
+      .mat-mdc-header-row {
+        background: rgba($s3, .95) !important;
+        border-bottom: 1px solid rgba($violet, .2) !important;
+      }
+
       .mat-mdc-header-cell {
-        font-size: 11px !important; font-weight: 700 !important; color: $t3 !important;
-        text-transform: uppercase; letter-spacing: .8px;
-        border-bottom: 1px solid $border !important;
-        background: rgba($s3,.7) !important; padding: 11px 14px !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        color: $t3 !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: none !important;
+        padding: 13px 16px !important;
+        white-space: nowrap;
+        background: transparent !important;
+
+        &:first-child {
+          border-left: 3px solid transparent !important;
+          padding-left: 18px !important;
+        }
       }
-      .mat-mdc-cell {
-        font-size: 13px !important; color: $t1 !important;
-        border-bottom: 1px solid rgba(255,255,255,.04) !important; padding: 13px 14px !important;
-      }
+
+      // ── Body rows ─────────────────────────────────────────
       .mat-mdc-row {
-        transition: background .15s ease; animation: rowSlideIn .4s ease both;
-        @for $i from 1 through 20 { &:nth-child(#{$i}) { animation-delay: #{.04s * $i}; } }
-        &:hover .mat-mdc-cell { background: rgba($violet,.06) !important; }
+        background: transparent !important;
+        border-bottom: 1px solid rgba(255,255,255,.04) !important;
+        transition: background .18s ease, transform .18s ease;
+        animation: rowSlideIn .45s ease both;
+        cursor: pointer;
+
+        @for $i from 1 through 20 {
+          &:nth-child(#{$i}) { animation-delay: #{.04s * $i}; }
+        }
+
+        &:last-child { border-bottom: none !important; }
+
+        &:hover {
+          background: rgba($violet, .07) !important;
+          transform: translateX(3px);
+
+          .mat-mdc-cell:first-child {
+            border-left-color: rgba($violet, .65) !important;
+          }
+        }
       }
-      .mat-mdc-cell.negative { color: lighten($rose,12%) !important; font-weight: 700; }
-      .mat-mdc-cell.positive { color: $em-light !important; font-weight: 700; }
-      .mat-mdc-checkbox .mdc-checkbox__background { border-color: $b-hover !important; }
+
+      .mat-mdc-cell {
+        font-size: 13px !important;
+        color: $t1 !important;
+        border-bottom: none !important;
+        padding: 14px 16px !important;
+        vertical-align: middle !important;
+
+        &:first-child {
+          border-left: 3px solid transparent !important;
+          padding-left: 18px !important;
+          transition: border-color .18s ease;
+        }
+      }
+
+      // Amount colours
+      .mat-mdc-cell.negative {
+        color: lighten($rose, 12%) !important;
+        font-weight: 700 !important;
+      }
+      .mat-mdc-cell.positive {
+        color: $em-light !important;
+        font-weight: 700 !important;
+      }
+
+      // Checkbox overrides
+      .mat-mdc-checkbox .mdc-checkbox__background {
+        border-color: $b-hover !important;
+        border-radius: 4px !important;
+      }
       .mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__background {
-        background: $violet !important; border-color: $violet !important;
+        background: $violet !important;
+        border-color: $violet !important;
       }
     }
   }
 
-  .invoice-cell { display: flex; align-items: center; gap: 7px; font-weight: 600; color: $t2; font-size: 13px;
-    .invoice-icon { font-size: 15px; } }
+  // ── Cell components ────────────────────────────────────────
+
+  .invoice-cell {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 600;
+    color: $t2;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: .3px;
+    .invoice-icon { font-size: 14px; }
+  }
+
   .transaction-cell {
-    display: flex; align-items: center; gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
     .company-logo {
-      width: 36px; height: 36px; border-radius: $r-sm;
-      background: $s3; border: 1px solid $border; overflow: hidden; flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: $r-md;
+      background: linear-gradient(135deg, $s3, rgba($violet, .2));
+      border: 1px solid rgba($violet, .2);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .2s, box-shadow .2s;
       img { width: 100%; height: 100%; object-fit: cover; }
     }
-    .transaction-name     { font-weight: 600; color: $t1; font-size: 13px; }
-    .transaction-category { font-size: 11px; color: $t3; margin-top: 2px; }
+
+    &:hover .company-logo {
+      border-color: rgba($v-light, .4);
+      box-shadow: 0 4px 12px rgba($violet, .3);
+    }
+
+    .transaction-details { min-width: 0; }
+
+    .transaction-name {
+      font-weight: 600;
+      color: $t1;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .transaction-category {
+      font-size: 11px;
+      color: $t3;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
+
   .date-cell {
-    display: flex; flex-direction: column;
+    display: flex;
+    flex-direction: column;
     .date-main { font-size: 13px; font-weight: 600; color: $t1; }
     .date-year  { font-size: 10px; color: $t3; margin-top: 2px; }
   }
-  .amount-val { font-weight: 700; }
+
+  .amount-val {
+    font-weight: 700;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .3px;
+  }
+
+  // ── Status badges ──────────────────────────────────────────
   .status-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 11px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
     animation: badgePop .4s cubic-bezier(.34,1.56,.64,1) both;
-    &.completed { background: rgba($emerald,.15); color: $em-light; }
-    &.progress  { background: rgba($amber,.15);   color: lighten($amber,15%); }
-    &.pending   { background: rgba($rose,.15);     color: lighten($rose,12%); }
+    position: relative;
+    overflow: hidden;
+
+    // Shimmer sweep on hover
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+      transition: left .4s ease;
+      pointer-events: none;
+    }
+    &:hover::after { left: 150%; }
+
+    &.completed {
+      background: rgba($emerald, .15);
+      color: $em-light;
+      border: 1px solid rgba($emerald, .25);
+    }
+    &.progress {
+      background: rgba($amber, .15);
+      color: lighten($amber, 15%);
+      border: 1px solid rgba($amber, .25);
+    }
+    &.pending {
+      background: rgba($rose, .15);
+      color: lighten($rose, 12%);
+      border: 1px solid rgba($rose, .25);
+    }
+  }
+
+  // ── Empty state ────────────────────────────────────────────
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: $t3;
+    .empty-icon  { font-size: 36px; margin-bottom: 12px; opacity: .4; }
+    .empty-title { font-size: 14px; font-weight: 600; color: $t2; margin-bottom: 6px; }
+    .empty-sub   { font-size: 12px; }
   }
 }
 
@@ -784,6 +1040,35 @@ $r-lg: 16px;
     &:hover { color: white !important; }
     mat-icon { font-size: 15px; width: 15px; height: 15px; margin-left: 4px; }
   }
+}
+
+// ─── Financial Health Score ────────────────────────────────────
+.health-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: $s3;
+  border-radius: $r-md;
+  border: 1px solid $border;
+  margin-bottom: 10px;
+
+  .health-label { font-size: 12px; font-weight: 600; color: $t2; }
+
+  .health-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    animation: badgePop .4s cubic-bezier(.34,1.56,.64,1) both;
+    &.health-excellent { background: rgba($emerald,.18); color: $em-light; }
+    &.health-good      { background: rgba($cyan,.18);    color: lighten($cyan,10%); }
+    &.health-fair      { background: rgba($amber,.18);   color: lighten($amber,15%); }
+    &.health-poor      { background: rgba($rose,.18);    color: lighten($rose,12%); }
+  }
+}
+
+// ─── Over-budget text ─────────────────────────────────────────
+.over-budget {
+  color: lighten($rose, 12%);
+  font-weight: 600;
 }
 
 // ─── Snackbar ─────────────────────────────────────────────────

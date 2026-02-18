@@ -1,6 +1,6 @@
 <div class="dashboard-container">
 
-  <!-- ═══ Ambient Background (z-index 0, purely decorative) ═══ -->
+  <!-- ═══ Ambient Background ═══ -->
   <div class="bg-texture"></div>
   <div class="scan-line"></div>
   <div class="orb orb-violet"></div>
@@ -16,57 +16,46 @@
     </div>
   }
 
-  <!-- ═══ Stat Cards Row ═══ -->
+  <!-- ═══ Error Banner ═══ -->
+  @if (hasError()) {
+    <div class="error-banner">
+      <span>⚠️ Failed to load dashboard data.</span>
+      <button mat-button (click)="loadDashboardData()">Retry</button>
+    </div>
+  }
+
+  <!-- ═══ Stat Cards — rendered from statCards() computed signal ═══ -->
   <div class="stat-cards-row">
-    <div class="stat-card" data-color="violet">
-      <div class="stat-blob"></div>
-      <div class="stat-icon-wrap">💼</div>
-      <div class="stat-label">Total Balance</div>
-      <div class="stat-value">${{ totalBalance() | number:'1.0-0' }}</div>
-      <span class="stat-change up">↑ 12.4% this month</span>
-    </div>
-    <div class="stat-card" data-color="cyan">
-      <div class="stat-blob"></div>
-      <div class="stat-icon-wrap">📤</div>
-      <div class="stat-label">Total Spent</div>
-      @if (spendingData(); as s) {
-        <div class="stat-value">${{ s.total | number:'1.0-0' }}</div>
-        <span class="stat-change" [class.up]="s.isPositive" [class.down]="!s.isPositive">
-          {{ s.isPositive ? '↑' : '↓' }} {{ s.changePercentage }}% vs last
+    @for (card of statCards(); track card.label) {
+      <div class="stat-card" [attr.data-color]="card.color">
+        <div class="stat-blob"></div>
+        <div class="stat-icon-wrap">{{ card.icon }}</div>
+        <div class="stat-label">{{ card.label }}</div>
+        <div class="stat-value">
+          @if (card.isPercent) {
+            {{ card.value }}%
+          } @else {
+            ${{ card.value | number:'1.0-0' }}
+          }
+        </div>
+        <span class="stat-change" [class.up]="card.isPositive" [class.down]="!card.isPositive">
+          {{ card.isPositive ? '↑' : '↓' }} {{ card.changeLabel }}
         </span>
-      }
-    </div>
-    <div class="stat-card" data-color="emerald">
-      <div class="stat-blob"></div>
-      <div class="stat-icon-wrap">📥</div>
-      <div class="stat-label">Total Income</div>
-      @if (incomeData(); as i) {
-        <div class="stat-value">${{ i.total | number:'1.0-0' }}</div>
-        <span class="stat-change" [class.up]="i.isPositive" [class.down]="!i.isPositive">
-          {{ i.isPositive ? '↑' : '↓' }} {{ i.changePercentage }}% this month
-        </span>
-      }
-    </div>
-    <div class="stat-card" data-color="rose">
-      <div class="stat-blob"></div>
-      <div class="stat-icon-wrap">🎯</div>
-      <div class="stat-label">Savings Goal</div>
-      <div class="stat-value">68%</div>
-      <span class="stat-change up">↑ On track</span>
-    </div>
+      </div>
+    }
   </div>
 
   <!-- ═══ Main Grid ═══ -->
   <div class="dashboard-grid" [class.loading]="isLoading()">
 
-    <!-- LEFT SECTION -->
+    <!-- ══ LEFT SECTION ══ -->
     <div class="left-section">
 
       <!-- Balance Card -->
       <div class="balance-card">
         <div class="balance-card-inner">
           <div class="balance-left">
-            <h3 class="card-label">Total Balance in USD</h3>
+            <h3 class="card-label">Total Balance in {{ balanceData()?.currency || 'USD' }}</h3>
             <div class="balance-amount">
               <span class="balance-live-dot"></span>
               ${{ totalBalance() | number:'1.0-0' }}
@@ -83,6 +72,7 @@
               </button>
             </div>
           </div>
+
           <div class="balance-right">
             <div class="live-indicator">
               <div class="live-dot-sm"></div>
@@ -96,6 +86,8 @@
                 <div class="wave-bar"></div>
               </div>
             </div>
+
+            <!-- Savings ring — driven by savingsGoalPercent() from BalanceData -->
             <div class="mini-ring-wrap">
               <svg class="mini-ring" viewBox="0 0 80 80">
                 <defs>
@@ -104,12 +96,19 @@
                     <stop offset="100%" stop-color="#06b6d4"/>
                   </linearGradient>
                 </defs>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="url(#ringGrad)" stroke-width="8"
-                  stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="64"
-                  transform="rotate(-90 40 40)" class="ring-progress"/>
-                <text x="40" y="36" text-anchor="middle" fill="white" font-size="12" font-weight="700">68%</text>
-                <text x="40" y="50" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">saved</text>
+                <circle cx="40" cy="40" r="32" fill="none"
+                        stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none"
+                        stroke="url(#ringGrad)" stroke-width="8"
+                        stroke-linecap="round"
+                        [attr.stroke-dasharray]="201"
+                        [attr.stroke-dashoffset]="savingsRingOffset()"
+                        transform="rotate(-90 40 40)"
+                        class="ring-progress"/>
+                <text x="40" y="36" text-anchor="middle" fill="white"
+                      font-size="12" font-weight="700">{{ savingsGoalPercent() }}%</text>
+                <text x="40" y="50" text-anchor="middle"
+                      fill="rgba(255,255,255,0.6)" font-size="8">saved</text>
               </svg>
             </div>
           </div>
@@ -123,7 +122,11 @@
         </h3>
         <div class="users-carousel">
           @for (user of quickUsers(); track user.id) {
-            <div class="user-item" (click)="onUserClick(user)">
+            <div class="user-item"
+                 (click)="onUserClick(user)"
+                 [attr.aria-label]="'Send to ' + user.name"
+                 role="button"
+                 tabindex="0">
               <div class="user-avatar">
                 @if (user.avatar) {
                   <img [src]="user.avatar" [alt]="user.name" />
@@ -137,7 +140,7 @@
               }
             </div>
           }
-          <button mat-icon-button class="scroll-btn">
+          <button mat-icon-button class="scroll-btn" aria-label="Scroll users right">
             <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
@@ -145,6 +148,8 @@
 
       <!-- Charts Row -->
       <div class="charts-row">
+
+        <!-- Income Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-info">
@@ -155,23 +160,27 @@
               @if (incomeData(); as income) {
                 <div class="chart-value">
                   ${{ income.total | number:'1.0-0' }}
-                  <span class="change-badge" [class.positive]="income.isPositive" [class.negative]="!income.isPositive">
+                  <span class="change-badge"
+                        [class.positive]="income.isPositive"
+                        [class.negative]="!income.isPositive">
                     <mat-icon>{{ income.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
                     {{ income.changePercentage }}%
                   </span>
                 </div>
               }
             </div>
-            <select class="period-select" [value]="selectedPeriod()" (change)="onPeriodChange($any($event.target).value)">
+            <select class="period-select" (change)="onPeriodChange($event)">
               <option>Last 30 days</option>
               <option>Last 60 days</option>
               <option>Last 90 days</option>
             </select>
           </div>
-          <div class="chart-container">
+          <div class="chart-container" #incomeChartWrap>
             @if (incomeChartData().length) {
               <ngx-charts-area-chart
-                [results]="incomeChartData()" [xAxis]="showXAxis" [yAxis]="showYAxis"
+                [view]="chartView()"
+                [results]="incomeChartData()"
+                [xAxis]="showXAxis" [yAxis]="showYAxis"
                 [gradient]="gradient" [legend]="showLegend"
                 [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
                 [timeline]="timeline" [scheme]="incomeColorScheme"
@@ -181,6 +190,7 @@
           </div>
         </div>
 
+        <!-- Spending Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-info">
@@ -191,23 +201,27 @@
               @if (spendingData(); as spending) {
                 <div class="chart-value">
                   ${{ spending.total | number:'1.0-0' }}
-                  <span class="change-badge" [class.positive]="spending.isPositive" [class.negative]="!spending.isPositive">
+                  <span class="change-badge"
+                        [class.positive]="spending.isPositive"
+                        [class.negative]="!spending.isPositive">
                     <mat-icon>{{ spending.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
                     {{ spending.changePercentage }}%
                   </span>
                 </div>
               }
             </div>
-            <select class="period-select">
+            <select class="period-select" (change)="onPeriodChange($event)">
               <option>Last 30 days</option>
               <option>Last 60 days</option>
               <option>Last 90 days</option>
             </select>
           </div>
-          <div class="chart-container">
+          <div class="chart-container" #spendingChartWrap>
             @if (spendingChartData().length) {
               <ngx-charts-area-chart
-                [results]="spendingChartData()" [xAxis]="showXAxis" [yAxis]="showYAxis"
+                [view]="chartView()"
+                [results]="spendingChartData()"
+                [xAxis]="showXAxis" [yAxis]="showYAxis"
                 [gradient]="gradient" [legend]="showLegend"
                 [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
                 [timeline]="timeline" [scheme]="spendingColorScheme"
@@ -216,6 +230,7 @@
             }
           </div>
         </div>
+
       </div>
 
       <!-- Transaction History -->
@@ -230,26 +245,29 @@
           <div class="history-controls">
             <div class="search-box">
               <mat-icon>search</mat-icon>
-              <input type="text" placeholder="Search transactions…"
+              <input type="text"
+                     placeholder="Search transactions…"
                      [value]="searchQuery()"
-                     (input)="onSearchChange($any($event.target).value)" />
+                     (input)="onSearchChange($event)" />
             </div>
-            <select class="period-select">
+            <select class="period-select" (change)="onPeriodChange($event)">
               <option>Last 30 days</option>
               <option>Last 60 days</option>
               <option>Last 90 days</option>
             </select>
-            <button mat-icon-button class="filter-btn">
+            <button mat-icon-button class="filter-btn" aria-label="Filter transactions">
               <mat-icon>filter_list</mat-icon>
             </button>
           </div>
         </div>
 
         <table mat-table [dataSource]="filteredTransactions()" class="transactions-table">
+
           <ng-container matColumnDef="select">
             <th mat-header-cell *matHeaderCellDef><mat-checkbox></mat-checkbox></th>
             <td mat-cell *matCellDef="let row"><mat-checkbox></mat-checkbox></td>
           </ng-container>
+
           <ng-container matColumnDef="invoice">
             <th mat-header-cell *matHeaderCellDef>Invoice</th>
             <td mat-cell *matCellDef="let row">
@@ -258,6 +276,7 @@
               </div>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="transaction">
             <th mat-header-cell *matHeaderCellDef>Transaction</th>
             <td mat-cell *matCellDef="let row">
@@ -272,6 +291,7 @@
               </div>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Date</th>
             <td mat-cell *matCellDef="let row">
@@ -281,6 +301,7 @@
               </div>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="amount">
             <th mat-header-cell *matHeaderCellDef>Amount</th>
             <td mat-cell *matCellDef="let row"
@@ -291,37 +312,44 @@
               </span>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
             <td mat-cell *matCellDef="let row">
               <span class="status-badge"
                     [class.completed]="row.status === 'Completed'"
                     [class.progress]="row.status === 'On Progress'"
-                    [class.pending]="row.status === 'Pending'">
-                @if (row.status === 'Completed') { <span>✓</span> }
-                @else if (row.status === 'On Progress') { <span>⏳</span> }
-                @else { <span>🔴</span> }
+                    [class.pending]="row.status === 'Pending'"
+                    [attr.aria-label]="'Status: ' + row.status">
+                @if (row.status === 'Completed') { <span aria-hidden="true">✓</span> }
+                @else if (row.status === 'On Progress') { <span aria-hidden="true">⏳</span> }
+                @else { <span aria-hidden="true">●</span> }
                 {{ row.status }}
               </span>
             </td>
           </ng-container>
+
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
       </div>
+
     </div>
 
-    <!-- RIGHT SIDEBAR -->
+    <!-- ══ RIGHT SIDEBAR ══ -->
     <div class="right-sidebar">
 
       <!-- My Cards -->
       <div class="widget-card cards-widget">
         <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">💳</span> My Cards</h4>
+          <h4 class="widget-title">
+            <span class="widget-title-icon">💳</span> My Cards
+          </h4>
           <button mat-button class="add-btn" (click)="onAddCard()">
             Add New <mat-icon>add_circle_outline</mat-icon>
           </button>
         </div>
+
         @if (currentCard(); as card) {
           <div class="credit-card">
             <div class="cc-circles"></div>
@@ -343,31 +371,43 @@
             </div>
             @if (cards().length > 1) {
               <div class="card-navigation">
-                <button mat-icon-button (click)="previousCard()"><mat-icon>chevron_left</mat-icon></button>
+                <button mat-icon-button (click)="previousCard()" aria-label="Previous card">
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
                 <span>{{ selectedCard() + 1 }} / {{ cards().length }}</span>
-                <button mat-icon-button (click)="nextCard()"><mat-icon>chevron_right</mat-icon></button>
+                <button mat-icon-button (click)="nextCard()" aria-label="Next card">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
               </div>
             }
           </div>
+
+          <!-- Limit bar — from card.balance / card.limit -->
           <div class="card-limit-row">
             <span class="card-limit-label">Available limit</span>
-            <span class="card-limit-val">$15,200 / $20,000</span>
+            <span class="card-limit-val">
+              ${{ card.balance | number:'1.0-0' }} / ${{ card.limit | number:'1.0-0' }}
+            </span>
           </div>
-          <div class="limit-track"><div class="limit-fill"></div></div>
+          <div class="limit-track">
+            <div class="limit-fill" [style.width.%]="cardLimitPercent()"></div>
+          </div>
         }
       </div>
 
       <!-- Conversion Rate -->
       <div class="widget-card conversion-widget">
-        <h4 class="widget-title"><span class="widget-title-icon">🔄</span> Conversion Rate</h4>
+        <h4 class="widget-title">
+          <span class="widget-title-icon">🔄</span> Conversion Rate
+        </h4>
         <div class="conversion-form">
           <div class="conversion-row">
             <label>From</label>
             <div class="input-group">
-              <input type="number" [value]="conversionAmount1()"
-                     (input)="conversionAmount1.set(+$any($event.target).value)" />
-              <select [value]="conversionCurrency1()"
-                      (change)="conversionCurrency1.set($any($event.target).value)">
+              <input type="number"
+                     [value]="conversionAmount1()"
+                     (input)="onAmount1Change($event)" />
+              <select [value]="conversionCurrency1()" (change)="onCurrency1Change($event)">
                 <option value="USD">🇺🇸 USD</option>
                 <option value="EUR">🇪🇺 EUR</option>
                 <option value="GBP">🇬🇧 GBP</option>
@@ -376,16 +416,16 @@
           </div>
           <div class="conversion-swap-row">
             <div class="conversion-line"></div>
-            <div class="swap-icon">⇅</div>
+            <div class="swap-icon" role="button" aria-label="Swap currencies">⇅</div>
             <div class="conversion-line"></div>
           </div>
           <div class="conversion-row">
             <label>To</label>
             <div class="input-group">
-              <input type="number" [value]="conversionAmount2()"
-                     (input)="conversionAmount2.set(+$any($event.target).value)" />
-              <select [value]="conversionCurrency2()"
-                      (change)="conversionCurrency2.set($any($event.target).value)">
+              <input type="number"
+                     [value]="conversionAmount2()"
+                     (input)="onAmount2Change($event)" />
+              <select [value]="conversionCurrency2()" (change)="onCurrency2Change($event)">
                 <option value="EUR">🇪🇺 EUR</option>
                 <option value="USD">🇺🇸 USD</option>
                 <option value="GBP">🇬🇧 GBP</option>
@@ -398,6 +438,8 @@
             = {{ conversionAmount2() | number:'1.2-2' }} {{ conversionCurrency2() }}
           </button>
         </div>
+
+        <!-- Live Rates — from liveRates() signal -->
         <div class="live-rates">
           <div class="live-rates-header">
             <span class="rates-label">Live Rates</span>
@@ -405,38 +447,39 @@
               <div class="live-dot-sm"></div> LIVE
             </div>
           </div>
-          <div class="rate-row">
-            <span class="rate-flag">🇪🇺</span>
-            <span class="rate-pair">EUR/USD</span>
-            <span class="rate-sparkline">▁▃▅▇▅▆▇</span>
-            <span class="rate-val up">1.0842 <small>+0.12%</small></span>
-          </div>
-          <div class="rate-row">
-            <span class="rate-flag">🇬🇧</span>
-            <span class="rate-pair">GBP/USD</span>
-            <span class="rate-sparkline">▇▅▃▅▃▂▃</span>
-            <span class="rate-val down">1.2611 <small>-0.08%</small></span>
-          </div>
-          <div class="rate-row">
-            <span class="rate-flag">🇯🇵</span>
-            <span class="rate-pair">JPY/USD</span>
-            <span class="rate-sparkline">▂▄▅▃▆▇▆</span>
-            <span class="rate-val up">149.82 <small>+0.31%</small></span>
-          </div>
+          @for (rate of liveRates(); track rate.pair) {
+            <div class="rate-row">
+              <span class="rate-flag">{{ rate.flag }}</span>
+              <span class="rate-pair">{{ rate.pair }}</span>
+              <span class="rate-sparkline">{{ rate.sparkline }}</span>
+              <span class="rate-val" [class.up]="rate.isUp" [class.down]="!rate.isUp">
+                {{ rate.value }}
+                <small>{{ rate.isUp ? '+' : '' }}{{ rate.change }}%</small>
+              </span>
+            </div>
+          }
         </div>
       </div>
 
       <!-- Workflows + Budget -->
       <div class="widget-card workflows-widget">
         <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">⚙️</span> Workflows</h4>
-          <button mat-icon-button class="add-icon-btn">
+          <h4 class="widget-title">
+            <span class="widget-title-icon">⚙️</span> Workflows
+          </h4>
+          <button mat-icon-button class="add-icon-btn" aria-label="Add workflow">
             <mat-icon>add_circle_outline</mat-icon>
           </button>
         </div>
+
+        <!-- Workflows — from workflows() signal -->
         <div class="workflow-list">
           @for (workflow of workflows(); track workflow.id) {
-            <div class="workflow-item" (click)="onWorkflowClick(workflow)">
+            <div class="workflow-item"
+                 (click)="onWorkflowClick(workflow)"
+                 role="button"
+                 tabindex="0"
+                 [attr.aria-label]="workflow.title">
               <div class="workflow-icon">{{ workflow.icon }}</div>
               <div class="workflow-info">
                 <div class="workflow-title">{{ workflow.title }}</div>
@@ -446,31 +489,44 @@
             </div>
           }
         </div>
+
+        <!-- Budget — from budgetCategories() signal -->
         <div class="budget-tracker">
           <div class="budget-header">
             <span class="budget-label">📊 Budget Tracker</span>
-            <span class="budget-period">Feb 2026</span>
+            <span class="budget-period">
+              {{ balanceData()?.lastUpdated ? (balanceData()!.lastUpdated | date:'MMM yyyy') : 'Current' }}
+            </span>
           </div>
-          <div class="budget-item">
-            <div class="budget-row-top"><span>🏠 Housing</span><span>$1,840 / $2,000</span></div>
-            <div class="progress-track"><div class="progress-fill violet" style="width:92%"></div></div>
-          </div>
-          <div class="budget-item">
-            <div class="budget-row-top"><span>🍔 Food</span><span>$380 / $600</span></div>
-            <div class="progress-track"><div class="progress-fill cyan" style="width:63%"></div></div>
-          </div>
-          <div class="budget-item">
-            <div class="budget-row-top"><span>🚗 Transport</span><span>$190 / $400</span></div>
-            <div class="progress-track"><div class="progress-fill emerald" style="width:47%"></div></div>
-          </div>
-          <div class="budget-item">
-            <div class="budget-row-top">
-              <span>🛍️ Shopping</span>
-              <span class="over-budget">$540 / $500 ⚠️</span>
+          @for (cat of budgetCategories(); track cat.label) {
+            <div class="budget-item">
+              <div class="budget-row-top">
+                <span>{{ cat.icon }} {{ cat.label }}</span>
+                <span [class.over-budget]="budgetIsOver(cat)">
+                  ${{ cat.spent | number:'1.0-0' }} / ${{ cat.limit | number:'1.0-0' }}
+                  @if (budgetIsOver(cat)) { <span aria-label="Over budget">⚠️</span> }
+                </span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill"
+                     [class]="'progress-fill ' + cat.colorClass"
+                     [style.width.%]="budgetPercent(cat)">
+                </div>
+              </div>
             </div>
-            <div class="progress-track"><div class="progress-fill rose" style="width:100%"></div></div>
-          </div>
+          }
         </div>
+
+        <!-- Account Health — from accountHealth() signal -->
+        @if (accountHealth(); as health) {
+          <div class="health-score-row">
+            <span class="health-label">🏥 Financial Health</span>
+            <span class="health-badge" [class]="'health-badge health-' + health.level.toLowerCase()">
+              {{ health.score }}/100 · {{ health.level }}
+            </span>
+          </div>
+        }
+
         <button mat-button class="upcoming-btn">
           View Upcoming <mat-icon>arrow_forward</mat-icon>
         </button>

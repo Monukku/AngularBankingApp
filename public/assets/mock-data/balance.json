@@ -1,5 +1,7 @@
 {
-  "totalBalance": 32352,
+  "totalBalance": 24500,
   "currency": "USD",
-  "lastUpdated": "2024-02-16T10:30:00Z"
+  "lastUpdated": "2026-02-18",
+  "changePercentage": 12.4,
+  "savingsGoalPercent": 68
 }
