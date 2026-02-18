@@ -24,7 +24,7 @@
     </div>
   }
 
-  <!-- ═══ Stat Cards — rendered from statCards() computed signal ═══ -->
+  <!-- ═══ Stat Cards ═══ -->
   <div class="stat-cards-row">
     @for (card of statCards(); track card.label) {
       <div class="stat-card" [attr.data-color]="card.color">
@@ -86,8 +86,6 @@
                 <div class="wave-bar"></div>
               </div>
             </div>
-
-            <!-- Savings ring — driven by savingsGoalPercent() from BalanceData -->
             <div class="mini-ring-wrap">
               <svg class="mini-ring" viewBox="0 0 80 80">
                 <defs>
@@ -233,7 +231,7 @@
 
       </div>
 
-      <!-- Transaction History -->
+      <!-- ═══ Transaction History — native table (no mat-table) ═══ -->
       <div class="transaction-history-card">
         <div class="history-header">
           <div class="card-title-row">
@@ -261,77 +259,86 @@
           </div>
         </div>
 
-        <table mat-table [dataSource]="filteredTransactions()" class="transactions-table">
+        <div class="table-wrapper">
+          <table class="tx-table">
+            <thead>
+              <tr>
+                <th class="col-check"><mat-checkbox></mat-checkbox></th>
+                <th>Invoice</th>
+                <th>Transaction</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of filteredTransactions(); track row.invoice) {
+                <tr class="tx-row">
 
-          <ng-container matColumnDef="select">
-            <th mat-header-cell *matHeaderCellDef><mat-checkbox></mat-checkbox></th>
-            <td mat-cell *matCellDef="let row"><mat-checkbox></mat-checkbox></td>
-          </ng-container>
+                  <td class="col-check"><mat-checkbox></mat-checkbox></td>
 
-          <ng-container matColumnDef="invoice">
-            <th mat-header-cell *matHeaderCellDef>Invoice</th>
-            <td mat-cell *matCellDef="let row">
-              <div class="invoice-cell">
-                <span class="invoice-icon">📄</span>{{ row.invoice }}
-              </div>
-            </td>
-          </ng-container>
+                  <td>
+                    <div class="invoice-cell">
+                      <span class="invoice-icon">📄</span>
+                      {{ row.invoice }}
+                    </div>
+                  </td>
 
-          <ng-container matColumnDef="transaction">
-            <th mat-header-cell *matHeaderCellDef>Transaction</th>
-            <td mat-cell *matCellDef="let row">
-              <div class="transaction-cell">
-                <div class="company-logo">
-                  <img [src]="row.logo" [alt]="row.name" />
-                </div>
-                <div class="transaction-details">
-                  <div class="transaction-name">{{ row.name }}</div>
-                  <div class="transaction-category">{{ row.email || row.category }}</div>
-                </div>
-              </div>
-            </td>
-          </ng-container>
+                  <td>
+                    <div class="transaction-cell">
+                      <div class="company-logo">
+                        <img [src]="row.logo" [alt]="row.name" />
+                      </div>
+                      <div class="transaction-details">
+                        <div class="transaction-name">{{ row.name }}</div>
+                        <div class="transaction-category">{{ row.email || row.category }}</div>
+                      </div>
+                    </div>
+                  </td>
 
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let row">
-              <div class="date-cell">
-                <span class="date-main">{{ row.date | date:'dd MMM' }}</span>
-                <span class="date-year">{{ row.date | date:'yyyy' }}</span>
-              </div>
-            </td>
-          </ng-container>
+                  <td>
+                    <div class="date-cell">
+                      <span class="date-main">{{ row.date | date:'dd MMM' }}</span>
+                      <span class="date-year">{{ row.date | date:'yyyy' }}</span>
+                    </div>
+                  </td>
 
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let row"
-                [class.negative]="row.amount < 0"
-                [class.positive]="row.amount > 0">
-              <span class="amount-val">
-                {{ row.amount < 0 ? '−' : '+' }}${{ (row.amount < 0 ? row.amount * -1 : row.amount) | number:'1.2-2' }}
-              </span>
-            </td>
-          </ng-container>
+                  <td [class.negative]="row.amount < 0" [class.positive]="row.amount > 0">
+                    <span class="amount-val">
+                      {{ row.amount < 0 ? '−' : '+' }}${{ (row.amount < 0 ? row.amount * -1 : row.amount) | number:'1.2-2' }}
+                    </span>
+                  </td>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="status-badge"
-                    [class.completed]="row.status === 'Completed'"
-                    [class.progress]="row.status === 'On Progress'"
-                    [class.pending]="row.status === 'Pending'"
-                    [attr.aria-label]="'Status: ' + row.status">
-                @if (row.status === 'Completed') { <span aria-hidden="true">✓</span> }
-                @else if (row.status === 'On Progress') { <span aria-hidden="true">⏳</span> }
-                @else { <span aria-hidden="true">●</span> }
-                {{ row.status }}
-              </span>
-            </td>
-          </ng-container>
+                  <td>
+                    <span class="status-badge"
+                          [class.completed]="row.status === 'Completed'"
+                          [class.progress]="row.status === 'On Progress'"
+                          [class.pending]="row.status === 'Pending'"
+                          [attr.aria-label]="'Status: ' + row.status">
+                      @if (row.status === 'Completed') { <span aria-hidden="true">✓</span> }
+                      @else if (row.status === 'On Progress') { <span aria-hidden="true">⏳</span> }
+                      @else { <span aria-hidden="true">●</span> }
+                      {{ row.status }}
+                    </span>
+                  </td>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+                </tr>
+              }
+
+              @if (!filteredTransactions().length) {
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <div class="empty-icon">🔍</div>
+                      <div class="empty-title">No transactions found</div>
+                      <div class="empty-sub">Try adjusting your search or date filter</div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
@@ -382,7 +389,6 @@
             }
           </div>
 
-          <!-- Limit bar — from card.balance / card.limit -->
           <div class="card-limit-row">
             <span class="card-limit-label">Available limit</span>
             <span class="card-limit-val">
@@ -439,7 +445,6 @@
           </button>
         </div>
 
-        <!-- Live Rates — from liveRates() signal -->
         <div class="live-rates">
           <div class="live-rates-header">
             <span class="rates-label">Live Rates</span>
@@ -472,7 +477,6 @@
           </button>
         </div>
 
-        <!-- Workflows — from workflows() signal -->
         <div class="workflow-list">
           @for (workflow of workflows(); track workflow.id) {
             <div class="workflow-item"
@@ -490,7 +494,6 @@
           }
         </div>
 
-        <!-- Budget — from budgetCategories() signal -->
         <div class="budget-tracker">
           <div class="budget-header">
             <span class="budget-label">📊 Budget Tracker</span>
@@ -517,7 +520,6 @@
           }
         </div>
 
-        <!-- Account Health — from accountHealth() signal -->
         @if (accountHealth(); as health) {
           <div class="health-score-row">
             <span class="health-label">🏥 Financial Health</span>
