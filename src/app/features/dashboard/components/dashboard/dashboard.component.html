@@ -47,7 +47,7 @@
     <!-- ══ LEFT SECTION ══ -->
     <div class="left-section">
 
-      <!-- Balance Card (EXISTING) -->
+      <!-- Balance Card -->
       <div class="balance-card">
         <div class="balance-card-inner">
           <div class="balance-left">
@@ -99,7 +99,7 @@
         </div>
       </div>
 
-      <!-- Smart Insights (NEW) -->
+      <!-- Smart Insights -->
       <div class="insights-card">
         <div class="card-title-row">
           <h3 class="card-title"><span class="card-title-icon">🧠</span> Smart Insights</h3>
@@ -119,7 +119,7 @@
         </div>
       </div>
 
-      <!-- Quick Transaction (EXISTING) -->
+      <!-- Quick Transaction -->
       <div class="quick-transaction-card">
         <h3 class="card-title">
           <span class="card-title-icon">⚡</span> Quick Transaction
@@ -142,8 +142,11 @@
         </div>
       </div>
 
-      <!-- Charts Row (EXISTING) -->
+      <!-- ═══ Charts Row ═══ -->
+      <!-- CHANGED: replaced ngx-charts-area-chart with echarts directive -->
       <div class="charts-row">
+
+        <!-- Income Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-info">
@@ -161,20 +164,22 @@
                 </div>
               }
             </div>
+            <!-- CHANGED: dynamic period options from service -->
             <select class="period-select" (change)="onPeriodChange($event)">
-              <option>Last 30 days</option><option>Last 60 days</option><option>Last 90 days</option>
+              @for (opt of periodOptions(); track opt) {
+                <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
+              }
             </select>
           </div>
-          <div class="chart-container" #incomeChartWrap>
-            @if (incomeChartData().length) {
-              <ngx-charts-area-chart [view]="chartView()" [results]="incomeChartData()"
-                [xAxis]="showXAxis" [yAxis]="showYAxis" [gradient]="gradient" [legend]="showLegend"
-                [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
-                [timeline]="timeline" [scheme]="incomeColorScheme" [autoScale]="autoScale" [curve]="curve">
-              </ngx-charts-area-chart>
-            }
+          <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart -->
+          <div echarts
+               [options]="incomeChartOption()"
+               [autoResize]="true"
+               class="chart-container">
           </div>
         </div>
+
+        <!-- Spending Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-info">
@@ -192,23 +197,24 @@
                 </div>
               }
             </div>
+            <!-- CHANGED: dynamic period options from service -->
             <select class="period-select" (change)="onPeriodChange($event)">
-              <option>Last 30 days</option><option>Last 60 days</option><option>Last 90 days</option>
+              @for (opt of periodOptions(); track opt) {
+                <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
+              }
             </select>
           </div>
-          <div class="chart-container" #spendingChartWrap>
-            @if (spendingChartData().length) {
-              <ngx-charts-area-chart [view]="chartView()" [results]="spendingChartData()"
-                [xAxis]="showXAxis" [yAxis]="showYAxis" [gradient]="gradient" [legend]="showLegend"
-                [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
-                [timeline]="timeline" [scheme]="spendingColorScheme" [autoScale]="autoScale" [curve]="curve">
-              </ngx-charts-area-chart>
-            }
+          <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart -->
+          <div echarts
+               [options]="spendingChartOption()"
+               [autoResize]="true"
+               class="chart-container">
           </div>
         </div>
+
       </div>
 
-      <!-- Transaction History (EXISTING — native table) -->
+      <!-- Transaction History -->
       <div class="transaction-history-card">
         <div class="history-header">
           <div class="card-title-row">
@@ -221,8 +227,11 @@
               <input type="text" placeholder="Search transactions…"
                      [value]="searchQuery()" (input)="onSearchChange($event)" />
             </div>
+            <!-- CHANGED: dynamic period options from service -->
             <select class="period-select" (change)="onPeriodChange($event)">
-              <option>Last 30 days</option><option>Last 60 days</option><option>Last 90 days</option>
+              @for (opt of periodOptions(); track opt) {
+                <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
+              }
             </select>
             <button mat-icon-button class="filter-btn" aria-label="Filter">
               <mat-icon>filter_list</mat-icon>
@@ -294,7 +303,7 @@
     <!-- ══ RIGHT SIDEBAR ══ -->
     <div class="right-sidebar">
 
-      <!-- My Cards (EXISTING) -->
+      <!-- My Cards -->
       <div class="widget-card cards-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">💳</span> My Cards</h4>
@@ -331,7 +340,7 @@
         }
       </div>
 
-      <!-- Activity Feed (NEW) -->
+      <!-- Activity Feed -->
       <div class="widget-card activity-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">📡</span> Activity Feed</h4>
@@ -353,7 +362,7 @@
         </div>
       </div>
 
-      <!-- Upcoming Bills (NEW) -->
+      <!-- Upcoming Bills -->
       <div class="widget-card bills-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">📅</span> Upcoming Bills</h4>
@@ -377,7 +386,7 @@
         <button mat-button class="upcoming-btn">View All <mat-icon>arrow_forward</mat-icon></button>
       </div>
 
-      <!-- Recurring Subscriptions (NEW) -->
+      <!-- Recurring Subscriptions -->
       <div class="widget-card subscriptions-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">🔁</span> Subscriptions</h4>
@@ -397,7 +406,7 @@
         </div>
       </div>
 
-      <!-- Rewards & Cashback (NEW) -->
+      <!-- Rewards & Cashback -->
       <div class="widget-card rewards-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">🏆</span> Rewards</h4>
@@ -427,7 +436,7 @@
         </div>
       </div>
 
-      <!-- Security & Logins (NEW) -->
+      <!-- Security & Logins -->
       <div class="widget-card security-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">🔐</span> Security</h4>
@@ -450,7 +459,7 @@
         <button mat-button class="upcoming-btn">Manage Devices <mat-icon>arrow_forward</mat-icon></button>
       </div>
 
-      <!-- Conversion Rate (EXISTING) -->
+      <!-- Conversion Rate -->
       <div class="widget-card conversion-widget">
         <h4 class="widget-title"><span class="widget-title-icon">🔄</span> Conversion Rate</h4>
         <div class="conversion-form">
@@ -458,8 +467,11 @@
             <label>From</label>
             <div class="input-group">
               <input type="number" [value]="conversionAmount1()" (input)="onAmount1Change($event)" />
+              <!-- CHANGED: dynamic currencies from service -->
               <select [value]="conversionCurrency1()" (change)="onCurrency1Change($event)">
-                <option value="USD">🇺🇸 USD</option><option value="EUR">🇪🇺 EUR</option><option value="GBP">🇬🇧 GBP</option>
+                @for (c of supportedCurrencies(); track c.code) {
+                  <option [value]="c.code" [selected]="c.code === conversionCurrency1()">{{ c.flag }} {{ c.label }}</option>
+                }
               </select>
             </div>
           </div>
@@ -472,8 +484,11 @@
             <label>To</label>
             <div class="input-group">
               <input type="number" [value]="conversionAmount2()" (input)="onAmount2Change($event)" />
+              <!-- CHANGED: dynamic currencies from service -->
               <select [value]="conversionCurrency2()" (change)="onCurrency2Change($event)">
-                <option value="EUR">🇪🇺 EUR</option><option value="USD">🇺🇸 USD</option><option value="GBP">🇬🇧 GBP</option>
+                @for (c of supportedCurrencies(); track c.code) {
+                  <option [value]="c.code" [selected]="c.code === conversionCurrency2()">{{ c.flag }} {{ c.label }}</option>
+                }
               </select>
             </div>
           </div>
@@ -500,7 +515,7 @@
         </div>
       </div>
 
-      <!-- Workflows + Budget (EXISTING) -->
+      <!-- Workflows + Budget -->
       <div class="widget-card workflows-widget">
         <div class="widget-header">
           <h4 class="widget-title"><span class="widget-title-icon">⚙️</span> Workflows</h4>
@@ -554,18 +569,21 @@
     </div><!-- /right-sidebar -->
   </div><!-- /dashboard-grid -->
 
-  <!-- ═══ ANALYTICS GRID — full-width bottom section ═══ -->
+  <!-- ═══ ANALYTICS GRID ═══ -->
   <div class="analytics-grid">
 
-    <!-- Monthly Report (NEW) -->
+    <!-- Monthly Report -->
     <div class="analytics-card monthly-report-card">
       <div class="analytics-header">
         <div>
           <h3 class="analytics-title"><span>📊</span> Monthly Report</h3>
           <p class="analytics-subtitle">Income vs Expenses — last 6 months</p>
         </div>
+        <!-- CHANGED: dynamic period options from service -->
         <select class="period-select" (change)="onPeriodChange($event)">
-          <option>Last 6 months</option><option>Last 12 months</option><option>This Year</option>
+          @for (opt of periodOptions(); track opt) {
+            <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
+          }
         </select>
       </div>
       <div class="monthly-bars">
@@ -589,7 +607,7 @@
       </div>
     </div>
 
-    <!-- Spending Breakdown Donut (NEW) -->
+    <!-- Spending Breakdown Donut -->
     <div class="analytics-card spending-breakdown-card">
       <div class="analytics-header">
         <div>
@@ -625,7 +643,7 @@
       </div>
     </div>
 
-    <!-- Savings Goals (NEW) -->
+    <!-- Savings Goals -->
     <div class="analytics-card savings-goals-card">
       <div class="analytics-header">
         <div>
@@ -663,28 +681,27 @@
       </div>
     </div>
 
-    <!-- Cash Flow Forecast (NEW) -->
+    <!-- ═══ Cash Flow Forecast ═══ -->
+    <!-- CHANGED: replaced ngx-charts-area-chart with echarts directive -->
+    <!-- CHANGED: cashflowData() → cashflowRawData() to match renamed signal -->
     <div class="analytics-card cashflow-card">
       <div class="analytics-header">
         <div>
           <h3 class="analytics-title"><span>📈</span> Cash Flow Forecast</h3>
           <p class="analytics-subtitle">Projected balance — next 30 days</p>
         </div>
+        <!-- CHANGED: dynamic period options from service -->
         <select class="period-select" (change)="onPeriodChange($event)">
-          <option>Next 30 days</option><option>Next 60 days</option><option>Next 90 days</option>
+          @for (opt of periodOptions(); track opt) {
+            <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
+          }
         </select>
       </div>
-      <div class="cashflow-chart-wrap" #cashflowChartWrap>
-        @if (cashflowData().length) {
-          <ngx-charts-area-chart
-            [view]="cashflowChartView()"
-            [results]="cashflowData()"
-            [xAxis]="showXAxis" [yAxis]="showYAxis"
-            [gradient]="true" [legend]="false"
-            [showXAxisLabel]="false" [showYAxisLabel]="false"
-            [scheme]="cashflowColorScheme" [autoScale]="true" [curve]="curve">
-          </ngx-charts-area-chart>
-        }
+      <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart block -->
+      <div echarts
+           [options]="cashflowChartOption()"
+           [autoResize]="true"
+           class="cashflow-chart-wrap">
       </div>
       <div class="cashflow-summary">
         @for (point of cashflowSummary(); track point.label) {
@@ -698,7 +715,7 @@
       </div>
     </div>
 
-    <!-- Net Worth (NEW) -->
+    <!-- Net Worth -->
     <div class="analytics-card networth-card">
       <div class="analytics-header">
         <div>
@@ -731,7 +748,7 @@
       </div>
     </div>
 
-    <!-- Tax Summary (NEW) -->
+    <!-- Tax Summary -->
     <div class="analytics-card tax-card">
       <div class="analytics-header">
         <div>

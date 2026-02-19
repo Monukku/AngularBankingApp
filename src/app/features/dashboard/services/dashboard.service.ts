@@ -13,6 +13,7 @@ import {
   DashboardData,
   LiveRate,
   AccountHealthScore,
+  BudgetCategory,
   SmartInsight,
   ActivityEvent,
   UpcomingBill,
@@ -126,7 +127,9 @@ export class DashboardService {
         return () => clearInterval(id);
       });
     }
-    return this.http.get<LiveRate[]>(`${this.apiBase}/rates/live`);
+    return interval(5000).pipe(
+      switchMap(() => this.http.get<LiveRate[]>(`${this.apiBase}/rates/live`))
+    );
   }
 
   private generateMockRates(): LiveRate[] {
@@ -163,28 +166,36 @@ export class DashboardService {
 
   sendMoney(userId: string, amount: number): Observable<{ success: boolean; message: string }> {
     if (this.useMock) {
-      return new Observable(o => { setTimeout(() => { o.next({ success: true, message: 'Transfer successful' }); o.complete(); }, 1000); });
+      return new Observable(o => {
+        setTimeout(() => { o.next({ success: true, message: 'Transfer successful' }); o.complete(); }, 1000);
+      });
     }
     return this.http.post<{ success: boolean; message: string }>(`${this.apiBase}/transactions/send`, { userId, amount });
   }
 
   requestMoney(amount: number): Observable<{ success: boolean; message: string }> {
     if (this.useMock) {
-      return new Observable(o => { setTimeout(() => { o.next({ success: true, message: 'Request sent' }); o.complete(); }, 1000); });
+      return new Observable(o => {
+        setTimeout(() => { o.next({ success: true, message: 'Request sent' }); o.complete(); }, 1000);
+      });
     }
     return this.http.post<{ success: boolean; message: string }>(`${this.apiBase}/transactions/request`, { amount });
   }
 
   topUp(amount: number): Observable<{ success: boolean; message: string }> {
     if (this.useMock) {
-      return new Observable(o => { setTimeout(() => { o.next({ success: true, message: 'Top-up successful' }); o.complete(); }, 1000); });
+      return new Observable(o => {
+        setTimeout(() => { o.next({ success: true, message: 'Top-up successful' }); o.complete(); }, 1000);
+      });
     }
     return this.http.post<{ success: boolean; message: string }>(`${this.apiBase}/transactions/topup`, { amount });
   }
 
-  convertCurrency(from: string, to: string, amount: number): Observable<{
-    success: boolean; rate: number; convertedAmount: number; from: string; to: string;
-  }> {
+  convertCurrency(
+    from: string,
+    to: string,
+    amount: number
+  ): Observable<{ success: boolean; rate: number; convertedAmount: number; from: string; to: string }> {
     if (this.useMock) {
       const rates: Record<string, Record<string, number>> = {
         USD: { EUR: 0.93, GBP: 0.79, USD: 1 },
@@ -202,185 +213,334 @@ export class DashboardService {
     return this.http.post<any>(`${this.apiBase}/currency/convert`, { from, to, amount });
   }
 
-  // ─── New widget mock methods ──────────────────────────────────
+  // ─── NEW widget methods — all follow useMock pattern ─────────
 
+  /**
+   * GET /insights/smart
+   * Mock: inline data  |  Real: GET request
+   */
   getSmartInsights(): Observable<SmartInsight[]> {
-    return of<SmartInsight[]>([
-      { id: 1, icon: '⚠️', type: 'warning', tag: 'Spending', title: 'Dining spend up 40% this month', description: 'You\'ve spent $340 on restaurants vs $242 last month.' },
-      { id: 2, icon: '✅', type: 'success', tag: 'Goal',     title: 'On track for Emergency Fund',   description: 'At this rate you\'ll hit your $10,000 goal by August.' },
-      { id: 3, icon: '💡', type: 'info',    tag: 'Tip',      title: 'Unused subscriptions detected', description: '3 subscriptions haven\'t been used in 30+ days — $42/mo.' },
-      { id: 4, icon: '🔔', type: 'alert',   tag: 'Bill',     title: 'Electricity bill due in 2 days', description: 'Estimated $128 due on 21 Feb. Sufficient balance available.' },
-    ]).pipe(delay(200));
-  }
-
-  getActivityFeed(): Observable<ActivityEvent[]> {
-    return of<ActivityEvent[]>([
-      { id: 1, type: 'credit', title: 'Salary received from Acme Corp',    time: '2 min ago',  amount: 4200,  isCredit: true  },
-      { id: 2, type: 'debit',  title: 'Netflix subscription charged',       time: '1 hr ago',   amount: 15.99, isCredit: false },
-      { id: 3, type: 'credit', title: 'Refund from Amazon',                 time: '3 hrs ago',  amount: 49.99, isCredit: true  },
-      { id: 4, type: 'debit',  title: 'Grocery store — Whole Foods',        time: '5 hrs ago',  amount: 87.40, isCredit: false },
-      { id: 5, type: 'login',  title: 'New login from Chrome / Windows',    time: 'Yesterday',  amount: 0,     isCredit: false },
-      { id: 6, type: 'debit',  title: 'Electricity bill payment',           time: 'Yesterday',  amount: 128,   isCredit: false },
-    ]).pipe(delay(150));
-  }
-
-  getUpcomingBills(): Observable<UpcomingBill[]> {
-    const now = new Date();
-    const d = (offset: number) => new Date(now.getTime() + offset * 86400000).toISOString();
-    return of<UpcomingBill[]>([
-      { id: 1, icon: '⚡', name: 'Electricity',   dueDate: d(-1),  amount: 128,  urgency: 'overdue'  },
-      { id: 2, icon: '📱', name: 'Phone Plan',    dueDate: d(0),   amount: 45,   urgency: 'today'    },
-      { id: 3, icon: '🌐', name: 'Internet',      dueDate: d(3),   amount: 60,   urgency: 'upcoming' },
-      { id: 4, icon: '🏠', name: 'Rent',          dueDate: d(7),   amount: 1800, urgency: 'upcoming' },
-      { id: 5, icon: '🚗', name: 'Car Insurance', dueDate: d(12),  amount: 220,  urgency: 'upcoming' },
-    ]).pipe(delay(200));
-  }
-
-  getRecurringSubscriptions(): Observable<RecurringSubscription[]> {
-    const now = new Date();
-    const d = (offset: number) => new Date(now.getTime() + offset * 86400000).toISOString();
-    return of<RecurringSubscription[]>([
-      { id: 1, icon: '🎬', name: 'Netflix',        nextDate: d(3),  amount: 15.99 },
-      { id: 2, icon: '🎵', name: 'Spotify',        nextDate: d(7),  amount: 9.99  },
-      { id: 3, icon: '☁️', name: 'iCloud Storage', nextDate: d(10), amount: 2.99  },
-      { id: 4, icon: '🏋️', name: 'Gym Membership', nextDate: d(14), amount: 49.00 },
-      { id: 5, icon: '🤖', name: 'ChatGPT Plus',   nextDate: d(18), amount: 20.00 },
-    ]).pipe(delay(150));
-  }
-
-  getSavingsGoals(): Observable<SavingsGoal[]> {
-    return of<SavingsGoal[]>([
-      { id: 1, icon: '🏖️', name: 'Vacation Fund',    saved: 2400,  target: 5000,  deadline: '2025-08-01', color: 'cyan'    },
-      { id: 2, icon: '🚨', name: 'Emergency Fund',   saved: 7200,  target: 10000, deadline: '2025-12-01', color: 'violet'  },
-      { id: 3, icon: '💻', name: 'New MacBook',      saved: 800,   target: 2500,  deadline: '2025-06-01', color: 'emerald' },
-      { id: 4, icon: '🏠', name: 'House Down Payment', saved: 18000, target: 60000, deadline: '2027-01-01', color: 'amber'   },
-    ]).pipe(delay(200));
-  }
-
-  getMonthlyReport(): Observable<MonthlyReportItem[]> {
-    // Build last 6 months with realistic mock data
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const now = new Date();
-    const items: MonthlyReportItem[] = [];
-    const incomes  = [5200, 4800, 5500, 5100, 5800, 5400];
-    const expenses = [3800, 4100, 3600, 4400, 3900, 4200];
-    const maxVal   = Math.max(...incomes, ...expenses);
-
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const idx = 5 - i;
-      items.push({
-        label:          months[d.getMonth()],
-        income:         incomes[idx],
-        expense:        expenses[idx],
-        incomePercent:  Math.round((incomes[idx] / maxVal) * 100),
-        expensePercent: Math.round((expenses[idx] / maxVal) * 100),
-      });
+    if (this.useMock) {
+      return of<SmartInsight[]>([
+        { id: 1, icon: '⚠️', type: 'warning', tag: 'Spending', title: 'Dining spend up 40% this month',   description: 'You\'ve spent $340 on restaurants vs $242 last month.' },
+        { id: 2, icon: '✅', type: 'success', tag: 'Goal',     title: 'On track for Emergency Fund',      description: 'At this rate you\'ll hit your $10,000 goal by August.' },
+        { id: 3, icon: '💡', type: 'info',    tag: 'Tip',      title: 'Unused subscriptions detected',    description: '3 subscriptions haven\'t been used in 30+ days — $42/mo.' },
+        { id: 4, icon: '🔔', type: 'alert',   tag: 'Bill',     title: 'Electricity bill due in 2 days',   description: 'Estimated $128 due on 21 Feb. Sufficient balance available.' },
+      ]).pipe(delay(200));
     }
-    return of(items).pipe(delay(300));
+    return this.http.get<SmartInsight[]>(`${this.apiBase}/insights/smart`);
   }
 
-  getSpendingBreakdown(): Observable<SpendingBreakdownSegment[]> {
-    const categories = [
-      { label: 'Housing',    value: 1840, color: '#7c3aed' },
-      { label: 'Food',       value: 380,  color: '#06b6d4' },
-      { label: 'Transport',  value: 190,  color: '#10b981' },
-      { label: 'Shopping',   value: 540,  color: '#f43f5e' },
-      { label: 'Health',     value: 120,  color: '#f59e0b' },
-      { label: 'Other',      value: 230,  color: '#8b8fa8' },
-    ];
-    const total = categories.reduce((s, c) => s + c.value, 0);
-    const circumference = 2 * Math.PI * 45; // r=45 → ≈ 282.74
+  /**
+   * GET /activity/feed
+   * Mock: inline data  |  Real: GET request
+   */
+  getActivityFeed(): Observable<ActivityEvent[]> {
+    if (this.useMock) {
+      return of<ActivityEvent[]>([
+        { id: 1, type: 'credit', title: 'Salary received from Acme Corp',  time: '2 min ago', amount: 4200,  isCredit: true  },
+        { id: 2, type: 'debit',  title: 'Netflix subscription charged',     time: '1 hr ago',  amount: 15.99, isCredit: false },
+        { id: 3, type: 'credit', title: 'Refund from Amazon',               time: '3 hrs ago', amount: 49.99, isCredit: true  },
+        { id: 4, type: 'debit',  title: 'Grocery store — Whole Foods',      time: '5 hrs ago', amount: 87.40, isCredit: false },
+        { id: 5, type: 'login',  title: 'New login from Chrome / Windows',  time: 'Yesterday', amount: 0,     isCredit: false },
+        { id: 6, type: 'debit',  title: 'Electricity bill payment',         time: 'Yesterday', amount: 128,   isCredit: false },
+      ]).pipe(delay(150));
+    }
+    return this.http.get<ActivityEvent[]>(`${this.apiBase}/activity/feed`);
+  }
 
-    let offset = 0;
-    const segments: SpendingBreakdownSegment[] = categories.map(cat => {
-      const pct     = cat.value / total;
-      const dash    = pct * circumference;
-      const gap     = circumference - dash;
+  /**
+   * GET /bills/upcoming
+   * Mock: inline data  |  Real: GET request
+   */
+  getUpcomingBills(): Observable<UpcomingBill[]> {
+    if (this.useMock) {
+      const now = new Date();
+      const d   = (offset: number) => new Date(now.getTime() + offset * 86_400_000).toISOString();
+      return of<UpcomingBill[]>([
+        { id: 1, icon: '⚡', name: 'Electricity',   dueDate: d(-1), amount: 128,  urgency: 'overdue'  },
+        { id: 2, icon: '📱', name: 'Phone Plan',    dueDate: d(0),  amount: 45,   urgency: 'today'    },
+        { id: 3, icon: '🌐', name: 'Internet',      dueDate: d(3),  amount: 60,   urgency: 'upcoming' },
+        { id: 4, icon: '🏠', name: 'Rent',          dueDate: d(7),  amount: 1800, urgency: 'upcoming' },
+        { id: 5, icon: '🚗', name: 'Car Insurance', dueDate: d(12), amount: 220,  urgency: 'upcoming' },
+      ]).pipe(delay(200));
+    }
+    return this.http.get<UpcomingBill[]>(`${this.apiBase}/bills/upcoming`);
+  }
+
+  /**
+   * GET /subscriptions/recurring
+   * Mock: inline data  |  Real: GET request
+   */
+  getRecurringSubscriptions(): Observable<RecurringSubscription[]> {
+    if (this.useMock) {
+      const now = new Date();
+      const d   = (offset: number) => new Date(now.getTime() + offset * 86_400_000).toISOString();
+      return of<RecurringSubscription[]>([
+        { id: 1, icon: '🎬', name: 'Netflix',        nextDate: d(3),  amount: 15.99 },
+        { id: 2, icon: '🎵', name: 'Spotify',        nextDate: d(7),  amount: 9.99  },
+        { id: 3, icon: '☁️', name: 'iCloud Storage', nextDate: d(10), amount: 2.99  },
+        { id: 4, icon: '🏋️', name: 'Gym Membership', nextDate: d(14), amount: 49.00 },
+        { id: 5, icon: '🤖', name: 'ChatGPT Plus',   nextDate: d(18), amount: 20.00 },
+      ]).pipe(delay(150));
+    }
+    return this.http.get<RecurringSubscription[]>(`${this.apiBase}/subscriptions/recurring`);
+  }
+
+  /**
+   * GET /savings/goals
+   * Mock: inline data  |  Real: GET request
+   */
+  getSavingsGoals(): Observable<SavingsGoal[]> {
+    if (this.useMock) {
+      return of<SavingsGoal[]>([
+        { id: 1, icon: '🏖️', name: 'Vacation Fund',      saved: 2400,  target: 5000,  deadline: '2025-08-01', color: 'cyan'    },
+        { id: 2, icon: '🚨', name: 'Emergency Fund',      saved: 7200,  target: 10000, deadline: '2025-12-01', color: 'violet'  },
+        { id: 3, icon: '💻', name: 'New MacBook',         saved: 800,   target: 2500,  deadline: '2025-06-01', color: 'emerald' },
+        { id: 4, icon: '🏠', name: 'House Down Payment',  saved: 18000, target: 60000, deadline: '2027-01-01', color: 'amber'   },
+      ]).pipe(delay(200));
+    }
+    return this.http.get<SavingsGoal[]>(`${this.apiBase}/savings/goals`);
+  }
+
+  /**
+   * GET /reports/monthly
+   * Mock: computed inline  |  Real: GET request
+   */
+  getMonthlyReport(): Observable<MonthlyReportItem[]> {
+    if (this.useMock) {
+      const months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const now      = new Date();
+      const incomes  = [5200, 4800, 5500, 5100, 5800, 5400];
+      const expenses = [3800, 4100, 3600, 4400, 3900, 4200];
+      const maxVal   = Math.max(...incomes, ...expenses);
+      const items: MonthlyReportItem[] = [];
+
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const idx  = 5 - i;
+        items.push({
+          label:          months[date.getMonth()],
+          income:         incomes[idx],
+          expense:        expenses[idx],
+          incomePercent:  Math.round((incomes[idx]  / maxVal) * 100),
+          expensePercent: Math.round((expenses[idx] / maxVal) * 100),
+        });
+      }
+      return of(items).pipe(delay(300));
+    }
+    return this.http.get<MonthlyReportItem[]>(`${this.apiBase}/reports/monthly`);
+  }
+
+  /**
+   * GET /spending/breakdown
+   * Mock: computed inline  |  Real: GET request
+   * NOTE: When real API is used it should return pre-computed dashArray/dashOffset,
+   *       OR you can keep the SVG computation here client-side by mapping the raw
+   *       { label, value } array through buildBreakdownSegments().
+   */
+  getSpendingBreakdown(): Observable<SpendingBreakdownSegment[]> {
+    if (this.useMock) {
+      const categories = [
+        { label: 'Housing',   value: 1840, color: '#7c3aed' },
+        { label: 'Food',      value: 380,  color: '#06b6d4' },
+        { label: 'Transport', value: 190,  color: '#10b981' },
+        { label: 'Shopping',  value: 540,  color: '#f43f5e' },
+        { label: 'Health',    value: 120,  color: '#f59e0b' },
+        { label: 'Other',     value: 230,  color: '#8b8fa8' },
+      ];
+      return of(this.buildBreakdownSegments(categories)).pipe(delay(200));
+    }
+    // Real API returns raw { label, value, color }[] — map to segments client-side
+    return this.http
+      .get<{ label: string; value: number; color: string }[]>(`${this.apiBase}/spending/breakdown`)
+      .pipe(map(raw => this.buildBreakdownSegments(raw)));
+  }
+
+  /** Shared SVG donut calculation — used by both mock and real paths */
+  private buildBreakdownSegments(
+    categories: { label: string; value: number; color: string }[]
+  ): SpendingBreakdownSegment[] {
+    const total         = categories.reduce((s, c) => s + c.value, 0);
+    const circumference = 2 * Math.PI * 45; // r = 45 → ≈ 282.74
+    let offset          = 0;
+
+    return categories.map(cat => {
+      const pct  = cat.value / total;
+      const dash = pct * circumference;
+      const gap  = circumference - dash;
       const seg: SpendingBreakdownSegment = {
-        label:       cat.label,
-        value:       cat.value,
-        percent:     Math.round(pct * 100),
-        color:       cat.color,
-        dashArray:   `${dash.toFixed(2)} ${gap.toFixed(2)}`,
-        dashOffset:  `${-offset.toFixed(2)}`,
+        label:      cat.label,
+        value:      cat.value,
+        percent:    Math.round(pct * 100),
+        color:      cat.color,
+        dashArray:  `${dash.toFixed(2)} ${gap.toFixed(2)}`,
+        dashOffset: `${-offset.toFixed(2)}`,
       };
       offset += dash;
       return seg;
     });
-
-    return of(segments).pipe(delay(200));
   }
 
+  /**
+   * GET /cashflow/forecast
+   * Mock: computed inline  |  Real: GET request
+   * NOTE: Real API should return { chartData: NgxChartsSeriesItem[], summary: CashflowPoint[] }
+   */
   getCashflowData(): Observable<{ chartData: any[]; summary: CashflowPoint[] }> {
-    const now   = new Date();
-    const days  = Array.from({ length: 30 }, (_, i) => {
-      const d = new Date(now);
-      d.setDate(d.getDate() + i + 1);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
+    if (this.useMock) {
+      const now  = new Date();
+      let balance = 12400;
 
-    // Simulate a realistic balance curve
-    let balance = 12400;
-    const series = days.map((name, i) => {
-      balance += (Math.random() * 400 - 150);
-      if (i === 6)  balance -= 1800; // rent
-      if (i === 14) balance += 4200; // salary
-      if (i === 21) balance -= 220;  // insurance
-      return { name, value: Math.round(balance) };
-    });
+      const series = Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(now);
+        d.setDate(d.getDate() + i + 1);
+        const name = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        balance += (Math.random() * 400 - 150);
+        if (i === 6)  balance -= 1800; // rent
+        if (i === 14) balance += 4200; // salary
+        if (i === 21) balance -= 220;  // insurance
+        return { name, value: Math.round(balance) };
+      });
 
-    return of({
-      chartData: [{ name: 'Projected Balance', series }],
-      summary: [
-        { label: 'Current',     value: 12400,                    isPositive: true  },
-        { label: 'In 30 days',  value: Math.round(balance),      isPositive: balance > 12400 },
-        { label: 'Lowest',      value: Math.min(...series.map(s => s.value)), isPositive: true },
-      ],
-    }).pipe(delay(250));
+      return of({
+        chartData: [{ name: 'Projected Balance', series }],
+        summary: [
+          { label: 'Current',    value: 12400,                    isPositive: true  },
+          { label: 'In 30 days', value: Math.round(balance),      isPositive: balance > 12400 },
+          { label: 'Lowest',     value: Math.min(...series.map(s => s.value)), isPositive: true },
+        ],
+      }).pipe(delay(250));
+    }
+    return this.http.get<{ chartData: any[]; summary: CashflowPoint[] }>(
+      `${this.apiBase}/cashflow/forecast`
+    );
   }
 
+  /**
+   * GET /net-worth
+   * Mock: inline  |  Real: GET request
+   */
   getNetWorth(): Observable<{ netWorth: number; change: number; assets: number; liabilities: number }> {
-    return of({
-      netWorth:    84200,
-      change:      1840,
-      assets:      112500,
-      liabilities: 28300,
-    }).pipe(delay(200));
+    if (this.useMock) {
+      return of({ netWorth: 84200, change: 1840, assets: 112500, liabilities: 28300 })
+        .pipe(delay(200));
+    }
+    return this.http.get<{ netWorth: number; change: number; assets: number; liabilities: number }>(
+      `${this.apiBase}/net-worth`
+    );
   }
 
+  /**
+   * GET /security/logins
+   * Mock: inline  |  Real: GET request
+   */
   getRecentLogins(): Observable<RecentLogin[]> {
-    return of<RecentLogin[]>([
-      { id: 1, deviceIcon: '💻', device: 'Chrome on Windows',  location: 'Bengaluru, IN', time: 'Now',        isCurrent: true  },
-      { id: 2, deviceIcon: '📱', device: 'Safari on iPhone',   location: 'Bengaluru, IN', time: '2 days ago', isCurrent: false },
-      { id: 3, deviceIcon: '💻', device: 'Firefox on macOS',   location: 'Mumbai, IN',    time: '5 days ago', isCurrent: false },
-    ]).pipe(delay(150));
+    if (this.useMock) {
+      return of<RecentLogin[]>([
+        { id: 1, deviceIcon: '💻', device: 'Chrome on Windows', location: 'Bengaluru, IN', time: 'Now',        isCurrent: true  },
+        { id: 2, deviceIcon: '📱', device: 'Safari on iPhone',  location: 'Bengaluru, IN', time: '2 days ago', isCurrent: false },
+        { id: 3, deviceIcon: '💻', device: 'Firefox on macOS',  location: 'Mumbai, IN',    time: '5 days ago', isCurrent: false },
+      ]).pipe(delay(150));
+    }
+    return this.http.get<RecentLogin[]>(`${this.apiBase}/security/logins`);
   }
 
+  /**
+   * GET /tax/summary
+   * Mock: inline  |  Real: GET request
+   */
   getTaxSummary(): Observable<{ items: TaxSummaryItem[]; estimatedTax: number }> {
-    return of({
-      items: [
-        { icon: '💰', label: 'Gross Income',    value: 62400, color: 'violet'  as const },
-        { icon: '🧾', label: 'Deductible Exp.', value: 8200,  color: 'cyan'    as const },
-        { icon: '📊', label: 'Taxable Income',  value: 54200, color: 'emerald' as const },
-        { icon: '✅', label: 'Tax Paid YTD',    value: 9800,  color: 'amber'   as const },
-      ],
-      estimatedTax: 13550,
-    }).pipe(delay(200));
+    if (this.useMock) {
+      return of({
+        items: [
+          { icon: '💰', label: 'Gross Income',    value: 62400, color: 'violet'  as const },
+          { icon: '🧾', label: 'Deductible Exp.', value: 8200,  color: 'cyan'    as const },
+          { icon: '📊', label: 'Taxable Income',  value: 54200, color: 'emerald' as const },
+          { icon: '✅', label: 'Tax Paid YTD',    value: 9800,  color: 'amber'   as const },
+        ],
+        estimatedTax: 13550,
+      }).pipe(delay(200));
+    }
+    return this.http.get<{ items: TaxSummaryItem[]; estimatedTax: number }>(
+      `${this.apiBase}/tax/summary`
+    );
   }
 
+  /**
+   * GET /rewards
+   * Mock: inline  |  Real: GET request
+   */
   getRewardsData(): Observable<{
     points: number; tier: string; tierPercent: number; tierCurrent: number; tierNext: number;
     cashbackMonth: number; cashbackTotal: number;
   }> {
-    return of({
-      points:        12840,
-      tier:          'Gold',
-      tierPercent:   68,
-      tierCurrent:   12840,
-      tierNext:      15000,
-      cashbackMonth: 24.60,
-      cashbackTotal: 312.45,
-    }).pipe(delay(150));
+    if (this.useMock) {
+      return of({
+        points:        12840,
+        tier:          'Gold',
+        tierPercent:   68,
+        tierCurrent:   12840,
+        tierNext:      15000,
+        cashbackMonth: 24.60,
+        cashbackTotal: 312.45,
+      }).pipe(delay(150));
+    }
+    return this.http.get<{
+      points: number; tier: string; tierPercent: number; tierCurrent: number; tierNext: number;
+      cashbackMonth: number; cashbackTotal: number;
+    }>(`${this.apiBase}/rewards`);
   }
+
+  // ─── FIX 1: Budget categories from service ────────────────────
+  /**
+   * GET /budget/categories
+   * Mock: inline data  |  Real: GET request
+   */
+  getBudgetCategories(): Observable<BudgetCategory[]> {
+    if (this.useMock) {
+      return of<BudgetCategory[]>([
+        { label: 'Housing',   icon: '🏠', spent: 1840, limit: 2000, colorClass: 'violet'  },
+        { label: 'Food',      icon: '🍔', spent: 380,  limit: 600,  colorClass: 'cyan'    },
+        { label: 'Transport', icon: '🚗', spent: 190,  limit: 400,  colorClass: 'emerald' },
+        { label: 'Shopping',  icon: '🛍️', spent: 540,  limit: 500,  colorClass: 'rose'    },
+      ]).pipe(delay(200));
+    }
+    return this.http.get<BudgetCategory[]>(`${this.apiBase}/budget/categories`);
+  }
+
+  // ─── FIX 2: Period options from service ───────────────────────
+  /**
+   * GET /config/period-options
+   * Mock: inline  |  Real: GET request
+   * Drives all <select> period dropdowns — no hardcoded <option> tags in templates.
+   */
+  getPeriodOptions(): Observable<string[]> {
+    if (this.useMock) {
+      return of(['Last 30 days', 'Last 60 days', 'Last 90 days']).pipe(delay(50));
+    }
+    return this.http.get<string[]>(`${this.apiBase}/config/period-options`);
+  }
+
+  // ─── FIX 2: Supported currencies from service ─────────────────
+  /**
+   * GET /config/currencies
+   * Mock: inline  |  Real: GET request
+   * Drives currency <select> dropdowns — replaces hardcoded USD/EUR/GBP options.
+   */
+  getSupportedCurrencies(): Observable<{ code: string; flag: string; label: string }[]> {
+    if (this.useMock) {
+      return of([
+        { code: 'USD', flag: '🇺🇸', label: 'USD' },
+        { code: 'EUR', flag: '🇪🇺', label: 'EUR' },
+        { code: 'GBP', flag: '🇬🇧', label: 'GBP' },
+        { code: 'JPY', flag: '🇯🇵', label: 'JPY' },
+        { code: 'INR', flag: '🇮🇳', label: 'INR' },
+      ]).pipe(delay(50));
+    }
+    return this.http.get<{ code: string; flag: string; label: string }[]>(
+      `${this.apiBase}/config/currencies`
+    );
+  }
+
 }

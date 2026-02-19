@@ -3,6 +3,7 @@ import {
   ErrorHandler,
   provideZoneChangeDetection,
   isDevMode,
+  importProvidersFrom,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
@@ -39,6 +40,7 @@ import { CustomRouterSerializer } from './store/router/custom-router-serializer'
 
 // Environment
 import { environment } from '../environments/environment';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -54,6 +56,9 @@ export const appConfig: ApplicationConfig = {
     // 4. Animations - Enables Angular animations
     provideAnimations(),
 
+     importProvidersFrom(
+      NgxEchartsModule.forRoot({ echarts: () => import('echarts') })
+    ),
     // 5. HTTP Client with Interceptors
     // Interceptor order matters: auth → logging → error
     // - Auth interceptor adds authentication tokens to requests
