@@ -1,181 +1,337 @@
-// Variables
-$primary-color: #6366f1;
-$primary-dark: #4f46e5;
+// ═══════════════════════════════════════════
+// SCSS Variables (design tokens — not theme-aware)
+// ═══════════════════════════════════════════
+$primary-color:   #6366f1;
+$primary-dark:    #4f46e5;
 $secondary-color: #8b5cf6;
-$bg-white: #ffffff;
-$text-primary: #111827;
-$text-secondary: #6b7280;
-$text-tertiary: #9ca3af;
-$border-color: #e5e7eb;
-$danger-color: #ef4444;
-$warning-color: #f59e0b;
-$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$danger-color:    #ef4444;
+$shadow-sm:       0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md:       0 4px 6px rgba(0, 0, 0, 0.1);
 
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: $bg-white;
-  border-bottom: 1px solid $border-color;
-  box-shadow: $shadow-sm;
-  height: 72px;
-  width: 100%; // Ensure full width
-  display: flex;
-  align-items: center;
+// ═══════════════════════════════════════════
+// Breakpoints
+// ═══════════════════════════════════════════
+$bp-xl:  1200px;
+$bp-lg:  1024px;
+$bp-md:   768px;
+$bp-sm:   480px;
 
-  .header-content {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; // Ensure items start from left
-    width: 100%;
-    padding: 0 24px;
-    gap: 16px; // Reduced gap to prevent excessive spacing
-  }
+// ═══════════════════════════════════════════
+// CSS Custom Properties — Light (default)
+// These live on :root so every component can use them.
+// The .dark class on <html> overrides them globally.
+// ═══════════════════════════════════════════
+:root {
+  --header-bg:          #ffffff;
+  --header-border:      #e5e7eb;
+  --search-bg:          #f3f4f6;
+  --search-bg-focus:    #ffffff;
+  --text-primary:       #111827;
+  --text-secondary:     #6b7280;
+  --text-tertiary:      #9ca3af;
+  --border-color:       #e5e7eb;
+  --menu-item-bg-hover: rgba(99, 102, 241, 0.08);
+  --menu-item-color:    #111827;
 }
 
-// Header Left Section
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 0 0 auto; // Don't grow or shrink
-  min-width: max-content;
-
-  .menu-toggle {
-    display: none;
-    color: $text-primary;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: rgba($primary-color, 0.08);
-      color: $primary-color;
-    }
-
-    @media (max-width: 768px) {
-      display: inline-flex;
-    }
-  }
-
-  .logo,
-  .logo-auth {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: $text-primary;
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-
-    .logo-icon {
-      color: $primary-color;
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-    }
-
-    .logo-text {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      white-space: nowrap;
-
-      @media (max-width: 480px) {
-        display: none;
-      }
-    }
-  }
+// Dark overrides — triggered by toggleTheme() adding .dark to <html>
+:root.dark {
+  --header-bg:          #1f2937;
+  --header-border:      #374151;
+  --search-bg:          #374151;
+  --search-bg-focus:    #1f2937;
+  --text-primary:       #f9fafb;
+  --text-secondary:     #d1d5db;
+  --text-tertiary:      #9ca3af;
+  --border-color:       #374151;
+  --menu-item-bg-hover: rgba(99, 102, 241, 0.15);
+  --menu-item-color:    #f9fafb;
 }
 
-// Header Center Section
-.header-center-search {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  width: 300px;
-
-  @media (max-width: 1024px) {
-    width: 250px;
-  }
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #f3f4f6;
-    border: 1px solid $border-color;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    width: 100%;
-
-    &:focus-within {
-      background: $bg-white;
-      border-color: $primary-color;
-      box-shadow: $shadow-sm;
-    }
-
-    .search-icon {
-      color: $text-tertiary;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    .search-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      color: $text-primary;
-
-      &::placeholder {
-        color: $text-tertiary;
-      }
-    }
-  }
-}
-
-// Spacer - takes up all remaining space
-.spacer {
-  flex: 1 1 auto; // Grow to fill available space
-  min-width: 0; // Allow it to shrink if needed
-}
-
-// Header Right Section
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px; // Increased gap for better spacing between right-side elements
-  flex: 0 0 auto; // Don't grow or shrink
-  min-width: max-content;
-}
-
-// Buttons
-.notification-btn,
-.theme-toggle-btn,
-.menu-toggle {
-  color: $text-secondary;
-  transition: all 0.3s ease;
-
+// ═══════════════════════════════════════════
+// Mixins
+// ═══════════════════════════════════════════
+@mixin icon-btn-hover {
   &:hover {
     background: rgba($primary-color, 0.08);
     color: $primary-color;
   }
-
   &:active {
     transform: scale(0.95);
   }
 }
 
+@mixin avatar($size: 36px, $font-size: 14px) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: $font-size;
+  color: #ffffff;
+  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  box-shadow: $shadow-sm;
+}
+
+// ═══════════════════════════════════════════
+// Header Shell
+// ═══════════════════════════════════════════
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  box-shadow: $shadow-sm;
+  height: 72px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  transition: background 0.3s ease, border-color 0.3s ease;
+
+  @media (max-width: $bp-md) { height: 64px; }
+  @media (max-width: $bp-sm) { height: 56px; }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 24px;
+  gap: 16px;
+
+  @media (max-width: $bp-lg) { padding: 0 16px; gap: 12px; }
+  @media (max-width: $bp-md) { padding: 0 12px; gap: 8px; }
+  @media (max-width: $bp-sm) { padding: 0 8px; }
+}
+
+// ═══════════════════════════════════════════
+// Left Section
+// ═══════════════════════════════════════════
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.menu-toggle {
+  display: none;
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+  @include icon-btn-hover;
+
+  @media (max-width: $bp-md) { display: inline-flex; }
+}
+
+.logo,
+.logo-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.3s ease;
+
+  &:hover { transform: translateY(-2px); }
+
+  .logo-icon {
+    color: $primary-color;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+
+    @media (max-width: $bp-sm) {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+
+    @media (max-width: $bp-lg) { font-size: 16px; }
+    @media (max-width: $bp-md) { font-size: 14px; }
+    @media (max-width: $bp-sm) { display: none; }
+  }
+}
+
+// ═══════════════════════════════════════════
+// Center Search
+// ═══════════════════════════════════════════
+.header-center-search {
+  display: flex;
+  align-items: center;
+  flex: 0 0 300px;
+
+  @media (max-width: $bp-lg) { flex-basis: 250px; }
+  @media (max-width: $bp-md) {
+    visibility: hidden;
+    width: 0;
+    flex-basis: 0;
+    overflow: hidden;
+  }
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--search-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+
+  &:focus-within {
+    background: var(--search-bg-focus);
+    border-color: $primary-color;
+    box-shadow: $shadow-sm;
+  }
+}
+
+.search-icon {
+  color: var(--text-tertiary);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+
+  &::placeholder { color: var(--text-tertiary); }
+}
+
+// ═══════════════════════════════════════════
+// Spacer
+// ═══════════════════════════════════════════
+.spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// ═══════════════════════════════════════════
+// Right Section
+// ═══════════════════════════════════════════
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+// ═══════════════════════════════════════════
+// Icon Buttons
+// ═══════════════════════════════════════════
+.notification-btn,
+.theme-toggle-btn,
+.menu-toggle {
+  color: var(--text-secondary);
+  transition: background 0.3s ease, color 0.3s ease, transform 0.15s ease;
+  @include icon-btn-hover;
+}
+
+.theme-toggle-btn {
+  @media (max-width: $bp-md) { display: none; }
+}
+
+// ═══════════════════════════════════════════
+// Action Buttons
+// ═══════════════════════════════════════════
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (max-width: $bp-lg) { gap: 6px; }
+  @media (max-width: $bp-md) { display: none; }
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease,
+              transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: $primary-color;
+    background: rgba($primary-color, 0.05);
+    color: $primary-color;
+    transform: translateY(-1px);
+  }
+
+  &:active { transform: scale(0.98); }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  span {
+    @media (max-width: $bp-xl) { display: none; }
+  }
+
+  &.primary-btn {
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+    color: white;
+    border: none;
+
+    &:hover {
+      background: linear-gradient(135deg, $primary-dark 0%, $secondary-color 100%);
+      border-color: transparent;
+      box-shadow: $shadow-md;
+      transform: translateY(-2px);
+      color: white;
+    }
+
+    mat-icon { color: white; }
+    span { display: inline !important; }
+  }
+
+  &.secondary-btn {
+    background: rgba($primary-color, 0.1);
+    color: $primary-color;
+    border-color: $primary-color;
+
+    &:hover {
+      background: $primary-color;
+      color: white;
+      transform: translateY(-1px);
+
+      mat-icon { color: white; }
+    }
+
+    span { display: inline !important; }
+  }
+}
+
+// ═══════════════════════════════════════════
+// Login Button
+// ═══════════════════════════════════════════
 .login-btn {
   background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
   color: white;
@@ -186,16 +342,14 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   gap: 6px;
   border: none;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: $shadow-md;
   }
 
-  &:active {
-    transform: scale(0.98);
-  }
+  &:active { transform: scale(0.98); }
 
   mat-icon {
     font-size: 18px;
@@ -203,7 +357,7 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     height: 18px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: $bp-sm) {
     padding: 6px 16px;
     font-size: 12px;
 
@@ -215,420 +369,189 @@ $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 }
 
-// Action Buttons
-.action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  // Removed margin-right since gap in header-right handles spacing
-
-  @media (max-width: 1024px) {
-    gap: 6px;
-  }
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  border: 1px solid $border-color;
-  color: $text-primary;
-
-  &:hover {
-    border-color: $primary-color;
-    background: rgba($primary-color, 0.05);
-    color: $primary-color;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  span {
-    @media (max-width: 1200px) {
-      display: none;
-    }
-  }
-
-  &:has(span:only-child) {
-    @media (max-width: 1200px) {
-      padding: 8px;
-    }
-  }
-}
-
-.action-btn.primary-btn {
-  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
-  color: white;
-  border: none;
-
-  &:hover {
-    border-color: transparent;
-    background: linear-gradient(135deg, $primary-dark 0%, $secondary-color 100%);
-    box-shadow: $shadow-md;
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  mat-icon {
-    color: white;
-  }
-
-  span {
-    @media (max-width: 1200px) {
-      display: inline;
-    }
-  }
-}
-
-.action-btn.secondary-btn {
-  background: rgba($primary-color, 0.1);
-  color: $primary-color;
-  border-color: $primary-color;
-
-  &:hover {
-    background: $primary-color;
-    color: white;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  mat-icon {
-    transition: color 0.3s ease;
-  }
-
-  &:hover mat-icon {
-    color: white;
-  }
-
-  span {
-    @media (max-width: 1200px) {
-      display: inline;
-    }
-  }
-}
-
+// ═══════════════════════════════════════════
 // User Menu
-.user-avatar-header {
-  display: flex;
-  align-items: center;
-
-  .avatar-badge {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 14px;
-    color: #ffffff;
-    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
-    box-shadow: $shadow-sm;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: $shadow-md;
-    }
-  }
-}
-
-// User Menu
+// ═══════════════════════════════════════════
 .user-menu-wrapper {
   display: flex;
   align-items: center;
+}
 
-  .user-menu-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    color: $text-primary;
-    transition: all 0.3s ease;
-    border-radius: 8px;
+.user-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  color: var(--text-primary);
+  border-radius: 8px;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.15s ease;
 
-    &:hover {
-      background: rgba($primary-color, 0.08);
-      color: $primary-color;
-    }
+  &:hover {
+    background: rgba($primary-color, 0.08);
+    color: $primary-color;
+  }
 
-    &:active {
-      transform: scale(0.98);
-    }
+  &:active { transform: scale(0.98); }
 
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-      color: #ffffff;
-      background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
-      box-shadow: $shadow-sm;
-    }
-
-    .user-name {
-      font-size: 14px;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 120px;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-
-    .dropdown-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: $text-secondary;
-      transition: transform 0.3s ease;
-    }
-
-    &[aria-expanded='true'] .dropdown-icon {
-      transform: rotate(180deg);
-    }
+  &[aria-expanded='true'] .dropdown-icon {
+    transform: rotate(180deg);
   }
 }
 
-// Menu Dropdown Styles
-::ng-deep {
-  .user-menu-dropdown {
-    .mat-mdc-menu-content {
-      padding: 8px 0 !important;
-    }
+.user-avatar {
+  @include avatar(36px, 14px);
 
-    .menu-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
-      color: white;
-
-      .menu-avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 16px;
-        background: rgba(255, 255, 255, 0.2);
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        flex-shrink: 0;
-      }
-
-      .menu-info {
-        flex: 1;
-
-        .menu-username {
-          margin: 0;
-          font-size: 14px;
-          font-weight: 600;
-          color: white;
-        }
-
-        .menu-email {
-          margin: 4px 0 0 0;
-          font-size: 12px;
-          color: rgba(255, 255, 255, 0.9);
-        }
-      }
-    }
-
-    .mat-mdc-menu-item {
-      font-size: 14px;
-      height: auto;
-      padding: 10px 16px;
-      color: $text-primary;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: rgba($primary-color, 0.08);
-        color: $primary-color;
-
-        mat-icon {
-          color: $primary-color;
-        }
-      }
-
-      mat-icon {
-        margin-right: 12px;
-        color: $text-secondary;
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
-
-      &.logout-menu-item {
-        color: $danger-color;
-
-        &:hover {
-          background: rgba($danger-color, 0.08);
-          color: $danger-color;
-
-          mat-icon {
-            color: $danger-color;
-          }
-        }
-      }
-    }
-
-    .mat-divider {
-      margin: 4px 0;
-      background: $border-color;
-    }
-  }
-}
-
-// Responsive Design
-@media (max-width: 1024px) {
-  .header-content {
-    padding: 0 16px;
-    gap: 12px; // Reduced gap
-  }
-
-  .logo-text,
-  .logo-auth .logo-text {
-    font-size: 16px;
-  }
-
-  .user-menu-btn:not(:hover) .user-name {
-    max-width: 100px;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-header {
-    height: 64px;
-  }
-
-  .header-content {
-    padding: 0 12px;
-    gap: 8px; // Reduced gap
-  }
-
-  .logo-text,
-  .logo-auth .logo-text {
-    font-size: 14px;
-  }
-
-  .header-center {
-    display: none;
-  }
-
-  .user-menu-btn .user-name {
-    display: none;
-  }
-
-  .theme-toggle-btn {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-header {
-    height: 56px;
-  }
-
-  .header-content {
-    padding: 0 8px;
-    gap: 8px;
-  }
-
-  .logo-icon {
-    font-size: 24px !important;
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  .notification-btn {
-    ::ng-deep {
-      .mat-badge-content {
-        font-size: 10px;
-      }
-    }
-  }
-
-  .user-menu-btn .user-avatar {
+  @media (max-width: $bp-sm) {
     width: 32px;
     height: 32px;
     font-size: 12px;
   }
 }
 
-// Theme Support
-@media (prefers-reduced-motion: reduce) {
-  .app-header,
-  .user-menu-btn,
-  .notification-btn,
-  .theme-toggle-btn,
-  .menu-toggle,
-  .logo,
-  .logo-auth {
-    transition: none;
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+
+  @media (max-width: $bp-lg) { max-width: 100px; }
+  @media (max-width: $bp-md) { display: none; }
+}
+
+.dropdown-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+// ═══════════════════════════════════════════
+// Dropdown Menu Panel
+// ═══════════════════════════════════════════
+::ng-deep .user-menu-dropdown {
+  .mat-mdc-menu-content { padding: 8px 0 !important; }
+
+  // Menu panel background responds to dark class
+  .mat-mdc-menu-panel {
+    background: var(--header-bg) !important;
+    transition: background 0.3s ease;
+  }
+
+  .menu-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+    color: white;
+  }
+
+  .menu-avatar {
+    @include avatar(44px, 16px);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+    flex-shrink: 0;
+  }
+
+  .menu-info {
+    flex: 1;
+
+    .menu-username {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .menu-email {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  .mat-mdc-menu-item {
+    font-size: 14px;
+    height: auto;
+    padding: 10px 16px;
+    color: var(--menu-item-color);
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: var(--menu-item-bg-hover);
+      color: $primary-color;
+
+      mat-icon { color: $primary-color; }
+    }
+
+    mat-icon {
+      margin-right: 12px;
+      color: var(--text-secondary);
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &.logout-menu-item {
+      color: $danger-color;
+
+      &:hover {
+        background: rgba($danger-color, 0.08);
+        color: $danger-color;
+
+        mat-icon { color: $danger-color; }
+      }
+    }
+  }
+
+  .mat-divider {
+    margin: 4px 0;
+    background: var(--border-color) !important;
   }
 }
 
-// Dark mode support (optional)
-@media (prefers-color-scheme: dark) {
-  .app-header {
-    background: #1f2937;
-    border-bottom-color: #374151;
+// ═══════════════════════════════════════════
+// Notification badge — small screens
+// ═══════════════════════════════════════════
+@media (max-width: $bp-sm) {
+  .notification-btn {
+    ::ng-deep .mat-badge-content { font-size: 10px; }
   }
+}
 
-  .header-center-search .search-box {
-    background: #374151;
-    border-color: #4b5563;
+// ═══════════════════════════════════════════
+// OS-level dark mode (no manual toggle needed)
+// Still respected when user hasn't toggled manually
+// ═══════════════════════════════════════════
+@media (prefers-color-scheme: dark) {
+  :root:not(.dark):not(.light) {
+    --header-bg:          #1f2937;
+    --header-border:      #374151;
+    --search-bg:          #374151;
+    --search-bg-focus:    #1f2937;
+    --text-primary:       #f9fafb;
+    --text-secondary:     #d1d5db;
+    --text-tertiary:      #9ca3af;
+    --border-color:       #374151;
+    --menu-item-bg-hover: rgba(99, 102, 241, 0.15);
+    --menu-item-color:    #f9fafb;
+  }
+}
 
-    &:focus-within {
-      background: #1f2937;
-      border-color: $primary-color;
-    }
-
-    .search-icon {
-      color: #9ca3af;
-    }
-
-    .search-input {
-      color: #e5e7eb;
-
-      &::placeholder {
-        color: #9ca3af;
-      }
-    }
+// ═══════════════════════════════════════════
+// Reduced Motion
+// ═══════════════════════════════════════════
+@media (prefers-reduced-motion: reduce) {
+  .app-header *,
+  .app-header *::before,
+  .app-header *::after {
+    transition: none !important;
+    animation: none !important;
   }
 }

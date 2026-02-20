@@ -1,22 +1,29 @@
 <div class="app-container" [class.authenticated]="isAuthenticated$ | async">
-  <!-- Header -->
-  <app-header *ngIf="isAuthenticated$ | async" class="app-header"></app-header>
+
+  @if (isAuthenticated$ | async) {
+    <app-header
+      class="app-header"
+      (themeToggled)="onThemeToggled($event)"
+    ></app-header>
+  }
 
   <div class="main-wrapper" [class.authenticated]="isAuthenticated$ | async">
-    <!-- Sidebar -->
-    <app-sidebar *ngIf="isAuthenticated$ | async" class="app-sidebar"></app-sidebar>
 
-    <!-- Content Area -->
+    @if (isAuthenticated$ | async) {
+      <app-sidebar class="app-sidebar"></app-sidebar>
+    }
+
     <div class="content-wrapper">
       <div class="content-area" [class.full-width]="!(isAuthenticated$ | async)">
         <router-outlet></router-outlet>
       </div>
-      
-      <!-- Footer -->
-      <app-footer *ngIf="isAuthenticated$ | async" class="app-footer"></app-footer>
+
+      @if (isAuthenticated$ | async) {
+        <app-footer class="app-footer"></app-footer>
+      }
     </div>
+
   </div>
 
-  <!-- Global Notification -->
   <app-notification class="app-notification"></app-notification>
 </div>

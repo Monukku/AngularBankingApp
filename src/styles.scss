@@ -1,35 +1,154 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+// ═══════════════════════════════════════════
+// Global resets
+// ═══════════════════════════════════════════
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f9fafb;
-  color: #111827;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-// Custom Scrollbar
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+// ═══════════════════════════════════════════
+// LIGHT MODE (default)
+// ═══════════════════════════════════════════
+:root {
+  // Shell
+  --bg-page:         #f0f2ff;
+  --bg-surface:      #ffffff;
+  --bg-surface-2:    #f9fafb;
+  --bg-surface-3:    #f3f4f6;
+  --bg-input:        #f3f4f6;
+
+  // Header
+  --header-bg:       #ffffff;
+  --header-border:   #e5e7eb;
+  --search-bg:       #f3f4f6;
+  --search-bg-focus: #ffffff;
+
+  // Text
+  --text-primary:    #111827;
+  --text-secondary:  #6b7280;
+  --text-tertiary:   #9ca3af;
+
+  // Borders
+  --border-color:    #e5e7eb;
+  --border-hover:    rgba(99, 102, 241, 0.35);
+
+  // Dashboard surfaces (used in dashboard.component.scss)
+  --dash-bg:         #f0f2ff;
+  --dash-s1:         #ffffff;
+  --dash-s2:         #f4f5ff;
+  --dash-s3:         #ebebf5;
+
+  // Dashboard text
+  --dash-t1:         #111827;
+  --dash-t2:         #4b5563;
+  --dash-t3:         #9ca3af;
+
+  // Dashboard borders
+  --dash-border:     rgba(0, 0, 0, 0.07);
+  --dash-border-h:   rgba(124, 58, 237, 0.3);
+
+  // Shadows
+  --card-shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 18px rgba(0,0,0,.04);
+  --card-shadow-h:   0 10px 36px rgba(0,0,0,.10), 0 0 0 1px rgba(99,102,241,.15);
+
+  // Dropdown menu
+  --menu-item-color:    #111827;
+  --menu-item-bg-hover: rgba(99, 102, 241, 0.08);
 }
 
-::-webkit-scrollbar-track {
-  background: #f3f4f6;
+// ═══════════════════════════════════════════
+// DARK MODE — .dark class on <html>
+// ═══════════════════════════════════════════
+:root.dark {
+  --bg-page:         #0d0f1a;
+  --bg-surface:      #141626;
+  --bg-surface-2:    #1c1f35;
+  --bg-surface-3:    #232640;
+  --bg-input:        #232640;
+
+  --header-bg:       #1f2937;
+  --header-border:   #374151;
+  --search-bg:       #374151;
+  --search-bg-focus: #111827;
+
+  --text-primary:    #f9fafb;
+  --text-secondary:  #d1d5db;
+  --text-tertiary:   #9ca3af;
+
+  --border-color:    #374151;
+  --border-hover:    rgba(124, 58, 237, 0.35);
+
+  --dash-bg:         #0d0f1a;
+  --dash-s1:         #141626;
+  --dash-s2:         #1c1f35;
+  --dash-s3:         #232640;
+
+  --dash-t1:         #f0f2ff;
+  --dash-t2:         #8b8fa8;
+  --dash-t3:         #5a5e78;
+
+  --dash-border:     rgba(255, 255, 255, 0.07);
+  --dash-border-h:   rgba(124, 58, 237, 0.35);
+
+  --card-shadow:     0 1px 4px rgba(0,0,0,.4), 0 4px 18px rgba(0,0,0,.25);
+  --card-shadow-h:   0 10px 36px rgba(0,0,0,.4), 0 0 0 1px rgba(99,102,241,.18);
+
+  --menu-item-color:    #f9fafb;
+  --menu-item-bg-hover: rgba(99, 102, 241, 0.15);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
+// ═══════════════════════════════════════════
+// OS preference — only when no manual choice has been stored
+// The .light class on <html> suppresses this block after first toggle
+// ═══════════════════════════════════════════
+@media (prefers-color-scheme: dark) {
+  :root:not(.dark):not(.light) {
+    --bg-page:         #0d0f1a;
+    --bg-surface:      #141626;
+    --bg-surface-2:    #1c1f35;
+    --bg-surface-3:    #232640;
+    --bg-input:        #232640;
+    --header-bg:       #1f2937;
+    --header-border:   #374151;
+    --search-bg:       #374151;
+    --search-bg-focus: #111827;
+    --text-primary:    #f9fafb;
+    --text-secondary:  #d1d5db;
+    --text-tertiary:   #9ca3af;
+    --border-color:    #374151;
+    --border-hover:    rgba(124, 58, 237, 0.35);
+    --dash-bg:         #0d0f1a;
+    --dash-s1:         #141626;
+    --dash-s2:         #1c1f35;
+    --dash-s3:         #232640;
+    --dash-t1:         #f0f2ff;
+    --dash-t2:         #8b8fa8;
+    --dash-t3:         #5a5e78;
+    --dash-border:     rgba(255, 255, 255, 0.07);
+    --dash-border-h:   rgba(124, 58, 237, 0.35);
+    --card-shadow:     0 1px 4px rgba(0,0,0,.4), 0 4px 18px rgba(0,0,0,.25);
+    --card-shadow-h:   0 10px 36px rgba(0,0,0,.4), 0 0 0 1px rgba(99,102,241,.18);
+    --menu-item-color:    #f9fafb;
+    --menu-item-bg-hover: rgba(99, 102, 241, 0.15);
+  }
+}
 
-  &:hover {
-    background: #9ca3af;
+// ═══════════════════════════════════════════
+// Global snackbars (rendered outside component trees)
+// ═══════════════════════════════════════════
+.snackbar-success .mdc-snackbar__surface { background: #10b981 !important; }
+.snackbar-error   .mdc-snackbar__surface { background: #f43f5e !important; }
+.snackbar-info    .mdc-snackbar__surface { background: #7c3aed !important; }
+.mat-mdc-snack-bar-label { color: white !important; font-weight: 600 !important; }
+
+// ═══════════════════════════════════════════
+// Reduced motion
+// ═══════════════════════════════════════════
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
   }
 }
