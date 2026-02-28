@@ -9,6 +9,7 @@ import { selectIsAuthenticated, selectCurrentUser } from '../../../store/auth/au
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,10 +28,12 @@ export class SidebarComponent {
   isAuthenticated$: Observable<boolean>;
   currentUser$: Observable<any>;
 
-  constructor(private store: Store) {
+  constructor(private store: Store,public themeService: ThemeService) {
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
     this.currentUser$ = this.store.select(selectCurrentUser);
   }
+
+  toggleTheme() { this.themeService.toggle(); }
 
   logout(): void {
     this.store.dispatch(AuthActions.logout());

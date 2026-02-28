@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-footer',
@@ -17,5 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
+  constructor(public themeService: ThemeService) {}
 
+  toggleTheme() { this.themeService.toggle(); }
 }

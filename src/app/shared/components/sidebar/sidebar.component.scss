@@ -20,15 +20,14 @@ $danger:          #d14f4f;
 $danger-soft:     rgba(209, 79, 79, 0.1);
 $danger-border:   rgba(209, 79, 79, 0.25);
 
-$bg:              #fafafa;
-$bg-card:         #ffffff;
-$surface:         #f4f4f8;
-
-$text-primary:    #1a1a2e;
-$text-secondary:  #55556e;
-$text-muted:      #a0a0b8;
-
-$border:          rgba(0, 0, 0, 0.08);
+// ── Replaced hardcoded colors with CSS variables ──
+$bg:              var(--bg-page);
+$bg-card:         var(--bg-surface);
+$surface:         var(--bg-surface-2);
+$text-primary:    var(--text-primary);
+$text-secondary:  var(--text-secondary);
+$text-muted:      var(--text-tertiary);
+$border:          var(--border-color);
 
 $ease-luxury:     cubic-bezier(0.4, 0, 0.2, 1);
 $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -58,8 +57,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
   50%       { filter: drop-shadow(0 0 10px $primary-glow); }
 }
 
-// ── LIGHT MODE shimmer: warm gold-white slash ──────────────────────
-// Boosted opacity so it pops on white/light backgrounds
 @keyframes shimmerPass {
   0%   { transform: translateX(-180%) skewX(-18deg); opacity: 0;   }
   12%  { opacity: 1; }
@@ -74,8 +71,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
   100% { transform: translateX(260%)  skewX(-18deg); opacity: 0;   }
 }
 
-// ── DARK MODE shimmer: electric violet-cyan slash ──────────────────
-// Separate keyframes so the gradient colors can differ
 @keyframes shimmerPassDark {
   0%   { transform: translateX(-180%) skewX(-18deg); opacity: 0;   }
   12%  { opacity: 1; }
@@ -92,20 +87,68 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 
 
 // ============================================
+// SHIMMER MIXINS
+// ============================================
+
+@mixin shimmer-gradient-light {
+  background: linear-gradient(
+    105deg,
+    transparent                0%,
+    rgba(201, 169, 110, 0.18) 20%,
+    rgba(255, 240, 180, 0.70) 40%,
+    rgba(255, 255, 255, 0.90) 50%,
+    rgba(255, 240, 180, 0.70) 60%,
+    rgba(201, 169, 110, 0.18) 80%,
+    transparent                100%
+  );
+}
+
+@mixin shimmer-gradient-dark {
+  background: linear-gradient(
+    105deg,
+    transparent               0%,
+    rgba(120,  80, 240, 0.12) 18%,
+    rgba(150, 100, 255, 0.70) 36%,
+    rgba(180, 220, 255, 0.95) 50%,
+    rgba(100, 200, 255, 0.70) 64%,
+    rgba(80,  140, 240, 0.12) 82%,
+    transparent               100%
+  );
+}
+
+@mixin shimmer-trail-dark {
+  background: linear-gradient(
+    105deg,
+    transparent               0%,
+    rgba(130,  90, 255, 0.25) 50%,
+    transparent               100%
+  );
+}
+
+
+// ============================================
 // SIDEBAR CONTAINER
 // ============================================
+
+:host {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease;
+}
 
 .sidebar-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: $bg;
-  border-right: 1px solid $border;
+  background: var(--bg-page);
+  border-right: 1px solid var(--border-color);
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
   animation: slideIn 0.4s $ease-luxury both;
   font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+  transition: background 0.3s ease, border-color 0.3s ease;
 
   &::before {
     content: '';
@@ -132,58 +175,16 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 
 
 // ============================================
-// SHIMMER MIXIN — keeps ::before light/dark gradients DRY
-// ============================================
-
-// Light mode shimmer gradient (gold-white)
-@mixin shimmer-gradient-light {
-  background: linear-gradient(
-    105deg,
-    transparent                0%,
-    rgba(201, 169, 110, 0.18) 20%,
-    rgba(255, 240, 180, 0.70) 40%,
-    rgba(255, 255, 255, 0.90) 50%,
-    rgba(255, 240, 180, 0.70) 60%,
-    rgba(201, 169, 110, 0.18) 80%,
-    transparent                100%
-  );
-}
-
-// Dark mode shimmer gradient (electric violet → cyan)
-@mixin shimmer-gradient-dark {
-  background: linear-gradient(
-    105deg,
-    transparent               0%,
-    rgba(120,  80, 240, 0.12) 18%,
-    rgba(150, 100, 255, 0.70) 36%,
-    rgba(180, 220, 255, 0.95) 50%,
-    rgba(100, 200, 255, 0.70) 64%,
-    rgba(80,  140, 240, 0.12) 82%,
-    transparent               100%
-  );
-}
-
-// Dark mode trail gradient
-@mixin shimmer-trail-dark {
-  background: linear-gradient(
-    105deg,
-    transparent               0%,
-    rgba(130,  90, 255, 0.25) 50%,
-    transparent               100%
-  );
-}
-
-
-// ============================================
 // HEADER
 // ============================================
 
 .sidebar-header {
   padding: 22px 20px 18px;
-  border-bottom: 1px solid $border;
-  background: $bg-card;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
   position: relative;
   z-index: 1;
+  transition: background 0.3s ease, border-color 0.3s ease;
 
   .logo {
     display: flex;
@@ -195,7 +196,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     margin: -8px -10px;
     transition: background 0.3s $ease-luxury, transform 0.3s $ease-luxury;
 
-    // ── Light shimmer layer ──
     &::before {
       content: '';
       position: absolute;
@@ -240,7 +240,7 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     .logo-text {
       font-size: 17px;
       font-weight: 700;
-      color: $text-primary;
+      color: var(--text-primary);
       letter-spacing: -0.5px;
       transition: color 0.3s $ease-luxury;
     }
@@ -283,7 +283,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     transition: transform 0.35s $ease-spring, border-color 0.3s $ease-luxury, box-shadow 0.3s $ease-luxury;
 
-    // Avatar sits on the dark-ish gradient — use bright shimmer here always
     &::before {
       content: '';
       position: absolute;
@@ -291,7 +290,7 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
       width: 60%; height: 120%;
       background: linear-gradient(
         105deg,
-        transparent              0%,
+        transparent               0%,
         rgba(255, 255, 255, 0.15) 28%,
         rgba(255, 255, 255, 0.85) 50%,
         rgba(255, 255, 255, 0.15) 72%,
@@ -363,12 +362,9 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
       padding: 4px 14px 10px;
       font-size: 10px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 1.4px;
-      color: $text-muted;
+      color: var(--text-tertiary);
     }
 
-    // ─────────────────────────────────────────
-    // NAV ITEM
-    // ─────────────────────────────────────────
     .nav-item {
       display: flex;
       align-items: center;
@@ -382,7 +378,7 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
       font-weight: 500;
       position: relative;
       overflow: hidden;
-      color: $text-secondary;
+      color: var(--text-secondary);
       background: transparent;
       border: 1px solid transparent;
 
@@ -397,8 +393,8 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         flex-shrink: 0;
         width: 34px; height: 34px;
         border-radius: 8px;
-        background: $surface;
-        border: 1px solid $border;
+        background: var(--bg-surface-2);
+        border: 1px solid var(--border-color);
         display: flex; align-items: center; justify-content: center;
         transition:
           background   0.25s $ease-luxury,
@@ -410,7 +406,7 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
       .nav-icon {
         font-size: 18px;
         width: 18px; height: 18px;
-        color: $text-muted;
+        color: var(--text-tertiary);
         transition: color 0.25s $ease-luxury, transform 0.3s $ease-spring;
         display: block;
       }
@@ -438,12 +434,11 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         flex-shrink: 0;
         font-size: 15px;
         width: 15px; height: 15px;
-        color: $text-muted;
+        color: var(--text-tertiary);
         opacity: 0.4;
         transition: opacity 0.25s $ease-luxury, transform 0.25s $ease-luxury, color 0.25s $ease-luxury;
       }
 
-      // ── LIGHT MODE shimmer (main beam) ──────
       &::before {
         content: '';
         position: absolute;
@@ -455,7 +450,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         will-change: transform, opacity;
       }
 
-      // ── LIGHT MODE shimmer (trail) ──────────
       &::after {
         content: '';
         position: absolute;
@@ -463,9 +457,9 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         width: 45%; height: 120%;
         background: linear-gradient(
           105deg,
-          transparent              0%,
+          transparent               0%,
           rgba(201, 169, 110, 0.28) 50%,
-          transparent              100%
+          transparent               100%
         );
         transform: translateX(-220%) skewX(-18deg);
         pointer-events: none;
@@ -473,11 +467,10 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         opacity: 0;
       }
 
-      // ── HOVER STATE ─────────────────────────
       &:hover {
-        background:   $bg-card;
-        color:        $text-primary;
-        border-color: $border;
+        background:   var(--bg-surface);
+        color:        var(--text-primary);
+        border-color: var(--border-color);
         box-shadow:   0 2px 10px rgba(0,0,0,0.06), 0 0 0 1px rgba($primary, 0.08);
         transform:    translateX(3px);
 
@@ -499,7 +492,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         .nav-badge { opacity: 1; transform: scale(1.05); }
       }
 
-      // ── ACTIVE / PRESSED ────────────────────
       &:active {
         transform: scale(0.975) translateX(2px);
         transition-duration: 0.1s;
@@ -510,9 +502,8 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         .nav-icon-wrap { transform: scale(0.96); }
       }
 
-      // ── SELECTED STATE ───────────────────────
       &.active {
-        background:   $bg-card;
+        background:   var(--bg-surface);
         color:        $primary;
         border-color: $primary-border;
         box-shadow:
@@ -522,7 +513,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         font-weight: 600;
         transform: translateX(2px);
 
-        // Gold left indicator bar
         &::after {
           content: '';
           position: absolute;
@@ -566,8 +556,9 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 
 .sidebar-footer {
   padding: 14px 10px 20px;
-  border-top: 1px solid $border;
+  border-top: 1px solid var(--border-color);
   position: relative; z-index: 1;
+  transition: border-color 0.3s ease;
 
   .logout-btn {
     width: 100%;
@@ -577,9 +568,9 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     gap: 9px;
     padding: 11px 16px;
     border-radius: 10px;
-    color: $text-secondary;
-    background: $bg-card;
-    border: 1px solid $border;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
     font-size: 13px; font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -596,8 +587,8 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     .logout-icon-wrap {
       width: 28px; height: 28px;
       border-radius: 7px;
-      background: $surface;
-      border: 1px solid $border;
+      background: var(--bg-surface-2);
+      border: 1px solid var(--border-color);
       display: flex; align-items: center; justify-content: center;
       transition:
         background   0.3s $ease-luxury,
@@ -614,7 +605,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 
     span { position: relative; z-index: 1; }
 
-    // Light mode shimmer
     &::before {
       content: '';
       position: absolute;
@@ -709,12 +699,12 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 
 
 // ============================================
-// DARK MODE — electric violet-cyan shimmer
+// DARK MODE — triggered by .dark class on <html>
+// (NOT media query — controlled by ThemeService button)
 // ============================================
 
-@media (prefers-color-scheme: dark) {
+:root.dark {
 
-  // ── Core background surfaces ───────────────
   .sidebar-container {
     background: #12121e;
     border-right-color: rgba(255,255,255,0.07);
@@ -727,7 +717,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     .logo .logo-text { color: #e5e5f0; }
     .logo:hover .logo-text { color: lighten($primary, 25%); }
 
-    // ── Override shimmer to electric violet-cyan on dark ──
     .logo::before {
       @include shimmer-gradient-dark;
     }
@@ -749,15 +738,8 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 
       .nav-icon { color: rgba(255,255,255,0.35); }
 
-      // ── Dark mode shimmer: replace gradient on ::before ──
-      &::before {
-        @include shimmer-gradient-dark;
-      }
-
-      // ── Dark mode trail: vivid violet glow ──
-      &::after {
-        @include shimmer-trail-dark;
-      }
+      &::before { @include shimmer-gradient-dark; }
+      &::after  { @include shimmer-trail-dark; }
 
       &:hover {
         background: rgba(255,255,255,0.05);
@@ -771,7 +753,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         .nav-icon { color: lighten($primary, 20%); }
       }
 
-      // Dark mode active: use dark shimmer keyframes
       &:active {
         &::before { animation: shimmerPassDark  0.5s  cubic-bezier(0.22, 1, 0.36, 1) both; }
         &::after  { animation: shimmerTrailDark 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both; }
@@ -783,7 +764,6 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
         border-color: rgba($primary, 0.3);
         box-shadow: 0 4px 16px rgba($primary, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
 
-        // Shimmer sweep on entry
         &::before {
           animation: shimmerPassDark 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
@@ -803,10 +783,7 @@ $ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
     background: rgba(255,255,255,0.03);
     border-color: rgba(255,255,255,0.08);
 
-    // ── Dark mode shimmer on logout button ──
-    &::before {
-      @include shimmer-gradient-dark;
-    }
+    &::before { @include shimmer-gradient-dark; }
 
     .logout-icon-wrap {
       background: rgba(255,255,255,0.05);

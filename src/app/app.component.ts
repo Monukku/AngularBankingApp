@@ -12,6 +12,7 @@ import { SidebarComponent }      from './shared/components/sidebar/sidebar.compo
 import { FooterComponent }       from './shared/components/footer/footer.component';
 import { NotificationComponent } from './shared/components/notification/notification.component';
 import { mapKeycloakProfileToUserProfile } from './core/models/user.model';
+import { ThemeService } from './core/services/theme.service'; // 👈 just inject so it initialises early
 
 @Component({
   selector: 'app-root',
@@ -35,21 +36,13 @@ export class AppComponent implements OnInit {
   constructor(
     private store: Store,
     private keycloakService: KeycloakService,
+    private themeService: ThemeService, // 👈 eagerly instantiates the singleton
   ) {
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
   }
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
-
-      // 1. Theme restoration
-      const stored = localStorage.getItem('rewa-theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const isDark = stored ? stored === 'dark' : prefersDark;
-      document.documentElement.classList.toggle('dark',  isDark);
-      document.documentElement.classList.toggle('light', !isDark);
-
-      // 2. Keycloak auth sync
       try {
         const isLoggedIn = await this.keycloakService.isLoggedIn();
         if (isLoggedIn) {
@@ -63,11 +56,6 @@ export class AppComponent implements OnInit {
       } catch (error) {
         console.error('Failed to sync auth state on app init', error);
       }
-
     }
-  }
-
-  onThemeToggled(isDark: boolean): void {
-    // Header owns the toggle logic. Add analytics/API calls here if needed.
   }
 }
