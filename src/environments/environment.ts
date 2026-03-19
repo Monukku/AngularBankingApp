@@ -8,19 +8,21 @@ export const environment = {
 
   // API Configuration
   api: {
-    baseUrl: 'http://localhost:8080/api',
+    baseUrl: 'http://localhost/api/v1', // ✅ API Gateway via Istio ingress (no port-forward)
     timeout: 30000,
     endpoints: {
+      auth: '/auth',
       accounts: '/accounts',
       transactions: '/transactions',
       cards: '/cards',
       loans: '/loans',
       users: '/users',
       customers: '/customers',
+      fraud: '/fraud',
     },
     // Mock Configuration
     mock: {
-      enabled: true,
+      enabled: false, // ✅ Disable mocks — use real backend
       baseUrl: 'assets/mock-data',
       delays: {
         balance: 500,

@@ -25,8 +25,8 @@ interface AuthInterceptorConfig {
 }
 
 const defaultConfig: AuthInterceptorConfig = {
-  excludedUrls: ['/assets', '/api/public'],
-  excludedUrlPatterns: [/\.json$/, /\/public\//],
+  excludedUrls: ['/assets', '/api/public', '/auth/register', '/auth/login', '/api/v1/auth/register', '/api/v1/auth/login'],
+  excludedUrlPatterns: [/\.json$/, /\/public\//, /\/auth\/(register|login)/],
   loginRoute: '/auth/login',
   autoRefreshToken: true,
   tokenMinValiditySeconds: 30, // Refresh if token expires in less than 30 seconds
@@ -69,7 +69,7 @@ function shouldExcludeRequest(
 ): boolean {
   // Check URL strings
   const matchesUrl = config.excludedUrls.some((url) => req.url.includes(url));
-  
+
   // Check URL patterns
   const matchesPattern = config.excludedUrlPatterns.some((pattern) =>
     pattern.test(req.url)
@@ -89,21 +89,22 @@ async function getValidToken(
   try {
     // Check if token needs refresh
     if (config.autoRefreshToken) {
-      const needsRefresh = !(await keycloakService.isTokenExpired(
+      // ✅ isTokenExpired(thresholdSeconds) returns true if token expires in less than threshold seconds
+      const isTokenExpired = await keycloakService.isTokenExpired(
         config.tokenMinValiditySeconds
-      ));
-      
-      if (!needsRefresh) {
-        logger.debug('Token is valid, no refresh needed');
-      } else {
+      );
+
+      if (isTokenExpired) {
         logger.debug('Token is about to expire, refreshing...');
         await keycloakService.updateToken(config.tokenMinValiditySeconds);
         logger.debug('Token refreshed successfully');
+      } else {
+        logger.debug('Token is valid, no refresh needed');
       }
     }
 
     const token = await keycloakService.getToken();
-    
+
     if (!token) {
       logger.warn('No token available after refresh attempt');
       throw new Error('No authentication token available');
@@ -125,7 +126,7 @@ function addAuthHeader(
   logger: LoggerService
 ): HttpRequest<unknown> {
   logger.debug('Adding Authorization header to request', req.url);
-  
+
   return req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`,
@@ -211,13 +212,13 @@ export function createCustomAuthInterceptor(
     return from(getValidToken(keycloakService, mergedConfig, logger)).pipe(
       switchMap((token) => {
         logger.debug(`Adding ${headerName} header to request`, req.url);
-        
+
         const authReq = req.clone({
           setHeaders: {
             [headerName]: `${tokenPrefix} ${token}`,
           },
         });
-        
+
         return next(authReq);
       }),
       catchError((error) => handleAuthError(error, router, logger, mergedConfig))
@@ -279,14 +280,14 @@ export function createAuthInterceptorWithHeaders(
     return from(getValidToken(keycloakService, mergedConfig, logger)).pipe(
       switchMap((token) => {
         logger.debug('Adding Authorization and custom headers', req.url);
-        
+
         const authReq = req.clone({
           setHeaders: {
             Authorization: `Bearer ${token}`,
             ...additionalHeaders,
           },
         });
-        
+
         return next(authReq);
       }),
       catchError((error) => handleAuthError(error, router, logger, mergedConfig))

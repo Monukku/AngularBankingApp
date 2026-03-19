@@ -4,7 +4,11 @@ import {
   provideZoneChangeDetection,
   isDevMode,
   importProvidersFrom,
+  APP_INITIALIZER,
+  PLATFORM_ID,
+  Inject,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { provideRouter } from '@angular/router';
 
 import { provideClientHydration } from '@angular/platform-browser';
@@ -41,6 +45,38 @@ import { CustomRouterSerializer } from './store/router/custom-router-serializer'
 // Environment
 import { environment } from '../environments/environment';
 import { NgxEchartsModule } from 'ngx-echarts';
+
+// ✅ Keycloak initialization function
+function initializeKeycloak(keycloak: KeycloakService, platformId: Object) {
+  return () => {
+    // Only initialize Keycloak in browser, not on server
+    if (!isPlatformBrowser(platformId)) {
+      return Promise.resolve();
+    }
+
+    return keycloak.init({
+      config: environment.keycloak,
+      initOptions: {
+        onLoad: 'check-sso',  // Keep check-sso but don't auto-redirect
+        checkLoginIframe: false,
+        checkLoginIframeInterval: 0,
+        silentCheckSsoRedirectUri:
+          window.location.origin + '/assets/silent-check-sso.html',
+        // Don't redirect automatically - let guards handle it
+        redirectUri: window.location.origin + '/dashboard',
+      },
+      enableBearerInterceptor: true,
+      bearerExcludedUrls: ['/assets', '/clients/public'],
+    }).then(() => {
+      return Promise.resolve();
+    }).catch((error) => {
+      // ✅ Handle 3p-cookies check timeout gracefully
+      console.warn('Keycloak initialization warning:', error);
+      // Allow app to continue even if 3p-cookies check fails
+      return Promise.resolve();
+    });
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -131,5 +167,13 @@ export const appConfig: ApplicationConfig = {
     // 11. Keycloak Service - OAuth 2.0 / OpenID Connect authentication
     // Handles user authentication, token management, and SSO
     KeycloakService,
+
+    // 12. Keycloak Initialization - Initialize Keycloak before app starts
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      multi: true,
+      deps: [KeycloakService, PLATFORM_ID], // ✅ Added PLATFORM_ID to check browser context
+    },
   ],
 };

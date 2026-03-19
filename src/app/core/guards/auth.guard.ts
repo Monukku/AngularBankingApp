@@ -44,8 +44,9 @@ export const authGuard: CanActivateFn = async (
 
   if (!isLoggedIn) {
     // ✅ User not logged in - redirect to Keycloak login
-    const redirectUri = state.url === '/home' || state.url === '/' 
-      ? window.location.origin + '/home'
+    // Use /dashboard as redirect (main app route after login)
+    const redirectUri = state.url === '/auth' || state.url === '/'
+      ? window.location.origin + '/dashboard'
       : window.location.origin + state.url;
 
     await keycloakService.login({

@@ -1,0 +1,166 @@
+<div class="register-wrapper">
+  <!-- Animated background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="register-container">
+    <!-- Registration Form -->
+    <div class="register-card">
+      <h1>Create RewaBank Account</h1>
+      <p class="subtitle">Join thousands of banking customers</p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <!-- Full Name Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input
+            matInput
+            formControlName="fullName"
+            placeholder="Enter your full name"
+            autocomplete="name"
+          />
+          <mat-error *ngIf="registerForm.get('fullName')?.hasError('required')">
+            Full name is required
+          </mat-error>
+          <mat-error *ngIf="registerForm.get('fullName')?.hasError('minlength')">
+            Full name must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Email Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input
+            matInput
+            formControlName="email"
+            type="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+          />
+          <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
+            Email is required
+          </mat-error>
+          <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
+            Please enter a valid email
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Mobile Number Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mobile Number</mat-label>
+          <input
+            matInput
+            formControlName="mobileNumber"
+            placeholder="e.g., +91-9876543210"
+            autocomplete="tel"
+          />
+          <mat-hint>Enter a valid 10-15 digit mobile number</mat-hint>
+          <mat-error *ngIf="registerForm.get('mobileNumber')?.hasError('required')">
+            Mobile number is required
+          </mat-error>
+          <mat-error *ngIf="registerForm.get('mobileNumber')?.hasError('pattern')">
+            Please enter a valid mobile number
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            formControlName="password"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Enter a strong password"
+            autocomplete="new-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            type="button"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="showPassword"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint>
+            Min 8 chars, uppercase, lowercase, number, special character (&#64;$!%*?&amp;)
+          </mat-hint>
+        </mat-form-field>
+
+        <!-- Password Error Messages -->
+        <div class="password-errors" *ngIf="registerForm.get('password')?.touched && getPasswordErrors().length > 0">
+          <div *ngFor="let error of getPasswordErrors()" class="error-item">
+            ❌ {{ error }}
+          </div>
+        </div>
+
+        <!-- Confirm Password Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input
+            matInput
+            formControlName="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            placeholder="Confirm your password"
+            autocomplete="new-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="toggleConfirmPasswordVisibility()"
+            type="button"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="showConfirmPassword"
+          >
+            <mat-icon>{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="registerForm.hasError('passwordMismatch')">
+            Passwords do not match
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="isLoading" class="loading-spinner">
+          <mat-spinner diameter="30"></mat-spinner>
+          <span>Creating your account...</span>
+        </div>
+
+        <!-- Register Button -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width submit-button"
+          [disabled]="registerForm.invalid || isLoading"
+        >
+          {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+        </button>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>Already have an account?</span>
+        </div>
+
+        <!-- Login Link -->
+        <button
+          mat-stroked-button
+          type="button"
+          class="full-width"
+          (click)="goToLogin()"
+          [disabled]="isLoading"
+        >
+          Sign In Instead
+        </button>
+      </form>
+
+      <!-- Terms & Conditions -->
+      <p class="terms">
+        By creating an account, you agree to our
+        <a href="/terms" target="_blank">Terms of Service</a> and
+        <a href="/privacy" target="_blank">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+</div>

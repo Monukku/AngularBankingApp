@@ -5,19 +5,25 @@ import { NotFoundComponent } from './shared/components/not-found/not-found.compo
 
 
 export const routes: Routes = [
-  
+
+  // ✅ Auth Routes (public - no guard needed)
+  {
+    path: 'auth',
+    loadChildren: () =>
+      import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
+  },
 
   {
     path: '',
-    redirectTo: '/dashboard',
+    redirectTo: '/auth',
     pathMatch: 'full'
   },
   {
     path: 'dashboard',
     canActivate: [authGuard],
-    loadComponent: () => 
+    loadComponent: () =>
       import('./features/dashboard/components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-  },  
+  },
   {
     path: 'dashboard',
     canActivate: [authGuard],

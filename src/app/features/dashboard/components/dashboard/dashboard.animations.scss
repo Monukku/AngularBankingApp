@@ -1,0 +1,38 @@
+// ============================================================
+// dashboard.animations.scss — All keyframes (shared/global)
+// ============================================================
+
+// Accent colours
+$violet:   #7c3aed;
+$em-light: #34d399;
+$rose:     #f43f5e;
+
+// ─── Keyframes ────────────────────────────────────────────────
+@keyframes orbDrift1  { 0%,100%{transform:translate(0,0) scale(1);opacity:.2} 33%{transform:translate(55px,-70px) scale(1.12);opacity:.28} 66%{transform:translate(-25px,35px) scale(.9);opacity:.14} }
+@keyframes orbDrift2  { 0%,100%{transform:translate(0,0) scale(1);opacity:.15} 40%{transform:translate(-65px,55px) scale(1.2);opacity:.2} 75%{transform:translate(40px,-25px) scale(.88);opacity:.1} }
+@keyframes orbDrift3  { 0%,100%{transform:translate(0,0);opacity:.1} 50%{transform:translate(50px,-45px);opacity:.18} }
+@keyframes orbDrift4  { 0%,100%{transform:translate(0,0);opacity:.09} 50%{transform:translate(-40px,50px);opacity:.15} }
+@keyframes gridBreathe{ 0%,100%{opacity:.3} 50%{opacity:.55} }
+@keyframes scanLine   { from{top:-2px;opacity:0} 4%{opacity:1} 96%{opacity:1} to{top:100vh;opacity:0} }
+@keyframes cardFadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shimmerBorder{ 0%{left:-100%} 100%{left:150%} }
+@keyframes blobPulse  { 0%,100%{transform:scale(1);opacity:.08} 50%{transform:scale(1.6);opacity:.14} }
+@keyframes holoShift  { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+@keyframes balanceGlow{ 0%,100%{text-shadow:none} 50%{text-shadow:0 0 32px rgba($violet,.3)} }
+@keyframes livePulse  { 0%,100%{box-shadow:0 0 0 0 rgba($em-light,.7)} 50%{box-shadow:0 0 0 7px rgba($em-light,0)} }
+@keyframes btnGlow    { 0%,100%{box-shadow:0 4px 16px rgba($violet,.35)} 50%{box-shadow:0 4px 32px rgba($violet,.6),0 0 0 4px rgba($violet,.12)} }
+@keyframes avatarPop  { from{opacity:0;transform:scale(.6) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes txRowIn    { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+@keyframes badgePop   { from{opacity:0;transform:scale(.6)} to{opacity:1;transform:scale(1)} }
+@keyframes workflowSlide{from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:translateX(0)}}
+@keyframes waveBar    { from{transform:scaleY(.2)} to{transform:scaleY(1)} }
+@keyframes fillBar    { from{width:0 !important} }
+@keyframes ringDraw   { from{stroke-dashoffset:201} }
+@keyframes statCardUp { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes spinnerFade{ from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+@keyframes insightSlide{from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)}}
+@keyframes activityPulse{0%,100%{transform:scale(1)} 50%{transform:scale(1.4)}}
+@keyframes barGrow    { from{height:0 !important} }
+@keyframes donutDraw  { from{stroke-dashoffset:283} }
+@keyframes goalFill   { from{width:0 !important} }
+

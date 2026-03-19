@@ -1,0 +1,61 @@
+<div class="page">
+  <div class="bg-orb bg-orb--1"></div>
+  <div class="bg-orb bg-orb--2"></div>
+  <div class="bg-grid"></div>
+
+  <!-- NAV -->
+  <nav class="nav" [@fadeDown]>
+    <div class="nav__brand">
+      <mat-icon class="nav__icon">account_balance</mat-icon>
+      <span class="nav__name">RewaBank</span>
+    </div>
+    <div class="nav__actions">
+      <button mat-button class="btn-nav-ghost" (click)="login()">
+        <mat-icon>login</mat-icon>
+        Login
+      </button>
+      <button mat-raised-button routerLink="/auth/register" class="btn-nav-primary">
+        <mat-icon>person_add</mat-icon>
+        Register
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Welcome -->
+    <div class="welcome" [@fadeUp]>
+      <p class="welcome__eyebrow">Welcome to RewaBank</p>
+      <h1 class="welcome__title">
+        Your premium
+        <span class="welcome__accent">banking experience</span>
+      </h1>
+      <p class="welcome__subtitle">
+        Experience secure, fast, and intuitive banking with cutting-edge technology
+      </p>
+      <!-- CTA Buttons -->
+
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="cards" [@staggerCards]>
+      <div class="feature-card" *ngFor="let f of features">
+        <div class="feature-card__icon">
+          <mat-icon>{{ f.icon }}</mat-icon>
+        </div>
+        <h3 class="feature-card__title">{{ f.title }}</h3>
+        <p class="feature-card__desc">{{ f.description }}</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" [@fadeUp]>
+      <div class="stat" *ngFor="let s of stats">
+        <span class="stat__num">{{ s.number }}</span>
+        <span class="stat__label">{{ s.label }}</span>
+      </div>
+    </div>
+
+  </main>
+</div>

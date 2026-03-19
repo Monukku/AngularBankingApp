@@ -1,13 +1,14 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../store/auth/auth.actions';
 import { LoggerService } from './logger.service';
 import { UserProfile } from '../models/user.model';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ import { UserProfile } from '../models/user.model';
 export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  
+
   // ✅ All dependencies now use inject() pattern
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
@@ -23,6 +24,7 @@ export class AuthService {
   private keycloakService = inject(KeycloakService);
   private store = inject(Store);
   private logger = inject(LoggerService);
+  private apiService = inject(ApiService);
 
   constructor() {
     // Only sync state in browser
@@ -51,6 +53,32 @@ export class AuthService {
 
   public loadUserProfile(): Promise<UserProfile> {
     return this.keycloakService.loadUserProfile() as Promise<UserProfile>;
+  }
+
+  /**
+   * Register new user with backend
+   * Calls /api/v1/auth/register endpoint
+   */
+  public register(data: {
+    fullName: string;
+    email: string;
+    mobileNumber: string;
+    password: string;
+  }): Observable<any> {
+    return this.apiService.register(data);
+  }
+
+  /**
+   * After successful registration, automatically login user
+   * Redirects to Keycloak login
+   */
+  public loginAfterRegistration(): Promise<void> {
+    if (isPlatformBrowser(this.platformId)) {
+      return this.keycloakService.login({
+        redirectUri: window.location.origin + '/dashboard',
+      });
+    }
+    return Promise.resolve();
   }
 
   // ✅ Login redirects to /home
@@ -82,16 +110,22 @@ export class AuthService {
     return Promise.resolve();
   }
 
-  public getToken(): Promise<string> {
-    return this.keycloakService
-      .updateToken(5)
-      .then(() => {
-        return this.keycloakService.getToken() || '';
-      })
-      .catch((err) => {
-        this.logger.error('Failed to refresh token', err);
-        return '';
-      });
+  public async getToken(): Promise<string> {
+    try {
+      await this.keycloakService.updateToken(5);
+      const token = this.keycloakService.getToken();
+
+      if (!token) {
+        this.logger.error('No token available after refresh attempt');
+        throw new Error('Authentication token unavailable - user may need to re-login');
+      }
+
+      return token;
+    } catch (err) {
+      this.logger.error('Failed to refresh token', err);
+      // Don't return empty string - let the error bubble up so interceptor can handle it
+      throw err;
+    }
   }
 
   public async getAuthHeaders(): Promise<HttpHeaders> {

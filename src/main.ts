@@ -17,7 +17,7 @@
 //       initOptions: {
 //         onLoad: 'check-sso',
 //         checkLoginIframe: false,
-//         silentCheckSsoRedirectUri: 
+//         silentCheckSsoRedirectUri:
 //           window.location.origin + '/assets/silent-check-sso.html',
 //       },
 //       enableBearerInterceptor: true,
@@ -47,38 +47,15 @@
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
-import { APP_INITIALIZER, importProvidersFrom, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { KeycloakAngularModule } from 'keycloak-angular';
+import { importProvidersFrom } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 
 import { appConfig } from './app/app.config';
-import { environment } from './environments/environment';
 
-// ✅ SSR-safe Keycloak initialization
-function initializeKeycloak(keycloak: KeycloakService, platformId: object) {
-  return () => {
-    // Only initialize Keycloak in browser
-    if (isPlatformBrowser(platformId)) {
-      return keycloak.init({
-        config: environment.keycloak,
-        initOptions: {
-          onLoad: 'check-sso',
-          checkLoginIframe: false,
-          silentCheckSsoRedirectUri:
-            window.location.origin + '/assets/silent-check-sso.html',
-        },
-        enableBearerInterceptor: true,
-        bearerExcludedUrls: ['/assets', '/clients/public'],
-      });
-    }
-    // Return resolved promise on server
-    return Promise.resolve();
-  };
-}
-
+// ✅ Bootstrap with app.config providers (includes Keycloak initialization)
 bootstrapApplication(AppComponent, {
   providers: [
     ...appConfig.providers,
@@ -88,11 +65,5 @@ bootstrapApplication(AppComponent, {
       KeycloakAngularModule,
       BrowserAnimationsModule
     ),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeKeycloak,
-      multi: true,
-      deps: [KeycloakService, PLATFORM_ID],
-    },
   ],
 });

@@ -29,12 +29,19 @@ body {
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
   background: $bg-light;
 
+  // When not authenticated (landing page), allow full height expansion
+  &:not(.authenticated) {
+    height: auto;
+    overflow: visible;
+  }
+
   &.authenticated {
     // Authenticated layout with header + sidebar + content
+    height: 100vh;
     .app-header {
       display: flex;
       box-shadow: $shadow-sm;
