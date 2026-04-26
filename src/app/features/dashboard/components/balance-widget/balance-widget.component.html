@@ -1,0 +1,54 @@
+ <div class="balance-widget">
+      <div class="balance-header">
+        <h2>Total Balance</h2>
+        <div class="balance-amount">
+          <span class="currency">$</span>
+          <span class="amount">{{ totalBalance() | number:'1.0-0' }}</span>
+        </div>
+        <div class="balance-change" [class.positive]="changePercentage() >= 0">
+          <mat-icon>{{ changePercentage() >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+          <span>{{ changePercentage() }}% this month</span>
+        </div>
+      </div>
+
+      <div class="savings-goal">
+        <div class="savings-label">
+          <span>Savings Goal</span>
+          <span>{{ savingsGoalPercent() }}%</span>
+        </div>
+        <div class="savings-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle
+              cx="40" cy="40" r="32"
+              fill="none"
+              stroke="rgba(255,255,255,0.1)"
+              stroke-width="4"
+            />
+            <circle
+              cx="40" cy="40" r="32"
+              fill="none"
+              stroke="#10b981"
+              stroke-width="4"
+              stroke-dasharray="201"
+              [attr.stroke-dashoffset]="savingsRingOffset()"
+              transform="rotate(-90 40 40)"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button mat-stroked-button (click)="onSend()">
+          <mat-icon>send</mat-icon>
+          Send
+        </button>
+        <button mat-stroked-button (click)="onRequest()">
+          <mat-icon>call_received</mat-icon>
+          Request
+        </button>
+        <button mat-stroked-button (click)="onTopUp()">
+          <mat-icon>add_circle</mat-icon>
+          Top Up
+        </button>
+      </div>
+    </div>

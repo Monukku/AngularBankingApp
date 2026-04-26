@@ -1,0 +1,22 @@
+ <div class="stats-grid">
+      @for (card of statCards(); track card.label) {
+        <div class="stat-card" [class]="card.color">
+          <div class="stat-icon">
+            <span>{{ card.icon }}</span>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">{{ card.label }}</div>
+            <div class="stat-value">
+              @if (card.isPercent) {
+                {{ card.value }}%
+              } @else {
+                \${{ card.value | number:'1.0-0' }}
+              }
+            </div>
+            <div class="stat-change" [class]="card.isPositive ? 'positive' : 'negative'">
+              {{ card.changeLabel }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>

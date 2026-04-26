@@ -1,0 +1,80 @@
+.balance-widget {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .balance-header h2 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .balance-amount {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .currency {
+      font-size: 24px;
+      margin-right: 4px;
+    }
+
+    .amount {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .balance-change {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .balance-change.positive {
+      color: #10b981;
+    }
+
+    .savings-goal {
+      margin: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .savings-label {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .savings-label span:first-child {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .savings-label span:last-child {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .savings-ring {
+      position: relative;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .quick-actions button {
+      flex: 1;
+      color: white;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
