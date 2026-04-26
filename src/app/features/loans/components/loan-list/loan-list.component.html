@@ -1,5 +1,5 @@
 <div class="loan-list">
-  @for (loan of loans; track trackByLoanId($index, loan)) {
+  @for (loan of (loans$ | async)?.data; track trackByLoanId($index, loan)) {
     <div class="loan-card">
       <mat-card>
         <mat-card-title>{{ loan.loanType }} Loan</mat-card-title>

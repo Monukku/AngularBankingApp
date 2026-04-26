@@ -1,5 +1,5 @@
 <!-- transaction-list.component.html -->
-@for (transaction of transactions; track trackByTransactionId($index, transaction)) {
+@for (transaction of transactions(); track trackByTransactionId($index, transaction)) {
   <div>
     <p>{{ transaction.id }}</p>
     <p>{{ transaction.amount }}</p>

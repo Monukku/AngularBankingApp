@@ -602,3 +602,12 @@ Would you like me to:
 2. **Show how to implement a complete feature (e.g., loading accounts)?**
 3. **Explain the EntityAdapter pattern for managing collections?**
 4. **Show how to connect this to Angular components?**
+
+**StateManagement Best practice being followed in this APP:
+Best Practice for Your App:
+Given your architecture:
+
+Scenario	Best Option
+One-time data fetch (Dashboard, Transaction list)	Signals 
+Continuous streams (Real-time rates, live updates in Dashboard)	Observables 
+Global state (Auth, User data)	NgRx Store 

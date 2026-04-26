@@ -25,21 +25,9 @@
   }
 
   <!-- ═══ Stat Cards ═══ -->
-  <div class="stat-cards-row">
-    @for (card of statCards(); track card.label) {
-      <div class="stat-card" [attr.data-color]="card.color">
-        <div class="stat-blob"></div>
-        <div class="stat-icon-wrap">{{ card.icon }}</div>
-        <div class="stat-label">{{ card.label }}</div>
-        <div class="stat-value">
-          @if (card.isPercent) { {{ card.value }}% } @else { ${{ card.value | number:'1.0-0' }} }
-        </div>
-        <span class="stat-change" [class.up]="card.isPositive" [class.down]="!card.isPositive">
-          {{ card.isPositive ? '↑' : '↓' }} {{ card.changeLabel }}
-        </span>
-      </div>
-    }
-  </div>
+  <app-stats-cards
+    [statCards]="statCards()">
+  </app-stats-cards>
 
   <!-- ═══ Main Grid ═══ -->
   <div class="dashboard-grid" [class.loading]="isLoading()">
@@ -48,56 +36,9 @@
     <div class="left-section">
 
       <!-- Balance Card -->
-      <div class="balance-card">
-        <div class="balance-card-inner">
-          <div class="balance-left">
-            <h3 class="card-label">Total Balance in {{ balanceData()?.currency || 'USD' }}</h3>
-            <div class="balance-amount">
-              <span class="balance-live-dot"></span>
-              ${{ totalBalance() | number:'1.0-0' }}
-            </div>
-            <div class="quick-actions">
-              <button mat-raised-button color="primary" class="action-btn action-send" (click)="onSend()">
-                <span class="action-icon">↑</span> Send
-              </button>
-              <button mat-stroked-button class="action-btn outlined" (click)="onRequest()">
-                <span class="action-icon">↓</span> Request
-              </button>
-              <button mat-stroked-button class="action-btn outlined" (click)="onTopUp()">
-                <span class="action-icon">+</span> Top-Up
-              </button>
-            </div>
-          </div>
-          <div class="balance-right">
-            <div class="live-indicator">
-              <div class="live-dot-sm"></div>
-              LIVE
-              <div class="waveform">
-                <div class="wave-bar"></div><div class="wave-bar"></div>
-                <div class="wave-bar"></div><div class="wave-bar"></div>
-                <div class="wave-bar"></div><div class="wave-bar"></div>
-              </div>
-            </div>
-            <div class="mini-ring-wrap">
-              <svg class="mini-ring" viewBox="0 0 80 80">
-                <defs>
-                  <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#a78bfa"/>
-                    <stop offset="100%" stop-color="#06b6d4"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="url(#ringGrad)" stroke-width="8"
-                        stroke-linecap="round" [attr.stroke-dasharray]="201"
-                        [attr.stroke-dashoffset]="savingsRingOffset()"
-                        transform="rotate(-90 40 40)" class="ring-progress"/>
-                <text x="40" y="36" text-anchor="middle" fill="white" font-size="12" font-weight="700">{{ savingsGoalPercent() }}%</text>
-                <text x="40" y="50" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">saved</text>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
+      <app-balance-widget
+        [balanceData]="balanceData()">
+      </app-balance-widget>
 
       <!-- Smart Insights -->
       <div class="insights-card">
@@ -172,10 +113,9 @@
             </select>
           </div>
           <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart -->
-          <div echarts
-               [options]="incomeChartOption()"
-               [autoResize]="true"
-               class="chart-container">
+          <div class="chart-container">
+            <!-- Chart will be implemented later -->
+            <div class="chart-placeholder">Income Chart</div>
           </div>
         </div>
 
@@ -205,98 +145,23 @@
             </select>
           </div>
           <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart -->
-          <div echarts
-               [options]="spendingChartOption()"
-               [autoResize]="true"
-               class="chart-container">
+          <div class="chart-container">
+            <!-- Chart will be implemented later -->
+            <div class="chart-placeholder">Spending Chart</div>
           </div>
         </div>
 
       </div>
 
       <!-- Transaction History -->
-      <div class="transaction-history-card">
-        <div class="history-header">
-          <div class="card-title-row">
-            <h3 class="card-title"><span class="card-title-icon">🧾</span> Transaction History</h3>
-            <span class="history-badge">{{ filteredTransactions().length }} records</span>
-          </div>
-          <div class="history-controls">
-            <div class="search-box">
-              <mat-icon>search</mat-icon>
-              <input type="text" placeholder="Search transactions…"
-                     [value]="searchQuery()" (input)="onSearchChange($event)" />
-            </div>
-            <!-- CHANGED: dynamic period options from service -->
-            <select class="period-select" (change)="onPeriodChange($event)">
-              @for (opt of periodOptions(); track opt) {
-                <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
-              }
-            </select>
-            <button mat-icon-button class="filter-btn" aria-label="Filter">
-              <mat-icon>filter_list</mat-icon>
-            </button>
-          </div>
-        </div>
-        <div class="table-wrapper">
-          <table class="tx-table">
-            <thead>
-              <tr>
-                <th class="col-check"><mat-checkbox></mat-checkbox></th>
-                <th>Invoice</th><th>Transaction</th><th>Date</th><th>Amount</th><th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of filteredTransactions(); track row.invoice) {
-                <tr class="tx-row">
-                  <td class="col-check"><mat-checkbox></mat-checkbox></td>
-                  <td><div class="invoice-cell"><span class="invoice-icon">📄</span>{{ row.invoice }}</div></td>
-                  <td>
-                    <div class="transaction-cell">
-                      <div class="company-logo"><img [src]="row.logo" [alt]="row.name" /></div>
-                      <div class="transaction-details">
-                        <div class="transaction-name">{{ row.name }}</div>
-                        <div class="transaction-category">{{ row.email || row.category }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="date-cell">
-                      <span class="date-main">{{ row.date | date:'dd MMM' }}</span>
-                      <span class="date-year">{{ row.date | date:'yyyy' }}</span>
-                    </div>
-                  </td>
-                  <td [class.negative]="row.amount < 0" [class.positive]="row.amount > 0">
-                    <span class="amount-val">
-                      {{ row.amount < 0 ? '−' : '+' }}${{ (row.amount < 0 ? row.amount * -1 : row.amount) | number:'1.2-2' }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-badge"
-                          [class.completed]="row.status === 'Completed'"
-                          [class.progress]="row.status === 'On Progress'"
-                          [class.pending]="row.status === 'Pending'">
-                      @if (row.status === 'Completed') { <span>✓</span> }
-                      @else if (row.status === 'On Progress') { <span>⏳</span> }
-                      @else { <span>●</span> }
-                      {{ row.status }}
-                    </span>
-                  </td>
-                </tr>
-              }
-              @if (!filteredTransactions().length) {
-                <tr><td colspan="6">
-                  <div class="empty-state">
-                    <div class="empty-icon">🔍</div>
-                    <div class="empty-title">No transactions found</div>
-                    <div class="empty-sub">Try adjusting your search or date filter</div>
-                  </div>
-                </td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <app-transaction-list-widget
+        [transactions]="filteredTransactions()"
+        [searchQuery]="searchQuery()"
+        [selectedPeriod]="selectedPeriod()"
+        [periodOptions]="periodOptions()"
+        (searchChange)="onSearchChange($event)"
+        (periodChange)="onPeriodChange($event)">
+      </app-transaction-list-widget>
 
     </div><!-- /left-section -->
 
@@ -698,10 +563,9 @@
         </select>
       </div>
       <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart block -->
-      <div echarts
-           [options]="cashflowChartOption()"
-           [autoResize]="true"
-           class="cashflow-chart-wrap">
+      <div class="cashflow-chart-wrap">
+        <!-- Chart will be implemented later -->
+        <div class="chart-placeholder">Cash Flow Chart</div>
       </div>
       <div class="cashflow-summary">
         @for (point of cashflowSummary(); track point.label) {

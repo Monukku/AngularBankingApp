@@ -5,34 +5,24 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
-import type { EChartsOption } from 'echarts';
-import { NgxEchartsModule } from 'ngx-echarts';
-import * as echarts from 'echarts';
 
 // Angular Material
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-// Services & Models
+// Services
 import { DashboardService } from '../../services/dashboard.service';
-import {
-  BalanceData, QuickUser, Transaction, IncomeData, SpendingData,
-  CreditCard, Workflow, LiveRate, AccountHealthScore, BudgetCategory,
-  SmartInsight, ActivityEvent, UpcomingBill, RecurringSubscription,
-  SavingsGoal, MonthlyReportItem, SpendingBreakdownSegment,
-  CashflowPoint, RecentLogin, TaxSummaryItem,
-} from '../../models/dashboard.model';
+import { DashboardStateService } from '../../services/dashboard-state.service';
 
-// Full echarts import — works with Angular 18+ and ngx-echarts v8+
-// Tree-shaking is handled by the bundler for production builds.
+// Components
+import { BalanceWidgetComponent } from '../balance-widget/balance-widget.component';
+import { StatsCardsComponent } from '../stats-cards/stats-cards.component';
+import { TransactionListWidgetComponent } from '../transaction-list-widget/transaction-list-widget.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -43,346 +33,60 @@ import {
     FormsModule,
     MatIconModule,
     MatButtonModule,
-    MatTableModule,
-    MatCheckboxModule,
     MatInputModule,
     MatSelectModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    NgxEchartsModule,      // replaces NgxChartsModule — no more [view] / ResizeObserver
+
+    // Custom components
+    BalanceWidgetComponent,
+    StatsCardsComponent,
+    TransactionListWidgetComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
-  private snackBar         = inject(MatSnackBar);
-  private destroyRef       = inject(DestroyRef);
+  private stateService = inject(DashboardStateService);
+  private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
 
-  // ─── Loading & error ──────────────────────────────────────────
-  isLoading = this.dashboardService.isLoading;
-  hasError  = signal(false);
+  // ─── Loading & UI State ───────────────────────────────────────
+  isLoading = signal(false);
 
-  // ─── Core data signals ────────────────────────────────────────
-  balanceData      = signal<BalanceData | null>(null);
-  quickUsers       = signal<QuickUser[]>([]);
-  transactions     = signal<Transaction[]>([]);
-  incomeData       = signal<IncomeData | null>(null);
-  spendingData     = signal<SpendingData | null>(null);
-  cards            = signal<CreditCard[]>([]);
-  workflows        = signal<Workflow[]>([]);
-  liveRates        = signal<LiveRate[]>([]);
-  accountHealth    = signal<AccountHealthScore | null>(null);
-  budgetCategories = signal<BudgetCategory[]>([]);
-
-  // ─── New widget data signals ──────────────────────────────────
-  smartInsights          = signal<SmartInsight[]>([]);
-  activityFeed           = signal<ActivityEvent[]>([]);
-  upcomingBills          = signal<UpcomingBill[]>([]);
-  recurringSubscriptions = signal<RecurringSubscription[]>([]);
-  savingsGoals           = signal<SavingsGoal[]>([]);
-  monthlyReport          = signal<MonthlyReportItem[]>([]);
-  spendingBreakdown      = signal<SpendingBreakdownSegment[]>([]);
-  cashflowRawData        = signal<any[]>([]);
-  cashflowSummaryData    = signal<CashflowPoint[]>([]);
-  recentLogins           = signal<RecentLogin[]>([]);
-  taxSummary             = signal<TaxSummaryItem[]>([]);
-
-  // Rewards
-  rewardsPointsVal  = signal(0);
-  rewardsTierVal    = signal('Gold');
-  rewardsTierPct    = signal(0);
-  rewardsTierCurr   = signal(0);
-  rewardsTierNxt    = signal(0);
-  cashbackEarnedVal = signal(0);
-  cashbackTotalVal  = signal(0);
-
-  // Net worth
-  netWorthVal       = signal(0);
-  netWorthChangeVal = signal(0);
-  totalAssetsVal    = signal(0);
-  totalLiabsVal     = signal(0);
-
-  // Tax / Security
-  estimatedTaxVal  = signal(0);
-  securityLevelVal = signal('Strong');
-
-  // ─── UI state ─────────────────────────────────────────────────
-  searchQuery         = signal('');
-  selectedPeriod      = signal('Last 30 days');
-  selectedCard        = signal(0);
-  periodOptions       = signal<string[]>([]);
-  supportedCurrencies = signal<{ code: string; flag: string; label: string }[]>([]);
-
-  conversionAmount1   = signal(0);
+  // ─── Currency Conversion ──────────────────────────────────────
+  conversionAmount1 = signal(0);
   conversionCurrency1 = signal('USD');
-  conversionAmount2   = signal(0);
+  conversionAmount2 = signal(0);
   conversionCurrency2 = signal('EUR');
-
-  displayedColumns = ['select', 'invoice', 'transaction', 'date', 'amount', 'status'];
-
-  // ─── Shared palette matching your SCSS vars ───────────────────
-  private readonly p = {
-    violet:  '#7c3aed',
-    vLight:  '#a78bfa',
-    cyan:    '#06b6d4',
-    emerald: '#10b981',
-    grid:    'rgba(255,255,255,0.07)',
-    text:    '#5a5e78',
-    tooltip: '#1c1f35',
-  };
-
-  private baseStyle = {
-    backgroundColor: 'transparent',
-    textStyle: { color: this.p.text, fontFamily: 'DM Sans, sans-serif' },
-  };
-
-  // ─── Computed: core ───────────────────────────────────────────
-  totalBalance       = computed(() => this.balanceData()?.totalBalance ?? 0);
-  savingsGoalPercent = computed(() => this.balanceData()?.savingsGoalPercent ?? 0);
-
-  savingsRingOffset = computed(() => {
-    const c = 201;
-    return c - (c * this.savingsGoalPercent() / 100);
-  });
-
-  statCards = computed(() => [
-    {
-      label: 'Total Balance', icon: '💼', color: 'violet',
-      value: this.totalBalance(),
-      changeLabel: `${this.balanceData()?.changePercentage ?? 0}% this month`,
-      isPositive: (this.balanceData()?.changePercentage ?? 0) >= 0,
-      isPercent: false,
-    },
-    {
-      label: 'Total Spent', icon: '📤', color: 'cyan',
-      value: this.spendingData()?.total ?? 0,
-      changeLabel: `${this.spendingData()?.changePercentage ?? 0}% vs last`,
-      isPositive: this.spendingData()?.isPositive ?? true,
-      isPercent: false,
-    },
-    {
-      label: 'Total Income', icon: '📥', color: 'emerald',
-      value: this.incomeData()?.total ?? 0,
-      changeLabel: `${this.incomeData()?.changePercentage ?? 0}% this month`,
-      isPositive: this.incomeData()?.isPositive ?? true,
-      isPercent: false,
-    },
-    {
-      label: 'Savings Goal', icon: '🎯', color: 'rose',
-      value: this.savingsGoalPercent(),
-      changeLabel: 'On track',
-      isPositive: true,
-      isPercent: true,
-    },
-  ]);
-
-  filteredTransactions = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    if (!q) return this.transactions();
-    return this.transactions().filter(t =>
-      t.name.toLowerCase().includes(q) ||
-      t.category.toLowerCase().includes(q) ||
-      t.invoice.toLowerCase().includes(q)
-    );
-  });
-
-  currentCard = computed(() => {
-    const list = this.cards();
-    return list[this.selectedCard()] ?? list[0] ?? null;
-  });
-
-  cardLimitPercent = computed(() => {
-    const card = this.currentCard();
-    if (!card?.limit) return 0;
-    return Math.min((card.balance / card.limit) * 100, 100);
-  });
-
-  // ─── Computed: widget helpers ─────────────────────────────────
-  overdueCount = computed(() =>
-    this.upcomingBills().filter(b => b.urgency === 'overdue').length
-  );
-  subscriptionsTotal = computed(() =>
-    this.recurringSubscriptions().reduce((s, r) => s + r.amount, 0)
-  );
-  spendingBreakdownTotal = computed(() =>
-    this.spendingBreakdown().reduce((s, r) => s + r.value, 0)
-  );
-  cashflowSummary    = computed(() => this.cashflowSummaryData());
-  netWorth           = computed(() => this.netWorthVal());
-  netWorthChange     = computed(() => this.netWorthChangeVal());
-  totalAssets        = computed(() => this.totalAssetsVal());
-  totalLiabilities   = computed(() => this.totalLiabsVal());
-  assetsPercent      = computed(() => {
-    const t = this.totalAssetsVal() + this.totalLiabsVal();
-    return t ? Math.round((this.totalAssetsVal() / t) * 100) : 0;
-  });
-  liabilitiesPercent = computed(() => {
-    const t = this.totalAssetsVal() + this.totalLiabsVal();
-    return t ? Math.round((this.totalLiabsVal() / t) * 100) : 0;
-  });
-  rewardsPoints      = computed(() => this.rewardsPointsVal());
-  rewardsTier        = computed(() => this.rewardsTierVal());
-  rewardsTierPercent = computed(() => this.rewardsTierPct());
-  rewardsTierCurrent = computed(() => this.rewardsTierCurr());
-  rewardsTierNext    = computed(() => this.rewardsTierNxt());
-  cashbackEarned     = computed(() => this.cashbackEarnedVal());
-  cashbackTotal      = computed(() => this.cashbackTotalVal());
-  estimatedTax       = computed(() => this.estimatedTaxVal());
-  securityLevel      = computed(() => this.securityLevelVal());
-  currentYear        = computed(() => new Date().getFullYear());
-
-  // ─── Computed: ECharts options ────────────────────────────────
-  // All three are computed signals so they update reactively when
-  // data signals change. ECharts [autoresize]="true" handles sizing —
-  // no ViewChild, no ResizeObserver, no [view] tuple needed.
-
-  incomeChartOption = computed<EChartsOption>(() => {
-    const d = this.incomeData();
-    if (!d) return {};
-    return {
-      ...this.baseStyle,
-      tooltip: this.makeTooltip(this.p.emerald),
-      grid: { top: 10, right: 10, bottom: 20, left: 45 },
-      xAxis: this.makeCategoryAxis(d.chartData.map(c => c.month)),
-      yAxis: this.makeValueAxis(),
-      series: [{
-        type: 'line',
-        data: d.chartData.map(c => c.value),
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: this.p.emerald, width: 2.5 },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(16,185,129,0.35)' },
-            { offset: 1, color: 'rgba(16,185,129,0.02)' },
-          ]),
-        },
-      }],
-    };
-  });
-
-  spendingChartOption = computed<EChartsOption>(() => {
-    const d = this.spendingData();
-    if (!d) return {};
-    return {
-      ...this.baseStyle,
-      tooltip: this.makeTooltip(this.p.cyan),
-      grid: { top: 10, right: 10, bottom: 20, left: 45 },
-      xAxis: this.makeCategoryAxis(d.chartData.map(c => c.month)),
-      yAxis: this.makeValueAxis(),
-      series: [{
-        type: 'line',
-        data: d.chartData.map(c => c.value),
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: this.p.cyan, width: 2.5 },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(6,182,212,0.35)' },
-            { offset: 1, color: 'rgba(6,182,212,0.02)' },
-          ]),
-        },
-      }],
-    };
-  });
-
-  cashflowChartOption = computed<EChartsOption>(() => {
-    const raw    = this.cashflowRawData();
-    if (!raw.length) return {};
-    const series = raw[0]?.series ?? [];
-    return {
-      ...this.baseStyle,
-      tooltip: this.makeTooltip(this.p.violet),
-      grid: { top: 10, right: 10, bottom: 30, left: 55 },
-      xAxis: this.makeCategoryAxis(
-        series.map((s: any) => s.name),
-        { interval: 4 }
-      ),
-      yAxis: this.makeValueAxis(),
-      series: [{
-        type: 'line',
-        data: series.map((s: any) => s.value),
-        smooth: true,
-        symbol: 'none',
-        lineStyle: {
-          color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
-            { offset: 0, color: this.p.violet },
-            { offset: 1, color: this.p.cyan },
-          ]),
-          width: 2.5,
-        },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(124,58,237,0.30)' },
-            { offset: 1, color: 'rgba(6,182,212,0.02)' },
-          ]),
-        },
-      }],
-    };
-  });
-
-  // ─── ECharts builder helpers (DRY) ────────────────────────────
-  private makeTooltip(borderColor: string) {
-    return {
-      trigger: 'axis' as const,
-      backgroundColor: this.p.tooltip,
-      borderColor,
-      borderWidth: 1,
-      textStyle: { color: '#f0f2ff', fontSize: 12 },
-      formatter: (params: any) =>
-        `${params[0].name}<br/><b>$${(params[0].value as number).toLocaleString()}</b>`,
-    };
-  }
-
-  private makeCategoryAxis(data: string[], extra: Record<string, any> = {}) {
-    return {
-      type: 'category' as const,
-      data,
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { color: this.p.text, fontSize: 11, ...extra },
-      splitLine: { show: false },
-    };
-  }
-
-  private makeValueAxis() {
-    return {
-      type: 'value' as const,
-      axisLabel: {
-        color: this.p.text,
-        fontSize: 11,
-        formatter: (v: number) => `$${v / 1000}k`,
-      },
-      splitLine: { lineStyle: { color: this.p.grid } },
-      axisLine: { show: false },
-      axisTick: { show: false },
-    };
-  }
 
   // ─── Lifecycle ────────────────────────────────────────────────
   ngOnInit(): void {
+    this.isLoading.set(true);
+    // Data loading is now handled by toSignal in services
+    setTimeout(() => this.isLoading.set(false), 100);
+
     this.loadConfig();
-    this.loadDashboardData();
     this.loadLiveRates();
     this.loadAccountHealth();
     this.loadNewWidgets();
   }
 
-  // ─── Config loader ────────────────────────────────────────────
+  // ─── Data Loading ─────────────────────────────────────────────
   private loadConfig(): void {
     this.dashboardService.getPeriodOptions()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(opts => {
-        this.periodOptions.set(opts);
-        if (opts.length) this.selectedPeriod.set(opts[0]);
+        this.stateService.periodOptions.set(opts);
+        if (opts.length) this.stateService.selectedPeriod.set(opts[0]);
       });
 
     this.dashboardService.getSupportedCurrencies()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(currencies => {
-        this.supportedCurrencies.set(currencies);
+        this.stateService.supportedCurrencies.set(currencies);
         if (currencies.length >= 2) {
           this.conversionCurrency1.set(currencies[0].code);
           this.conversionCurrency2.set(currencies[1].code);
@@ -390,137 +94,93 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-  // ─── Data loaders ─────────────────────────────────────────────
-  loadDashboardData(): void {
-    this.hasError.set(false);
-    this.dashboardService.getAllDashboardData().pipe(
-      finalize(() => this.dashboardService.isLoading.set(false)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: data => {
-        this.balanceData.set(data.balance);
-        this.quickUsers.set(data.quickUsers);
-        this.transactions.set(data.transactions);
-        this.incomeData.set(data.income);
-        this.spendingData.set(data.spending);
-        this.cards.set(data.cards);
-        this.workflows.set(data.workflows);
-      },
-      error: () => {
-        this.hasError.set(true);
-        this.showMessage('Error loading dashboard data', 'error');
-      },
-    });
-  }
-
   loadLiveRates(): void {
     this.dashboardService.getLiveRates()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(rates => this.liveRates.set(rates));
+      .subscribe(rates => this.stateService.liveRates.set(rates));
   }
 
   loadAccountHealth(): void {
     this.dashboardService.getAccountHealth()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(health => this.accountHealth.set(health));
-  }
-
-  reloadTransactions(): void {
-    this.dashboardService.getTransactions(this.selectedPeriod())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(t => this.transactions.set(t));
+      .subscribe(health => this.stateService.accountHealth.set(health));
   }
 
   private loadNewWidgets(): void {
-    this.dashboardService.getBudgetCategories()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.budgetCategories.set(d));
+    // Load all widget data - simplified version
+    const loaders = [
+      this.dashboardService.getBudgetCategories().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.budgetCategories.set(d)),
 
-    this.dashboardService.getSmartInsights()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.smartInsights.set(d));
+      this.dashboardService.getSmartInsights().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.smartInsights.set(d)),
 
-    this.dashboardService.getActivityFeed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.activityFeed.set(d));
+      this.dashboardService.getActivityFeed().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.activityFeed.set(d)),
 
-    this.dashboardService.getUpcomingBills()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.upcomingBills.set(d));
+      this.dashboardService.getUpcomingBills().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.upcomingBills.set(d)),
 
-    this.dashboardService.getRecurringSubscriptions()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.recurringSubscriptions.set(d));
+      this.dashboardService.getRecurringSubscriptions().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.recurringSubscriptions.set(d)),
 
-    this.dashboardService.getSavingsGoals()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.savingsGoals.set(d));
+      this.dashboardService.getSavingsGoals().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.savingsGoals.set(d)),
 
-    this.dashboardService.getMonthlyReport()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.monthlyReport.set(d));
+      this.dashboardService.getMonthlyReport().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.monthlyReport.set(d)),
 
-    this.dashboardService.getSpendingBreakdown()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.spendingBreakdown.set(d));
+      this.dashboardService.getSpendingBreakdown().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.spendingBreakdown.set(d)),
 
-    this.dashboardService.getCashflowData()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.cashflowRawData.set(d.chartData);
-        this.cashflowSummaryData.set(d.summary);
-      });
+      this.dashboardService.getCashflowData().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.cashflowRawData.set(d.chartData);
+          this.stateService.cashflowSummaryData.set(d.summary);
+        }),
 
-    this.dashboardService.getNetWorth()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.netWorthVal.set(d.netWorth);
-        this.netWorthChangeVal.set(d.change);
-        this.totalAssetsVal.set(d.assets);
-        this.totalLiabsVal.set(d.liabilities);
-      });
+      this.dashboardService.getNetWorth().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.netWorth.set(d.netWorth);
+          this.stateService.netWorthChange.set(d.change);
+          this.stateService.totalAssets.set(d.assets);
+          this.stateService.totalLiabilities.set(d.liabilities);
+        }),
 
-    this.dashboardService.getRecentLogins()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.recentLogins.set(d));
+      this.dashboardService.getRecentLogins().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.recentLogins.set(d)),
 
-    this.dashboardService.getTaxSummary()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.taxSummary.set(d.items);
-        this.estimatedTaxVal.set(d.estimatedTax);
-      });
+      this.dashboardService.getTaxSummary().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.taxSummary.set(d.items);
+          this.stateService.estimatedTax.set(d.estimatedTax);
+        }),
 
-    this.dashboardService.getRewardsData()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.rewardsPointsVal.set(d.points);
-        this.rewardsTierVal.set(d.tier);
-        this.rewardsTierPct.set(d.tierPercent);
-        this.rewardsTierCurr.set(d.tierCurrent);
-        this.rewardsTierNxt.set(d.tierNext);
-        this.cashbackEarnedVal.set(d.cashbackMonth);
-        this.cashbackTotalVal.set(d.cashbackTotal);
-      });
+      this.dashboardService.getRewardsData().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.rewardsPoints.set(d.points);
+          this.stateService.rewardsTier.set(d.tier);
+          this.stateService.rewardsTierPercent.set(d.tierPercent);
+          this.stateService.rewardsTierCurrent.set(d.tierCurrent);
+          this.stateService.rewardsTierNext.set(d.tierNext);
+          this.stateService.cashbackEarned.set(d.cashbackMonth);
+          this.stateService.cashbackTotal.set(d.cashbackTotal);
+        }),
+    ];
   }
 
-  // ─── Event handlers ───────────────────────────────────────────
-  onSearchChange(event: Event): void {
-    this.searchQuery.set((event.target as HTMLInputElement).value);
+  // ─── Event Handlers ───────────────────────────────────────────
+  onSearchChange(query: string): void {
+    this.stateService.updateSearchQuery(query);
   }
 
-  onPeriodChange(event: Event): void {
-    this.selectedPeriod.set((event.target as HTMLSelectElement).value);
-    this.reloadTransactions();
-  }
-
-  onCurrency1Change(event: Event): void {
-    this.conversionCurrency1.set((event.target as HTMLSelectElement).value);
+  onCurrency1Change(event: any): void {
+    this.conversionCurrency1.set(event.value);
     this.conversionAmount2.set(0);
   }
 
-  onCurrency2Change(event: Event): void {
-    this.conversionCurrency2.set((event.target as HTMLSelectElement).value);
+  onCurrency2Change(event: any): void {
+    this.conversionCurrency2.set(event.value);
     this.conversionAmount2.set(0);
   }
 
@@ -529,31 +189,10 @@ export class DashboardComponent implements OnInit {
     this.conversionAmount2.set(0);
   }
 
-  onAmount2Change(event: Event): void {
-    this.conversionAmount2.set(+(event.target as HTMLInputElement).value);
-  }
-
-  // ─── Actions ──────────────────────────────────────────────────
-  onSend(): void    { this.showMessage('Send money feature'); }
-  onRequest(): void { this.showMessage('Request money feature'); }
-  onTopUp(): void   { this.showMessage('Top-up feature'); }
-  onAddCard(): void { this.showMessage('Add new card feature'); }
-
-  onUserClick(user: QuickUser): void {
-    if (user.amount) this.showMessage(`Quick transfer to ${user.name}`);
-  }
-
-  onWorkflowClick(workflow: Workflow): void {
-    this.showMessage(`Opening ${workflow.title} workflow`);
-  }
-
-  nextCard(): void {
-    this.selectedCard.set((this.selectedCard() + 1) % this.cards().length);
-  }
-
-  previousCard(): void {
-    const len = this.cards().length;
-    this.selectedCard.set(this.selectedCard() === 0 ? len - 1 : this.selectedCard() - 1);
+  reloadTransactions(): void {
+    this.dashboardService.getTransactions(this.stateService.selectedPeriod())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(t => this.stateService.transactions.set(t));
   }
 
   convert(): void {
@@ -575,14 +214,6 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-  // ─── Template helpers ─────────────────────────────────────────
-  formatCardNumber(cardNumber: string): string {
-    return cardNumber.replace(/(\d{4})(?=\d)/g, '$1 ');
-  }
-
-  budgetIsOver(cat: BudgetCategory): boolean { return cat.spent > cat.limit; }
-  budgetPercent(cat: BudgetCategory): number  { return Math.min((cat.spent / cat.limit) * 100, 100); }
-
   private showMessage(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
     this.snackBar.open(message, 'Close', {
       duration: 3000,
@@ -590,5 +221,126 @@ export class DashboardComponent implements OnInit {
       verticalPosition: 'top',
       panelClass: [`snackbar-${type}`],
     });
+  }
+
+  // ─── Expose state service properties ──────────────────────────
+  get balanceData() { return this.stateService.balanceData; }
+  get savingsGoalPercent() { return this.stateService.savingsGoalPercent; }
+  get statCards() { return this.stateService.statCards; }
+  get transactions() { return this.stateService.transactions; }
+  get filteredTransactions() { return this.stateService.filteredTransactions; }
+  get searchQuery() { return this.stateService.searchQuery; }
+  get selectedPeriod() { return this.stateService.selectedPeriod; }
+  get periodOptions() { return this.stateService.periodOptions; }
+  get supportedCurrencies() { return this.stateService.supportedCurrencies; }
+  get incomeData() { return this.stateService.incomeData; }
+  get spendingData() { return this.stateService.spendingData; }
+  get totalBalance() { return this.stateService.totalBalance; }
+  get accountHealth() { return this.stateService.accountHealth; }
+  get monthlyReport() { return this.stateService.monthlyReport; }
+  get spendingBreakdown() { return this.stateService.spendingBreakdown; }
+  get spendingBreakdownTotal() { return computed(() => this.spendingBreakdown().reduce((s, r) => s + r.value, 0)); }
+  get savingsGoals() { return this.stateService.savingsGoals; }
+  get cashflowSummary() { return this.stateService.cashflowSummaryData; }
+  get netWorth() { return this.stateService.netWorth; }
+  get netWorthChange() { return this.stateService.netWorthChange; }
+  get totalAssets() { return this.stateService.totalAssets; }
+  get assetsPercent() { return computed(() => {
+    const t = this.totalAssets() + this.stateService.totalLiabilities();
+    return t ? Math.round((this.totalAssets() / t) * 100) : 0;
+  }); }
+  get totalLiabilities() { return this.stateService.totalLiabilities; }
+  get liabilitiesPercent() { return computed(() => {
+    const t = this.totalAssets() + this.stateService.totalLiabilities();
+    return t ? Math.round((this.stateService.totalLiabilities() / t) * 100) : 0;
+  }); }
+  get currentYear() { return computed(() => new Date().getFullYear()); }
+  get taxSummary() { return this.stateService.taxSummary; }
+  get estimatedTax() { return this.stateService.estimatedTax; }
+  get securityLevel() { return this.stateService.securityLevel; }
+  get hasError() { return this.stateService.hasError; }
+  get smartInsights() { return this.stateService.smartInsights; }
+  get quickUsers() { return this.stateService.quickUsers; }
+  get activityFeed() { return this.stateService.activityFeed; }
+  get upcomingBills() { return this.stateService.upcomingBills; }
+  get recurringSubscriptions() { return this.stateService.recurringSubscriptions; }
+  get liveRates() { return this.stateService.liveRates; }
+  get budgetCategories() { return this.stateService.budgetCategories; }
+  get recentLogins() { return this.stateService.recentLogins; }
+  get rewardsPoints() { return this.stateService.rewardsPoints; }
+  get rewardsTier() { return this.stateService.rewardsTier; }
+  get rewardsTierPercent() { return this.stateService.rewardsTierPercent; }
+  get rewardsTierCurrent() { return this.stateService.rewardsTierCurrent; }
+  get rewardsTierNext() { return this.stateService.rewardsTierNext; }
+  get cashbackEarned() { return this.stateService.cashbackEarned; }
+  get cashbackTotal() { return this.stateService.cashbackTotal; }
+  get currentCard() { return this.stateService.currentCard; }
+  get cards() { return this.stateService.cards; }
+  get selectedCard() { return this.stateService.selectedCard; }
+  get cardLimitPercent() { return this.stateService.cardLimitPercent; }
+  get overdueCount() { return this.stateService.overdueCount; }
+  get subscriptionsTotal() { return this.stateService.subscriptionsTotal; }
+  get workflows() { return this.stateService.workflows; }
+
+  // Methods
+  loadDashboardData() {
+    this.dashboardService.loadDashboardData();
+  }
+
+  onUserClick(user: any) {
+    // Handle user click - could navigate to user profile or send money
+    console.log('User clicked:', user);
+  }
+
+  onPeriodChange(value: string | Event): void {
+    let period: string;
+    if (typeof value === 'string') {
+      period = value;
+    } else {
+      period = (value.target as HTMLSelectElement)?.value || '';
+    }
+    if (period) {
+      this.stateService.selectedPeriod.set(period);
+    }
+  }
+
+  onAddCard() {
+    // Handle add card functionality
+    console.log('Add card clicked');
+  }
+
+  formatCardNumber(cardNumber: string): string {
+    // Format card number for display
+    return cardNumber.replace(/(\d{4})(?=\d)/g, '$1 ');
+  }
+
+  previousCard() {
+    const current = this.selectedCard();
+    const total = this.cards().length;
+    this.stateService.selectedCard.set(current > 0 ? current - 1 : total - 1);
+  }
+
+  nextCard() {
+    const current = this.selectedCard();
+    const total = this.cards().length;
+    this.stateService.selectedCard.set(current < total - 1 ? current + 1 : 0);
+  }
+
+  onAmount2Change(event: any) {
+    // Handle amount 2 change
+    console.log('Amount 2 changed:', event);
+  }
+
+  onWorkflowClick(workflow: any) {
+    // Handle workflow click
+    console.log('Workflow clicked:', workflow);
+  }
+
+  budgetIsOver(cat: any): boolean {
+    return cat.spent > cat.limit;
+  }
+
+  budgetPercent(cat: any): number {
+    return cat.limit ? Math.min((cat.spent / cat.limit) * 100, 100) : 0;
   }
 }

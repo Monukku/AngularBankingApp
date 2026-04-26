@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { LoanService } from '../../service/loan.service'; 
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoanDetails } from '../../models/loan.model';
+import { BehaviorSubject, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-loan-list',
@@ -17,22 +18,20 @@ import { LoanDetails } from '../../models/loan.model';
   styleUrls: ['./loan-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoanListComponent implements OnInit {
+export class LoanListComponent {
   private loanService = inject(LoanService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
-  loans: LoanDetails[] = [];
+  // Trigger to refresh loans list
+  private refreshLoans$ = new BehaviorSubject<void>(undefined);
 
-  constructor() { }
-
-  ngOnInit(): void {
-    this.loanService.getLoans()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(response => {
-        this.loans = response.data;
-      });
-  }
+  // Observable stream - switches to fresh loan data on refresh
+  loans$ = this.refreshLoans$.pipe(
+    switchMap(() => this.loanService.getLoans().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ))
+  );
 
   /**
    * TrackBy function for loan list iteration
@@ -49,8 +48,11 @@ export class LoanListComponent implements OnInit {
   }
 
   deleteLoan(id: string) {
-    this.loanService.deleteLoan(id).subscribe(() => {
-      this.loans = this.loans.filter(loan => loan.loanId !== id);
-    });
+    this.loanService.deleteLoan(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        // Trigger refresh of loans list after deletion
+        this.refreshLoans$.next();
+      });
   }
 }

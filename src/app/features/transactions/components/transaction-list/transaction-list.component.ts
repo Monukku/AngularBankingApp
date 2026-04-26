@@ -1,9 +1,9 @@
 // transaction-list.component.ts
-import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, DestroyRef, signal } from '@angular/core';
 import { TransactionService } from '../../services/transaction.service';
-import { Transaction } from '../../models/transaction.model'; 
+import { Transaction } from '../../models/transaction.model';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -14,29 +14,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrls: ['./transaction-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TransactionListComponent implements OnInit {
+export class TransactionListComponent {
   private transactionService = inject(TransactionService);
   private destroyRef = inject(DestroyRef);
 
-  transactions: Transaction[] = []; // Initialize the property here
-
-  constructor() { }
-
-  ngOnInit(): void {
-    this.loadTransactions();
-  }
+  // Signal for transactions - automatically handles data fetching
+  transactions = toSignal(this.transactionService.getTransactions(), { initialValue: [] });
 
   /**
    * TrackBy function for transaction list iteration
    * Improves performance by tracking by transaction ID instead of object reference
    */
   trackByTransactionId = (index: number, transaction: Transaction) => transaction.id;
-
-  loadTransactions(): void {
-    this.transactionService.getTransactions()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(transactions => {
-        this.transactions = transactions;
-      });
-  }
 }

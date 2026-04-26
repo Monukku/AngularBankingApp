@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, map, delay, of, interval, switchMap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -26,16 +26,17 @@ import {
   TaxSummaryItem,
 } from '../models/dashboard.model';
 
+//interview resvision notes:
+//@Injectable({ providedIn: 'root' }) : means this service will be a singleton and available throughout the app without needing to add it to any module's providers array.
+//@Injectable({providedIn: 'platform' }): would make it available in all platforms (browser, server, web worker),
+//@Injectable({providedIn: 'any' }) : creates a new instance in each lazy loaded module.
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private http = inject(HttpClient);
-
   private readonly useMock  = environment.api.mock.enabled;
   private readonly apiBase  = environment.api.baseUrl;
   private readonly mockBase = environment.api.mock.baseUrl;
   private readonly delays   = environment.api.mock.delays;
-
-  isLoading = signal(false);
 
   private url(path: string): string {
     return this.useMock ? `${this.mockBase}/${path}.json` : `${this.apiBase}/${path}`;
@@ -150,7 +151,6 @@ export class DashboardService {
   }
 
   getAllDashboardData(): Observable<DashboardData> {
-    this.isLoading.set(true);
     return forkJoin({
       balance:      this.getBalance(),
       quickUsers:   this.getQuickUsers(),
@@ -159,7 +159,7 @@ export class DashboardService {
       spending:     this.getSpendingData(),
       cards:        this.getCards(),
       workflows:    this.getWorkflows(),
-    }).pipe(map(data => { this.isLoading.set(false); return data; }));
+    });
   }
 
   // ─── Mutations (unchanged) ────────────────────────────────────
@@ -543,4 +543,10 @@ export class DashboardService {
     );
   }
 
+  // ─── Load dashboard data method ───────────────────────────────
+  loadDashboardData(): void {
+    // This method would trigger reloading of all dashboard data
+    // In a real implementation, this would emit to a subject that components subscribe to
+    // For now, it's a placeholder that could be implemented with state management
+  }
 }
