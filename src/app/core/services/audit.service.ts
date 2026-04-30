@@ -9,6 +9,6 @@ export class AuditService {
   constructor() {}
 
   logAction(action: string): void {
-    console.debug('[AuditService] action:', action);
+    // Implement audit logging logic here
   }
 }

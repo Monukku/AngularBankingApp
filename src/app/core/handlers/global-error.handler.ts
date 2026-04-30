@@ -48,7 +48,7 @@ export class GlobalErrorHandler implements ErrorHandler {
    * Send error to remote logging service
    * This can be implemented when you have a logging backend
    */
-  private sendToRemoteLogger(_error: AppError): void {
+  private sendToRemoteLogger(error: AppError): void {
     // TODO: Implement sending to services like Sentry, Rollbar, etc.
   }
 }

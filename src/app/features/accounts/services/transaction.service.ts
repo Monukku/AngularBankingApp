@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
 import { catchError, tap } from 'rxjs/operators';
-import { Transaction } from '../../dashboard/models/dashboard.model';
+import { isHttpError } from '../../../core/models/error.model';
 
 /**
  * Transaction Service - Manages financial transactions with input validation
@@ -21,10 +21,10 @@ export class TransactionService {
   /**
    * Get transaction history with validation
    */
-  getTransactionHistory(): Observable<Transaction[]> {
+  getTransactionHistory(): Observable<any[]> {
     this.logger.debug('Fetching transaction history');
 
-    return this.http.get<Transaction[]>(`${this.apiUrl}/transactions/history`)
+    return this.http.get<any[]>(`${this.apiUrl}/transactions/history`)
       .pipe(
         tap(() => {
           this.logger.debug('Transaction history fetched successfully');
@@ -36,7 +36,7 @@ export class TransactionService {
   /**
    * Transfer funds between accounts with validation
    */
-  transferFunds(fromAccount: string, toAccount: string, amount: number): Observable<unknown> {
+  transferFunds(fromAccount: string, toAccount: string, amount: number): Observable<any> {
     // Validate inputs
     if (!fromAccount || fromAccount.trim().length === 0) {
       this.logger.error('Source account is required');
@@ -99,13 +99,12 @@ export class TransactionService {
   /**
    * Handle errors with type validation and detailed logging
    */
-  private handleError(error: unknown, defaultMessage: string): Observable<never> {
+  private handleError(error: any, defaultMessage: string): Observable<never> {
     let errorMessage = defaultMessage;
-    const maybeError = error as { status?: number; message?: string; error?: unknown };
 
-    // Type guard: Check if it's an HttpErrorResponse or object with status
-    if (error instanceof HttpErrorResponse || (maybeError && typeof maybeError.status === 'number')) {
-      const status = maybeError.status as number;
+    // Type guard: Check if it's an HttpErrorResponse with status property
+    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
+      const status = error.status;
 
       switch (status) {
         case 0:
@@ -135,8 +134,8 @@ export class TransactionService {
 
       this.logger.error('Transaction service HTTP error', {
         status,
-        message: maybeError.message,
-        error: maybeError.error,
+        message: error.message,
+        error: error.error,
       });
     } else if (error instanceof Error) {
       // Standard Error object

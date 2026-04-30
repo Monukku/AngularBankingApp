@@ -1,17 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 
-declare const expect: <T>(actual: T) => {
-  toBe(expected: T): void;
-  toBeTruthy(): void;
-  toBeFalsy(): void;
-  toBeDefined(): void;
-  toHaveBeenCalledWith(...args: any[]): void;
-  toContain(expected: string): void;
-  toBeGreaterThanOrEqual(expected: number): void;
-  toEqual(expected: T): void;
-};
-
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -38,4 +27,3 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('Hello, banking-app');
   });
 });
-

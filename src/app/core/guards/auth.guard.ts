@@ -35,8 +35,8 @@ export const authGuard: CanActivateFn = async (
     if (localStorage.getItem('CYPRESS_E2E') === 'true') {
       return true;
     }
-  } catch {
-    // Ignore localStorage access failures in non-browser environments
+  } catch (e) {
+    // ignore
   }
 
   // ✅ Check if user is logged in

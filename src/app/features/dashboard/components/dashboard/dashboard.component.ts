@@ -64,48 +64,17 @@ export class DashboardComponent implements OnInit {
 
   // ─── Lifecycle ────────────────────────────────────────────────
   ngOnInit(): void {
-    this.loadAllData();
-  }
-
-  // ─── Data Loading ─────────────────────────────────────────────
-  private loadAllData(): void {
     this.isLoading.set(true);
-    this.stateService.hasError.set(false);
+    // Data loading is now handled by toSignal in services
+    setTimeout(() => this.isLoading.set(false), 100);
 
-    // Load core dashboard data
-    this.loadCoreData();
-    // Load config and settings
     this.loadConfig();
-    // Load live rates (continuous stream)
     this.loadLiveRates();
-    // Load account health
     this.loadAccountHealth();
-    // Load all widget data
     this.loadNewWidgets();
   }
 
-  private loadCoreData(): void {
-    this.dashboardService.getAllDashboardData()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.stateService.balanceData.set(data.balance);
-          this.stateService.quickUsers.set(data.quickUsers);
-          this.stateService.transactions.set(data.transactions);
-          this.stateService.incomeData.set(data.income);
-          this.stateService.spendingData.set(data.spending);
-          this.stateService.cards.set(data.cards);
-          this.stateService.workflows.set(data.workflows);
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          console.error('Failed to load core dashboard data:', err);
-          this.stateService.hasError.set(true);
-          this.isLoading.set(false);
-        }
-      });
-  }
-
+  // ─── Data Loading ─────────────────────────────────────────────
   private loadConfig(): void {
     this.dashboardService.getPeriodOptions()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -138,77 +107,66 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadNewWidgets(): void {
-    // Load all widget data
-    this.dashboardService.getBudgetCategories()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.budgetCategories.set(d));
+    // Load all widget data - simplified version
+    const loaders = [
+      this.dashboardService.getBudgetCategories().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.budgetCategories.set(d)),
 
-    this.dashboardService.getSmartInsights()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.smartInsights.set(d));
+      this.dashboardService.getSmartInsights().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.smartInsights.set(d)),
 
-    this.dashboardService.getActivityFeed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.activityFeed.set(d));
+      this.dashboardService.getActivityFeed().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.activityFeed.set(d)),
 
-    this.dashboardService.getUpcomingBills()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.upcomingBills.set(d));
+      this.dashboardService.getUpcomingBills().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.upcomingBills.set(d)),
 
-    this.dashboardService.getRecurringSubscriptions()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.recurringSubscriptions.set(d));
+      this.dashboardService.getRecurringSubscriptions().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.recurringSubscriptions.set(d)),
 
-    this.dashboardService.getSavingsGoals()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.savingsGoals.set(d));
+      this.dashboardService.getSavingsGoals().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.savingsGoals.set(d)),
 
-    this.dashboardService.getMonthlyReport()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.monthlyReport.set(d));
+      this.dashboardService.getMonthlyReport().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.monthlyReport.set(d)),
 
-    this.dashboardService.getSpendingBreakdown()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.spendingBreakdown.set(d));
+      this.dashboardService.getSpendingBreakdown().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.spendingBreakdown.set(d)),
 
-    this.dashboardService.getCashflowData()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.stateService.cashflowRawData.set(d.chartData);
-        this.stateService.cashflowSummaryData.set(d.summary);
-      });
+      this.dashboardService.getCashflowData().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.cashflowRawData.set(d.chartData);
+          this.stateService.cashflowSummaryData.set(d.summary);
+        }),
 
-    this.dashboardService.getNetWorth()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.stateService.netWorth.set(d.netWorth);
-        this.stateService.netWorthChange.set(d.change);
-        this.stateService.totalAssets.set(d.assets);
-        this.stateService.totalLiabilities.set(d.liabilities);
-      });
+      this.dashboardService.getNetWorth().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.netWorth.set(d.netWorth);
+          this.stateService.netWorthChange.set(d.change);
+          this.stateService.totalAssets.set(d.assets);
+          this.stateService.totalLiabilities.set(d.liabilities);
+        }),
 
-    this.dashboardService.getRecentLogins()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => this.stateService.recentLogins.set(d));
+      this.dashboardService.getRecentLogins().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => this.stateService.recentLogins.set(d)),
 
-    this.dashboardService.getTaxSummary()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.stateService.taxSummary.set(d.items);
-        this.stateService.estimatedTax.set(d.estimatedTax);
-      });
+      this.dashboardService.getTaxSummary().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.taxSummary.set(d.items);
+          this.stateService.estimatedTax.set(d.estimatedTax);
+        }),
 
-    this.dashboardService.getRewardsData()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(d => {
-        this.stateService.rewardsPoints.set(d.points);
-        this.stateService.rewardsTier.set(d.tier);
-        this.stateService.rewardsTierPercent.set(d.tierPercent);
-        this.stateService.rewardsTierCurrent.set(d.tierCurrent);
-        this.stateService.rewardsTierNext.set(d.tierNext);
-        this.stateService.cashbackEarned.set(d.cashbackMonth);
-        this.stateService.cashbackTotal.set(d.cashbackTotal);
-      });
+      this.dashboardService.getRewardsData().pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(d => {
+          this.stateService.rewardsPoints.set(d.points);
+          this.stateService.rewardsTier.set(d.tier);
+          this.stateService.rewardsTierPercent.set(d.tierPercent);
+          this.stateService.rewardsTierCurrent.set(d.tierCurrent);
+          this.stateService.rewardsTierNext.set(d.tierNext);
+          this.stateService.cashbackEarned.set(d.cashbackMonth);
+          this.stateService.cashbackTotal.set(d.cashbackTotal);
+        }),
+    ];
   }
 
   // ─── Event Handlers ───────────────────────────────────────────
@@ -326,8 +284,7 @@ export class DashboardComponent implements OnInit {
 
   // Methods
   loadDashboardData() {
-    // Reload all dashboard data from scratch
-    this.loadAllData();
+    this.dashboardService.loadDashboardData();
   }
 
   onUserClick(user: any) {

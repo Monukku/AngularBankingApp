@@ -83,7 +83,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    const _file: File = event.target.files[0];
+    const file: File = event.target.files[0];
     // You can handle the selected file here
   }
 }

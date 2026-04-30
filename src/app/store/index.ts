@@ -6,7 +6,7 @@
 // 
 // State composition: AppState = Global + Feature States
 
-import { ActionReducerMap } from '@ngrx/store';
+import { ActionReducerMap, ActionReducerFactory } from '@ngrx/store';
 import { RouterReducerState, routerReducer } from '@ngrx/router-store';
 
 // Global State

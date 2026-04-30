@@ -117,20 +117,14 @@ export class ErrorHandlerService {
   /**
    * Handle client-side errors
    */
-  handleClientError(error: unknown): AppError {
+  handleClientError(error: Error | AppError): AppError {
     let appError: AppError;
 
     if (error instanceof AppError) {
       appError = error;
-    } else if (error instanceof Error) {
-      appError = new AppError(
-        error.message || 'An unexpected error occurred',
-        'CLIENT_ERROR'
-      );
-      appError.originalError = error;
     } else {
       appError = new AppError(
-        'An unexpected error occurred',
+        error.message || 'An unexpected error occurred',
         'CLIENT_ERROR'
       );
       appError.originalError = error;
