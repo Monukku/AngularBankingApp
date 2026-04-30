@@ -73,6 +73,9 @@ export interface CreateCardRequest {
   cardType: CardType;
   cardNetwork: CardNetwork;
   cardholderName: string;
+  cardNumber: string;
+  expiryDate: string;
+  cvv?: string;
   dailyLimit: number;
   monthlyLimit: number;
   isContactless?: boolean;
@@ -86,6 +89,9 @@ export interface CreateCardRequest {
  */
 export interface UpdateCardRequest {
   cardholderName?: string;
+  cardNumber?: string;
+  expiryDate?: string;
+  cvv?: string;
   dailyLimit?: number;
   monthlyLimit?: number;
   cardStatus?: CardStatus;

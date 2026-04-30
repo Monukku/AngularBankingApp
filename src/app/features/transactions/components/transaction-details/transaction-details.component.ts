@@ -13,20 +13,8 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionDetailsComponent implements OnInit {
-  transaction: Transaction = {
-    id: '2',
-    amount: 0,
-    date: '',
-    accountNumber: '',
-    description: '',
-    createdAt: '',
-    updatedAt: '',
-    category: undefined,
-    transactionType: 'TRANSFER',
-    transactionStatus: 'PENDING'
-  };
+  transaction?: Transaction;
        
-
   constructor(private route: ActivatedRoute, private transactionService: TransactionService) { }
 
   ngOnInit(): void {
@@ -37,8 +25,10 @@ export class TransactionDetailsComponent implements OnInit {
   }
 
   loadTransactionDetails(id: string): void {
-    this.transactionService.getTransactionById(id).subscribe(transaction => {
-      // this.transaction = transaction;    uncomment it later
+    this.transactionService.getTransactionById(id).subscribe((transaction) => {
+      if (transaction) {
+        this.transaction = transaction;
+      }
     });
   }
 }

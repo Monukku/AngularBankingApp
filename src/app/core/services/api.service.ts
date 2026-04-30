@@ -1,7 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+type ApiRequestBody = Record<string, unknown>;
+export type ApiParams = Record<string, string | number | boolean | ReadonlyArray<string>>;
+export type ApiResponse<T = unknown> = Observable<T>;
 
 /**
  * API Service - Central API communication layer
@@ -28,7 +32,7 @@ export class ApiService {
     email: string;
     mobileNumber: string;
     password: string;
-  }): Observable<any> {
+  }): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/auth/register`, data);
   }
 
@@ -36,7 +40,7 @@ export class ApiService {
    * Get current user profile
    * GET /api/v1/auth/profile
    */
-  getProfile(): Observable<any> {
+  getProfile(): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/auth/profile`);
   }
 
@@ -47,8 +51,16 @@ export class ApiService {
   changePassword(data: {
     currentPassword: string;
     newPassword: string;
-  }): Observable<any> {
+  }): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/auth/change-password`, data);
+  }
+
+  /**
+   * Send password reset link to email
+   * POST /api/v1/auth/forgot-password
+   */
+  forgotPassword(email: string): ApiResponse<unknown> {
+    return this.http.post(`${this.baseUrl}/auth/forgot-password`, { email });
   }
 
   // ============================================================
@@ -59,7 +71,7 @@ export class ApiService {
    * Get all customers (admin only)
    * GET /api/v1/customers
    */
-  getCustomers(params?: any): Observable<any> {
+  getCustomers(params?: ApiParams): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/customers`, { params });
   }
 
@@ -67,7 +79,7 @@ export class ApiService {
    * Get customer by ID
    * GET /api/v1/customers/:id
    */
-  getCustomer(customerId: string): Observable<any> {
+  getCustomer(customerId: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/customers/${customerId}`);
   }
 
@@ -75,7 +87,7 @@ export class ApiService {
    * Create new customer
    * POST /api/v1/customers
    */
-  createCustomer(data: any): Observable<any> {
+  createCustomer(data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/customers`, data);
   }
 
@@ -83,7 +95,7 @@ export class ApiService {
    * Update customer
    * PUT /api/v1/customers/:id
    */
-  updateCustomer(customerId: string, data: any): Observable<any> {
+  updateCustomer(customerId: string, data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.put(`${this.baseUrl}/customers/${customerId}`, data);
   }
 
@@ -95,7 +107,7 @@ export class ApiService {
    * Get my accounts
    * GET /api/v1/accounts/my-accounts
    */
-  getMyAccounts(): Observable<any> {
+  getMyAccounts(): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/accounts/my-accounts`);
   }
 
@@ -103,7 +115,7 @@ export class ApiService {
    * Get account by account number
    * GET /api/v1/accounts/:accountNumber
    */
-  getAccount(accountNumber: string): Observable<any> {
+  getAccount(accountNumber: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/accounts/${accountNumber}`);
   }
 
@@ -111,7 +123,7 @@ export class ApiService {
    * Get account balance
    * GET /api/v1/accounts/:accountNumber/balance
    */
-  getBalance(accountNumber: string): Observable<any> {
+  getBalance(accountNumber: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/accounts/${accountNumber}/balance`);
   }
 
@@ -119,9 +131,9 @@ export class ApiService {
    * Create new account
    * POST /api/v1/accounts
    */
-  createAccount(data: any): Observable<any> {
+  createAccount(data: ApiRequestBody): ApiResponse<unknown> {
     const headers = new HttpHeaders({
-      'X-Customer-Id': data.customerId || '',
+      'X-Customer-Id': (data as { customerId?: string }).customerId || '',
     });
     return this.http.post(`${this.baseUrl}/accounts`, data, { headers });
   }
@@ -130,7 +142,7 @@ export class ApiService {
    * Update account
    * PUT /api/v1/accounts/:accountNumber
    */
-  updateAccount(accountNumber: string, data: any): Observable<any> {
+  updateAccount(accountNumber: string, data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.put(`${this.baseUrl}/accounts/${accountNumber}`, data);
   }
 
@@ -138,7 +150,7 @@ export class ApiService {
    * Close account
    * DELETE /api/v1/accounts/:accountNumber
    */
-  closeAccount(accountNumber: string): Observable<any> {
+  closeAccount(accountNumber: string): ApiResponse<unknown> {
     return this.http.delete(`${this.baseUrl}/accounts/${accountNumber}`);
   }
 
@@ -150,7 +162,7 @@ export class ApiService {
    * Get my transactions
    * GET /api/v1/transactions/my-transactions
    */
-  getMyTransactions(params?: any): Observable<any> {
+  getMyTransactions(params?: ApiParams): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/transactions/my-transactions`, { params });
   }
 
@@ -160,8 +172,8 @@ export class ApiService {
    */
   getAccountTransactions(
     accountNumber: string,
-    params?: any
-  ): Observable<any> {
+    params?: ApiParams
+  ): ApiResponse<unknown> {
     return this.http.get(
       `${this.baseUrl}/transactions/account/${accountNumber}`,
       { params }
@@ -173,7 +185,7 @@ export class ApiService {
    * POST /api/v1/transactions/transfer
    * Requires X-Idempotency-Key header for idempotency
    */
-  transfer(data: any, idempotencyKey: string): Observable<any> {
+  transfer(data: ApiRequestBody, idempotencyKey: string): ApiResponse<unknown> {
     const headers = new HttpHeaders({
       'X-Idempotency-Key': idempotencyKey,
     });
@@ -186,7 +198,7 @@ export class ApiService {
    * Get transaction by ID
    * GET /api/v1/transactions/:transactionId
    */
-  getTransaction(transactionId: string): Observable<any> {
+  getTransaction(transactionId: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/transactions/${transactionId}`);
   }
 
@@ -198,7 +210,7 @@ export class ApiService {
    * Get my cards
    * GET /api/v1/cards/my-cards
    */
-  getMyCards(): Observable<any> {
+  getMyCards(): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/cards/my-cards`);
   }
 
@@ -206,7 +218,7 @@ export class ApiService {
    * Get card by ID
    * GET /api/v1/cards/:cardId
    */
-  getCard(cardId: string): Observable<any> {
+  getCard(cardId: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/cards/${cardId}`);
   }
 
@@ -214,7 +226,7 @@ export class ApiService {
    * Create new card
    * POST /api/v1/cards
    */
-  createCard(data: any): Observable<any> {
+  createCard(data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/cards`, data);
   }
 
@@ -222,7 +234,7 @@ export class ApiService {
    * Update card
    * PUT /api/v1/cards/:cardId
    */
-  updateCard(cardId: string, data: any): Observable<any> {
+  updateCard(cardId: string, data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.put(`${this.baseUrl}/cards/${cardId}`, data);
   }
 
@@ -230,7 +242,7 @@ export class ApiService {
    * Block card
    * POST /api/v1/cards/:cardId/block
    */
-  blockCard(cardId: string): Observable<any> {
+  blockCard(cardId: string): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/cards/${cardId}/block`, {});
   }
 
@@ -238,7 +250,7 @@ export class ApiService {
    * Unblock card
    * POST /api/v1/cards/:cardId/unblock
    */
-  unblockCard(cardId: string): Observable<any> {
+  unblockCard(cardId: string): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/cards/${cardId}/unblock`, {});
   }
 
@@ -250,7 +262,7 @@ export class ApiService {
    * Get my loans
    * GET /api/v1/loans/my-loans
    */
-  getMyLoans(): Observable<any> {
+  getMyLoans(): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/loans/my-loans`);
   }
 
@@ -258,7 +270,7 @@ export class ApiService {
    * Get loan by ID
    * GET /api/v1/loans/:loanId
    */
-  getLoan(loanId: string): Observable<any> {
+  getLoan(loanId: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/loans/${loanId}`);
   }
 
@@ -266,7 +278,7 @@ export class ApiService {
    * Apply for loan
    * POST /api/v1/loans/apply
    */
-  applyLoan(data: any): Observable<any> {
+  applyLoan(data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/loans/apply`, data);
   }
 
@@ -274,7 +286,7 @@ export class ApiService {
    * Get loan repayment schedule
    * GET /api/v1/loans/:loanId/schedule
    */
-  getLoanSchedule(loanId: string): Observable<any> {
+  getLoanSchedule(loanId: string): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/loans/${loanId}/schedule`);
   }
 
@@ -282,7 +294,7 @@ export class ApiService {
    * Make loan payment
    * POST /api/v1/loans/:loanId/payment
    */
-  makeLoanPayment(loanId: string, data: any): Observable<any> {
+  makeLoanPayment(loanId: string, data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/loans/${loanId}/payment`, data);
   }
 
@@ -294,7 +306,7 @@ export class ApiService {
    * Check transaction for fraud
    * POST /api/v1/fraud/check
    */
-  checkFraud(data: any): Observable<any> {
+  checkFraud(data: ApiRequestBody): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/fraud/check`, data);
   }
 
@@ -302,7 +314,7 @@ export class ApiService {
    * Report fraud transaction
    * POST /api/v1/fraud/report
    */
-  reportFraud(transactionId: string, reason: string): Observable<any> {
+  reportFraud(transactionId: string, reason: string): ApiResponse<unknown> {
     return this.http.post(`${this.baseUrl}/fraud/report`, {
       transactionId,
       reason,
@@ -317,7 +329,7 @@ export class ApiService {
    * Get my notifications
    * GET /api/v1/notifications
    */
-  getNotifications(params?: any): Observable<any> {
+  getNotifications(params?: ApiParams): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/notifications`, { params });
   }
 
@@ -325,7 +337,7 @@ export class ApiService {
    * Mark notification as read
    * PUT /api/v1/notifications/:notificationId/read
    */
-  markNotificationAsRead(notificationId: string): Observable<any> {
+  markNotificationAsRead(notificationId: string): ApiResponse<unknown> {
     return this.http.put(
       `${this.baseUrl}/notifications/${notificationId}/read`,
       {}
@@ -336,7 +348,7 @@ export class ApiService {
    * Delete notification
    * DELETE /api/v1/notifications/:notificationId
    */
-  deleteNotification(notificationId: string): Observable<any> {
+  deleteNotification(notificationId: string): ApiResponse<unknown> {
     return this.http.delete(
       `${this.baseUrl}/notifications/${notificationId}`
     );
@@ -350,7 +362,7 @@ export class ApiService {
    * Get audit logs
    * GET /api/v1/audit
    */
-  getAuditLogs(params?: any): Observable<any> {
+  getAuditLogs(params?: ApiParams): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/audit`, { params });
   }
 
@@ -358,7 +370,7 @@ export class ApiService {
    * Get user audit logs
    * GET /api/v1/audit/user/:userId
    */
-  getUserAuditLogs(userId: string, params?: any): Observable<any> {
+  getUserAuditLogs(userId: string, params?: ApiParams): ApiResponse<unknown> {
     return this.http.get(`${this.baseUrl}/audit/user/${userId}`, { params });
   }
 }

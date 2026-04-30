@@ -1,16 +1,29 @@
-import { Transaction } from './transaction.model';
+/// <reference types="jasmine" />
+import { TransactionClass } from './transaction.model';
 
-describe('Transaction', () => {
+declare const expect: <T>(actual: T) => {
+  toBe(expected: T): void;
+  toBeTruthy(): void;
+  toBeFalsy(): void;
+  toBeDefined(): void;
+  toHaveBeenCalledWith(...args: any[]): void;
+  toContain(expected: string): void;
+  toBeGreaterThanOrEqual(expected: number): void;
+  toEqual(expected: T): void;
+};
+
+describe('TransactionClass', () => {
   it('should create an instance', () => {
-    // Provide sample values for id, amount, and date
-    const id = '1';
-    const amount = 100;
-    const date = '2022-01-01';
-    
-    // Create an instance of Transaction with the provided values
-    const transaction = new Transaction(id, amount, date);
-    
-    // Verify that the instance is created successfully
+    const transaction = new TransactionClass(
+      '1',
+      '12345',
+      100,
+      'DEBIT',
+      'COMPLETED',
+      '2022-01-01'
+    );
+
     expect(transaction).toBeTruthy();
   });
 });
+

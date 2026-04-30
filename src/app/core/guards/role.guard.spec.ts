@@ -1,39 +1,49 @@
-// import { TestBed } from '@angular/core/testing';
-// import { CanActivateFn } from '@angular/router';
-
-// import { RoleGuard } from './role.guard';
-
-// describe('roleGuard', () => {
-//   const executeGuard: CanActivateFn = (...guardParameters) => 
-//       TestBed.runInInjectionContext(() => RoleGuard(...guardParameters));
-
-//   beforeEach(() => {
-//     TestBed.configureTestingModule({});
-//   });
-
-//   it('should be created', () => {
-//     expect(executeGuard).toBeTruthy();
-//   });
-// });
-
-
-
+/// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { RoleGuard } from './role.guard'; // Import the RoleGuard
+import { Router } from '@angular/router';
+import { KeycloakService } from 'keycloak-angular';
+import { roleGuard } from './role.guard';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
-describe('RoleGuard', () => {
-  let guard: RoleGuard;
+declare const expect: <T>(actual: T) => {
+  toBe(expected: T): void;
+  toBeTruthy(): void;
+  toBeFalsy(): void;
+  toBeDefined(): void;
+  toHaveBeenCalledWith(...args: any[]): void;
+  toContain(expected: string): void;
+  toBeGreaterThanOrEqual(expected: number): void;
+  toEqual(expected: T): void;
+};
+
+describe('roleGuard', () => {
+  let keycloakService: jasmine.SpyObj<KeycloakService>;
+  let router: jasmine.SpyObj<Router>;
+  let mockRoute: ActivatedRouteSnapshot;
+  let mockState: RouterStateSnapshot;
 
   beforeEach(() => {
+    const keycloakSpy = jasmine.createSpyObj('KeycloakService', ['getUserRoles']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [RoleGuard] // Include RoleGuard as a provider
+      providers: [
+        { provide: KeycloakService, useValue: keycloakSpy },
+        { provide: Router, useValue: routerSpy },
+      ],
     });
-    guard = TestBed.inject(RoleGuard);
+
+    keycloakService = TestBed.inject(KeycloakService) as jasmine.SpyObj<KeycloakService>;
+    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+
+    mockRoute = { data: { roles: ['admin'] } } as unknown as ActivatedRouteSnapshot;
+    mockState = { url: '/admin' } as unknown as RouterStateSnapshot;
   });
 
-  it('should be created', () => {
-    expect(guard).toBeTruthy();
+  it('should be defined', () => {
+    expect(roleGuard).toBeDefined();
   });
+
+  // Add additional tests for your guard logic here
 });
+

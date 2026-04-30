@@ -10,6 +10,17 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
+declare const expect: <T>(actual: T) => {
+  toBe(expected: T): void;
+  toBeTruthy(): void;
+  toBeFalsy(): void;
+  toBeDefined(): void;
+  toHaveBeenCalledWith(...args: any[]): void;
+  toContain(expected: string): void;
+  toBeGreaterThanOrEqual(expected: number): void;
+  toEqual(expected: T): void;
+};
+
 describe('ErrorHandlerService', () => {
   let service: ErrorHandlerService;
   let loggerService: LoggerService;
@@ -186,3 +197,4 @@ describe('ErrorHandlerService', () => {
     });
   });
 });
+

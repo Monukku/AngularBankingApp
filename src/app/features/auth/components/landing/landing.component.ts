@@ -63,4 +63,13 @@ export class LandingComponent {
       this.router.navigate(['/dashboard']);
     }
   }
+
+  navigateToLogin(): void {
+    this.router.navigate(['/auth/login']);
+  }
+
+  navigateToRegister(): void {
+    this.router.navigate(['/auth/register']);
+  }
 }
+

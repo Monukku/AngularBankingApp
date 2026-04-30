@@ -1,18 +1,44 @@
+/// <reference types="jasmine" />
+import 'jasmine';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LandingComponent } from './landing.component';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { KeycloakService } from 'keycloak-angular';
+
+declare const expect: <T>(actual: T) => {
+  toBe(expected: T): void;
+  toBeTruthy(): void;
+  toBeFalsy(): void;
+  toBeDefined(): void;
+  toHaveBeenCalledWith(...args: any[]): void;
+  toContain(expected: string): void;
+  toBeGreaterThanOrEqual(expected: number): void;
+  toEqual(expected: T): void;
+};
 
 describe('LandingComponent', () => {
   let component: LandingComponent;
   let fixture: ComponentFixture<LandingComponent>;
   let router: jasmine.SpyObj<Router>;
+  let keycloakService: jasmine.SpyObj<KeycloakService>;
+  let activatedRoute: jasmine.SpyObj<ActivatedRoute>;
 
   beforeEach(async () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
+    keycloakService = jasmine.createSpyObj('KeycloakService', ['login']);
+    activatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: jasmine.createSpyObj('ActivatedRouteSnapshot', [], {
+        queryParams: {}
+      })
+    });
 
     await TestBed.configureTestingModule({
       imports: [LandingComponent],
-      providers: [{ provide: Router, useValue: router }],
+      providers: [
+        { provide: Router, useValue: router },
+        { provide: KeycloakService, useValue: keycloakService },
+        { provide: ActivatedRoute, useValue: activatedRoute }
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LandingComponent);
@@ -54,4 +80,5 @@ describe('LandingComponent', () => {
     expect(statsItems.length).toBe(3);
   });
 });
+
 

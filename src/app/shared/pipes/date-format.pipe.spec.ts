@@ -1,3 +1,4 @@
+/// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 import { DateFormatPipe } from './date-format.pipe';
@@ -20,7 +21,7 @@ describe('DateFormatPipe', () => {
 
   it('should format date correctly', () => {
     const testDate = new Date('2024-02-07');
-    const result = pipe.transform(testDate);
+    const result = pipe.transform(testDate, 'mediumDate');
     expect(result).toBeTruthy();
   });
 });

@@ -1,4 +1,4 @@
-// src/app/authentication/components/forgot-password/forgot-password.component.ts
+// src/app/shared/components/forgot-password/forgot-password.component.ts
 import { Component } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -21,7 +21,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ],
   templateUrl: './forgot-password.component.html',
-  styleUrls: ['./forgot-password.component.scss']
+  styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {
   email: string = '';
@@ -39,7 +39,7 @@ export class ForgotPasswordComponent {
       () => {
         this.message = 'Password reset link sent to your email';
       },
-      error => {
+      _error => {
         this.message = 'Failed to send reset link';
       }
     );

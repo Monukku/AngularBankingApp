@@ -43,7 +43,7 @@ export class ChangePasswordComponent {
       () => {
         this.message = 'Password changed successfully';
       },
-      error => {
+      (_error: any) => {
         this.message = 'Failed to change password';
       }
     );

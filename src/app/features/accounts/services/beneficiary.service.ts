@@ -5,7 +5,6 @@ import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
 import { catchError, tap } from 'rxjs/operators';
 import { Beneficiary, BeneficiaryDetails, AddBeneficiaryRequest } from '../models/beneficiary.model';
-import { isHttpError } from '../../../core/models/error.model';
 
 /**
  * Beneficiary Service - Manages beneficiary operations with input validation
@@ -22,10 +21,10 @@ export class BeneficiaryService {
   /**
    * Get all beneficiaries
    */
-  getBeneficiaries(): Observable<any[]> {
+  getBeneficiaries(): Observable<BeneficiaryDetails[]> {
     this.logger.debug('Fetching beneficiaries');
 
-    return this.http.get<any[]>(`${this.apiUrl}/beneficiaries`)
+    return this.http.get<BeneficiaryDetails[]>(`${this.apiUrl}/beneficiaries`)
       .pipe(
         tap(() => {
           this.logger.debug('Beneficiaries fetched successfully');
@@ -37,7 +36,7 @@ export class BeneficiaryService {
   /**
    * Add a new beneficiary with validation
    */
-  addBeneficiary(beneficiary: any): Observable<any> {
+  addBeneficiary(beneficiary: AddBeneficiaryRequest): Observable<Beneficiary> {
     // Validate beneficiary object
     if (!beneficiary) {
       this.logger.error('Beneficiary data is required');
@@ -55,9 +54,9 @@ export class BeneficiaryService {
       return throwError(() => new Error('Beneficiary account number is required'));
     }
 
-    if (!beneficiary.bankCode || beneficiary.bankCode.trim().length === 0) {
-      this.logger.error('Bank code is required');
-      return throwError(() => new Error('Bank code is required'));
+    if (!beneficiary.ifscCode || beneficiary.ifscCode.trim().length === 0) {
+      this.logger.error('IFSC code is required');
+      return throwError(() => new Error('IFSC code is required'));
     }
 
     // Validate account number format
@@ -76,11 +75,12 @@ export class BeneficiaryService {
 
     this.logger.debug('Adding beneficiary', { name: beneficiary.name });
 
-    return this.http.post(`${this.apiUrl}/beneficiaries`, beneficiary)
+    return this.http.post<Beneficiary>(`${this.apiUrl}/beneficiaries`, beneficiary)
       .pipe(
         tap((response) => {
           this.logger.debug('Beneficiary added successfully', {
             name: beneficiary.name,
+            beneficiaryId: response.beneficiaryId,
           });
         }),
         catchError((error) => this.handleError(error, 'Failed to add beneficiary'))
@@ -90,7 +90,7 @@ export class BeneficiaryService {
   /**
    * Delete a beneficiary with validation
    */
-  deleteBeneficiary(beneficiaryId: string): Observable<any> {
+  deleteBeneficiary(beneficiaryId: string): Observable<void> {
     // Validate input
     if (!beneficiaryId || beneficiaryId.trim().length === 0) {
       this.logger.error('Beneficiary ID is required');
@@ -99,7 +99,7 @@ export class BeneficiaryService {
 
     this.logger.debug('Deleting beneficiary', { beneficiaryId });
 
-    return this.http.delete(`${this.apiUrl}/beneficiaries/${beneficiaryId}`)
+    return this.http.delete<void>(`${this.apiUrl}/beneficiaries/${beneficiaryId}`)
       .pipe(
         tap(() => {
           this.logger.debug('Beneficiary deleted successfully', { beneficiaryId });
@@ -111,12 +111,13 @@ export class BeneficiaryService {
   /**
    * Handle errors with type validation and detailed logging
    */
-  private handleError(error: any, defaultMessage: string): Observable<never> {
+  private handleError(error: unknown, defaultMessage: string): Observable<never> {
     let errorMessage = defaultMessage;
+    const maybeError = error as { status?: number; message?: string; error?: unknown };
 
-    // Type guard: Check if it's an HttpErrorResponse with status property
-    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
-      const status = error.status;
+    // Type guard: Check if it's an HttpErrorResponse or object with status property
+    if (error instanceof HttpErrorResponse || (maybeError && typeof maybeError.status === 'number')) {
+      const status = maybeError.status as number;
 
       switch (status) {
         case 400:
@@ -146,8 +147,8 @@ export class BeneficiaryService {
 
       this.logger.error('Beneficiary service HTTP error', {
         status,
-        message: error.message,
-        error: error.error,
+        message: maybeError.message,
+        error: maybeError.error,
       });
     } else if (error instanceof Error) {
       // Standard Error object

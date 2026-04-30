@@ -2,6 +2,8 @@ import { Observable, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../services/error-handler.service';
 
+export type ErrorHandlerObservable = Observable<never>;
+
 /**
  * Error handling helper for services
  * Use this in your service's catchError operator
@@ -12,7 +14,7 @@ export class ErrorHandlerHelper {
    * Usage: .pipe(catchError(ErrorHandlerHelper.handleError(errorHandlerService)))
    */
   static handleError(errorHandlerService: ErrorHandlerService) {
-    return (error: any) => {
+    return (error: unknown): ErrorHandlerObservable => {
       let appError;
 
       if (error instanceof HttpErrorResponse) {
@@ -29,7 +31,7 @@ export class ErrorHandlerHelper {
    * Create a catchError handler that logs and rethrows
    */
   static logAndRethrow(errorHandlerService: ErrorHandlerService) {
-    return (error: any) => {
+    return (error: unknown): ErrorHandlerObservable => {
       return ErrorHandlerHelper.handleError(errorHandlerService)(error);
     };
   }

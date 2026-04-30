@@ -1,5 +1,3 @@
-import { keycloakConfig } from './keycloak-config';
-
 export const environment = {
   production: false,
   staging: true,

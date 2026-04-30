@@ -4,8 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { LoggerService } from '../../../core/services/logger.service';
-import { Loan, LoanDetails, ApplyLoanRequest, LoanListResponse } from '../models/loan.model';
-import { isHttpError } from '../../../core/models/error.model';
+import { LoanDetails, ApplyLoanRequest, LoanListResponse } from '../models/loan.model';
 
 /**
  * Loan Service - Manages loan operations with input validation

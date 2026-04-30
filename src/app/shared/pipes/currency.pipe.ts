@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class CurrencyPipe implements PipeTransform {
 
-  transform(value: number, ...args: any[]): string {
+  transform(value: number, ..._args: any[]): string {
     if (!value) return '';
     return '$' + value.toFixed(2);
   }

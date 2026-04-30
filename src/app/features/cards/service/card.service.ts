@@ -2,10 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap, shareReplay } from 'rxjs/operators';
-import { environment } from '../../../../environments/environment'; 
-import { LoggerService } from '../../../core/services/logger.service'; 
-import { Card, CardDetails } from '../models/card.model';
-import { isHttpError, isValidationError } from '../../../core/models/error.model';
+import { environment } from '../../../../environments/environment';
+import { LoggerService } from '../../../core/services/logger.service';
+import { Card, CardDetails, CreateCardRequest, UpdateCardRequest } from '../models/card.model';
 
 /**
  * Card Service - Manages card operations with input validation
@@ -18,17 +17,17 @@ export class CardService {
   private apiUrl = `${environment.api.baseUrl}/cards`;
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
-  private cardsCache$: Observable<any[]> | null = null;
+  private cardsCache$: Observable<CardDetails[]> | null = null;
 
   /**
    * Get all cards for the user with caching via shareReplay
    * Multiple subscribers will share the same request result
    */
-  getCards(): Observable<any[]> {
+  getCards(): Observable<CardDetails[]> {
     if (!this.cardsCache$) {
       this.logger.debug('Fetching all cards');
 
-      this.cardsCache$ = this.http.get<any[]>(this.apiUrl)
+      this.cardsCache$ = this.http.get<CardDetails[]>(this.apiUrl)
         .pipe(
           tap(() => {
             this.logger.debug('Cards fetched successfully');
@@ -50,7 +49,7 @@ export class CardService {
   /**
    * Get a specific card by ID with validation
    */
-  getCard(id: string): Observable<any> {
+  getCard(id: string): Observable<CardDetails> {
     // Validate card ID
     if (!id || id.trim().length === 0) {
       this.logger.error('Card ID is required');
@@ -64,7 +63,7 @@ export class CardService {
 
     this.logger.debug('Fetching card', { id });
 
-    return this.http.get<any>(`${this.apiUrl}/${id}`)
+    return this.http.get<CardDetails>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
           this.logger.debug('Card fetched successfully', { id });
@@ -76,7 +75,7 @@ export class CardService {
   /**
    * Create a new card with validation
    */
-  createCard(card: any): Observable<any> {
+  createCard(card: CreateCardRequest): Observable<CardDetails> {
     // Validate card object
     if (!card) {
       this.logger.error('Card data is required');
@@ -125,10 +124,10 @@ export class CardService {
 
     this.logger.debug('Creating new card', { cardNumber: `****${card.cardNumber.slice(-4)}` });
 
-    return this.http.post<any>(this.apiUrl, card)
+    return this.http.post<CardDetails>(this.apiUrl, card)
       .pipe(
         tap((response) => {
-          this.logger.debug('Card created successfully', { cardId: response.id });
+          this.logger.debug('Card created successfully', { cardId: response.cardId });
           this.invalidateCardsCache(); // Invalidate cache on creation
         }),
         catchError((error) => this.handleError(error))
@@ -138,7 +137,7 @@ export class CardService {
   /**
    * Update a card with validation
    */
-  updateCard(id: string, card: any): Observable<any> {
+  updateCard(id: string, card: UpdateCardRequest): Observable<CardDetails> {
     // Validate card ID
     if (!id || id.trim().length === 0) {
       this.logger.error('Card ID is required for update');
@@ -164,7 +163,7 @@ export class CardService {
 
     this.logger.debug('Updating card', { id });
 
-    return this.http.put<any>(`${this.apiUrl}/${id}`, card)
+    return this.http.put<CardDetails>(`${this.apiUrl}/${id}`, card)
       .pipe(
         tap(() => {
           this.logger.debug('Card updated successfully', { id });
@@ -177,7 +176,7 @@ export class CardService {
   /**
    * Delete a card with validation
    */
-  deleteCard(id: string): Observable<any> {
+  deleteCard(id: string): Observable<void> {
     // Validate card ID
     if (!id || id.trim().length === 0) {
       this.logger.error('Card ID is required for deletion');
@@ -186,7 +185,7 @@ export class CardService {
 
     this.logger.debug('Deleting card', { id });
 
-    return this.http.delete<any>(`${this.apiUrl}/${id}`)
+    return this.http.delete<void>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
           this.logger.debug('Card deleted successfully', { id });
@@ -199,12 +198,13 @@ export class CardService {
   /**
    * Handle HTTP errors with detailed logging and type validation
    */
-  private handleError(error: any): Observable<never> {
+  private handleError(error: unknown): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
+    const maybeError = error as { status?: number; message?: string; error?: unknown };
 
-    // Type guard: Check if it's an HttpErrorResponse with status property
-    if (error instanceof HttpErrorResponse || (error && typeof error.status === 'number')) {
-      const status = error.status;
+    // Type guard: Check if it's an HttpErrorResponse or object with status property
+    if (error instanceof HttpErrorResponse || (maybeError && typeof maybeError.status === 'number')) {
+      const status = maybeError.status as number;
       
       switch (status) {
         case 0:
@@ -232,13 +232,13 @@ export class CardService {
           errorMessage = 'Service unavailable. Please try again later.';
           break;
         default:
-          errorMessage = `Error ${status}: ${error.message || 'Unknown error'}`;
+          errorMessage = `Error ${status}: ${maybeError.message || 'Unknown error'}`;
       }
 
       this.logger.error('Card service HTTP error', {
         status,
-        message: error.message,
-        error: error.error,
+        message: maybeError.message,
+        error: maybeError.error,
       });
     } else if (error instanceof Error) {
       // Standard Error object

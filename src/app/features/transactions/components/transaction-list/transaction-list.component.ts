@@ -1,5 +1,5 @@
 // transaction-list.component.ts
-import { Component, ChangeDetectionStrategy, inject, DestroyRef, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { TransactionService } from '../../services/transaction.service';
 import { Transaction } from '../../models/transaction.model';
 import { CommonModule } from '@angular/common';
@@ -16,7 +16,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class TransactionListComponent {
   private transactionService = inject(TransactionService);
-  private destroyRef = inject(DestroyRef);
 
   // Signal for transactions - automatically handles data fetching
   transactions = toSignal(this.transactionService.getTransactions(), { initialValue: [] });

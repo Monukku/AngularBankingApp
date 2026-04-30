@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Transaction } from '../../features/transactions/models/transaction.model';
-import { TransactionFilters, PaginationState } from './transaction.reducer';
+import { TransactionFilters } from './transaction.reducer';
 
 export const loadTransactions = createAction(
   '[Transactions] Load Transactions'

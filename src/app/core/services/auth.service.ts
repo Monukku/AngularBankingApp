@@ -1,8 +1,7 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../store/auth/auth.actions';
@@ -17,10 +16,8 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  // ✅ All dependencies now use inject() pattern
+  // All dependencies now use inject() pattern
   private platformId = inject(PLATFORM_ID);
-  private http = inject(HttpClient);
-  private router = inject(Router);
   private keycloakService = inject(KeycloakService);
   private store = inject(Store);
   private logger = inject(LoggerService);
@@ -95,6 +92,10 @@ export class AuthService {
     return await this.keycloakService.isLoggedIn();
   }
 
+  public changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.apiService.changePassword({ currentPassword, newPassword });
+  }
+
   public logout(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       return this.keycloakService.logout(window.location.origin).then(() => {
@@ -161,5 +162,13 @@ export class AuthService {
       return url;
     }
     return '/home';
+  }
+
+  /**
+   * Send password reset link to user email
+   * Calls /api/v1/auth/forgot-password endpoint
+   */
+  public sendResetLink(email: string): Observable<any> {
+    return this.apiService.forgotPassword(email);
   }
 }

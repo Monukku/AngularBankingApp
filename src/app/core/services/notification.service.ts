@@ -31,6 +31,10 @@ export class NotificationService {
     this.show(message, NotificationType.INFO, duration);
   }
 
+  dismissAll(): void {
+    this.snackBar.dismiss();
+  }
+
   private show(
     message: string,
     type: NotificationType,

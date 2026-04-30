@@ -6,7 +6,6 @@ import {
   importProvidersFrom,
   APP_INITIALIZER,
   PLATFORM_ID,
-  Inject,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { provideRouter } from '@angular/router';
