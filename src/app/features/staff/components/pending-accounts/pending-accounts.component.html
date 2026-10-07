@@ -1,0 +1,178 @@
+<div class="pa-page">
+
+  <!-- Gold top bar -->
+  <div class="pa-topbar"></div>
+
+  <div class="pa-inner">
+
+    <!-- Header -->
+    <div class="pa-header">
+      <div class="pa-header-left">
+        <div class="pa-title-row">
+          <h2 class="pa-title">Pending accounts</h2>
+          <span class="pa-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Teller · Approval queue
+          </span>
+        </div>
+        <p class="pa-sub">Review and activate customer accounts awaiting approval</p>
+      </div>
+      <button class="pa-btn-refresh" (click)="load()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="sf-bar">
+      <div class="sf-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6579" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="sf-search-icon">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+        </svg>
+        <input class="sf-search-input" type="text" placeholder="Search by name or account number…" [(ngModel)]="searchQuery" />
+      </div>
+      <div class="rb-dd-wrap sf-dd" (mouseenter)="openHoverDD('type')" (mouseleave)="closeHoverDD()">
+        <button class="rb-dd-trigger" [class.open]="openDropdown() === 'type'">
+          <span>{{ typeLabel }}</span>
+          <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        @if (openDropdown() === 'type') {
+          <div class="rb-dd-menu">
+            @for (opt of typeOptions; track opt.value) {
+              <div class="rb-dd-item" [class.selected]="typeFilter === opt.value" (click)="selectType(opt.value)">
+                {{ opt.label }}
+                @if (typeFilter === opt.value) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <app-loader [fullscreen]="false" message="Loading pending accounts…" />
+    }
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="pa-error-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!loading() && !error() && filteredAccounts().length === 0) {
+      <div class="pa-empty">
+        <div class="pa-empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p class="pa-empty-title">All clear</p>
+        <p class="pa-empty-desc">No pending accounts — all have been reviewed</p>
+      </div>
+    }
+
+    <!-- Table -->
+    @if (!loading() && filteredAccounts().length > 0) {
+      <div class="pa-table-wrap">
+        <table class="pa-table">
+          <thead>
+            <tr>
+              <th>Account number</th>
+              <th>Type</th>
+              <th>Customer ID</th>
+              <th>Created</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (acc of pagedAccounts(); track acc.id) {
+              <tr class="pa-row">
+                <td class="pa-cell pa-cell--mono">{{ acc.accountNumber }}</td>
+                <td class="pa-cell"><span class="pa-type-badge">{{ acc.accountType }}</span></td>
+                <td class="pa-cell pa-cell--mono pa-cell--dim">{{ acc.customerId }}</td>
+                <td class="pa-cell pa-cell--dim">{{ acc.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+                <td class="pa-cell"><span class="pa-status-badge">PENDING</span></td>
+                <td class="pa-cell">
+                  @if (actionMsg()?.id === acc.id) {
+                    <div class="pa-action-result">
+                      <span [class]="actionMsg()!.ok ? 'pa-msg-ok' : 'pa-msg-err'">
+                        {{ actionMsg()!.msg }}
+                      </span>
+                      @if (!actionMsg()!.ok) {
+                        <button class="pa-btn-reject" (click)="openRejectDialog(acc)">Reject account</button>
+                      }
+                    </div>
+                  } @else {
+                    <div class="pa-action-btns">
+                      <button class="pa-btn-activate"
+                              [disabled]="activating() === acc.id"
+                              (click)="activate(acc.id)">
+                        @if (activating() === acc.id) {
+                          <span class="pa-spinner"></span> Activating…
+                        } @else {
+                          Activate
+                        }
+                      </button>
+                      <button class="pa-btn-reject" (click)="openRejectDialog(acc)">Reject</button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pa-pagination">
+          <span class="pa-page-count">Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filteredAccounts().length }} accounts</span>
+          <div class="pa-page-btns">
+            <button class="pa-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(1)" title="First">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+            </button>
+            <button class="pa-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" title="Previous">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            @for (p of pageNumbers(); track p) {
+              <button class="pa-btn-page pa-btn-num" [class.pa-btn-page--active]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
+            }
+            <button class="pa-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" title="Next">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="pa-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())" title="Last">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+  </div>
+</div>
+
+<!-- Reject confirm modal -->
+@if (rejectTarget()) {
+  <div class="pa-modal-backdrop" (click)="rejectTarget.set(null)">
+    <div class="pa-modal" (click)="$event.stopPropagation()">
+      <h3 class="pa-modal-title">Reject Account</h3>
+      <p class="pa-modal-sub">
+        Account <strong>{{ rejectTarget().accountNumber }}</strong> ·
+        <span class="pa-type-badge" style="font-size:11px">{{ rejectTarget().accountType }}</span>
+      </p>
+      <p class="pa-modal-warn">This will permanently close the pending account. The customer will need to apply again.</p>
+      <label class="pa-modal-label">Reason for rejection</label>
+      <input class="pa-modal-input" type="text"
+             placeholder="e.g. Duplicate account type, KYC mismatch…"
+             [(ngModel)]="rejectReason" />
+      <div class="pa-modal-actions">
+        <button class="pa-modal-cancel" (click)="rejectTarget.set(null)">Cancel</button>
+        <button class="pa-modal-confirm" [disabled]="rejecting() !== null" (click)="confirmReject()">
+          {{ rejecting() ? '…' : 'Confirm Reject' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

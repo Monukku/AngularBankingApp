@@ -38,13 +38,3 @@ export const loadUserFailure = createAction(
   props<{ error: string }>()
 );
 
-// Token actions
-export const refreshToken = createAction('[Auth] Refresh Token');
-export const refreshTokenSuccess = createAction(
-  '[Auth] Refresh Token Success',
-  props<{ token: string }>()
-);
-export const refreshTokenFailure = createAction(
-  '[Auth] Refresh Token Failure',
-  props<{ error: string }>()
-);

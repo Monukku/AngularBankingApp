@@ -1,4 +1,4 @@
-.stats-grid {
+﻿.stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 16px;
@@ -13,10 +13,10 @@
       backdrop-filter: blur(10px);
     }
 
-    .stat-card.violet { border-color: #7c3aed; }
-    .stat-card.cyan { border-color: #06b6d4; }
-    .stat-card.emerald { border-color: #10b981; }
-    .stat-card.rose { border-color: #f43f5e; }
+    .stat-card.violet  { border-color: #e8a020; }
+    .stat-card.cyan    { border-color: #0d4f6c; }
+    .stat-card.emerald { border-color: #0d4f6c; }
+    .stat-card.rose    { border-color: #e8a020; }
 
     .stat-icon {
       font-size: 24px;

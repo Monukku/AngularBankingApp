@@ -8,6 +8,7 @@ import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
 
 export const TRANSACTIONS_ROUTES: Routes = [
+  { path: '', redirectTo: 'list', pathMatch: 'full' },
   { path: 'list', component: TransactionListComponent, canActivate: [authGuard]},
   { path: 'transfer-funds', component: TransferFundsComponent, canActivate: [authGuard]},
   { path: 'details/:id', component: TransactionDetailsComponent, canActivate: [authGuard]},

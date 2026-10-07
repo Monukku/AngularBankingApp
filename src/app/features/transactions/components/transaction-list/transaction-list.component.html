@@ -1,9 +1,165 @@
-<!-- transaction-list.component.html -->
-@for (transaction of transactions(); track trackByTransactionId($index, transaction)) {
-  <div>
-    <p>{{ transaction.id }}</p>
-    <p>{{ transaction.amount }}</p>
-    <p>{{ transaction.date }}</p>
+<div class="th-page">
+
+  <!-- Top bar -->
+  <div class="th-topbar">
+    <div>
+      <h2 class="th-title">{{ isStaff ? 'All Transactions' : 'Transaction history' }}</h2>
+      <p class="th-sub">{{ isStaff ? 'All customer transactions — staff view' : 'Your recent activity across all accounts' }}</p>
+    </div>
+    <div class="th-actions">
+      <button class="th-btn-ghost" (click)="exportCsv()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="th-btn-ghost" (click)="load()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+      @if (!isStaff) {
+        <button class="th-btn-primary" routerLink="/transactions/transfer-funds">
+          + New transfer
+        </button>
+      }
+    </div>
   </div>
-}
-  
+
+  @if (isStaff && actionMsg() && !processing()) {
+    <div [class]="actionMsg()!.ok ? 'th-banner ok' : 'th-banner err'">{{ actionMsg()!.msg }}</div>
+  }
+
+  <!-- Filter bar -->
+  <div class="th-filter-bar">
+    <div class="th-type-tabs">
+      <button class="th-tab" [class.active]="typeFilter() === 'ALL'"    (mouseenter)="setTypeFilter('ALL')"    (click)="setTypeFilter('ALL')">All</button>
+      <button class="th-tab" [class.active]="typeFilter() === 'CREDIT'" (mouseenter)="setTypeFilter('CREDIT')" (click)="setTypeFilter('CREDIT')">Credit</button>
+      <button class="th-tab" [class.active]="typeFilter() === 'DEBIT'"  (mouseenter)="setTypeFilter('DEBIT')"  (click)="setTypeFilter('DEBIT')">Debit</button>
+    </div>
+    <div class="th-filters-right">
+      <div class="rb-dd-wrap th-filter-select" (mouseenter)="openHoverDD('status')" (mouseleave)="closeHoverDD()">
+        <button class="rb-dd-trigger" [class.open]="openDropdown === 'status'">
+          <span>{{ statusLabel }}</span>
+          <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        @if (openDropdown === 'status') {
+          <div class="rb-dd-menu">
+            @for (opt of statusOptions; track opt.value) {
+              <div class="rb-dd-item" [class.selected]="statusFilter() === opt.value" (click)="selectStatus(opt.value)">
+                {{ opt.label }}
+                @if (statusFilter() === opt.value) {
+                  <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="th-date-range">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>{{ dateRangeLabel }}</span>
+      </div>
+      <div class="th-search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="th-search" [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" placeholder="Search name or txn ID…" />
+      </div>
+    </div>
+  </div>
+
+  <div class="th-divider"></div>
+
+  @if (loading()) {
+    <app-loader [fullscreen]="false" message="Loading transactions…" />
+  }
+
+  @if (error()) {
+    <div class="th-error-box">⚠ {{ error() }}</div>
+  }
+
+  @if (!loading() && !error()) {
+
+    <!-- Summary row -->
+    <div class="th-summary">
+      <div class="th-sum-item">
+        <div class="th-sum-label">Money in</div>
+        <div class="th-sum-val credit">{{ totalMoneyIn() | currency:'INR':'₹':'1.2-2' }}</div>
+      </div>
+      <div class="th-sum-item">
+        <div class="th-sum-label">Money out</div>
+        <div class="th-sum-val debit">{{ totalMoneyOut() | currency:'INR':'₹':'1.2-2' }}</div>
+      </div>
+      <div class="th-sum-item">
+        <div class="th-sum-label">Transactions</div>
+        <div class="th-sum-val neutral">{{ filteredTxns().length }}</div>
+      </div>
+    </div>
+
+    <div class="th-divider"></div>
+
+    <!-- Empty state -->
+    @if (filteredTxns().length === 0) {
+      <div class="th-empty">
+        <svg class="th-empty-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <h3>No transactions found</h3>
+        <p>{{ searchText() || statusFilter() ? 'Try adjusting your filters.' : 'Your transactions will appear here once you make a transfer.' }}</p>
+        @if (!isStaff && !searchText() && !statusFilter()) {
+          <button class="th-cta-btn" routerLink="/transactions/transfer-funds">Make your first transfer</button>
+        }
+      </div>
+    }
+
+    <!-- Grouped list -->
+    @for (group of groupedTxns(); track group.label) {
+      <div class="th-group">
+        <div class="th-group-label">{{ group.label }}</div>
+        @for (t of group.items; track t.id) {
+          <div class="th-row">
+            <div class="th-row-icon" [class]="txnIconClass(t)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                @if (isCreditTxn(t)) {
+                  <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+                } @else if (isDebitTxn(t)) {
+                  <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                } @else {
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                }
+              </svg>
+            </div>
+            <div class="th-row-info">
+              <div class="th-row-name">{{ txnLabel(t) }}</div>
+              <div class="th-row-meta">{{ t.referenceNumber || (t.id | slice:0:12) }} · {{ (t.createdAt ?? t.date) | date:'dd MMM yyyy' }}</div>
+            </div>
+            <div class="th-row-right">
+              @if (isStaff) {
+                @if (actionMsg()?.id === t.id && !processing()) {
+                  <span [class]="actionMsg()!.ok ? 'msg-ok' : 'msg-err'">{{ actionMsg()!.msg }}</span>
+                } @else if ((t.transactionStatus ?? t.status) === 'COMPLETED') {
+                  <button class="th-btn-reverse" [disabled]="processing() === t.id" (click)="openReverseModal(t.id)">
+                    {{ processing() === t.id ? '…' : 'Reverse' }}
+                  </button>
+                } @else if ((t.transactionStatus ?? t.status) === 'REVERSED') {
+                  <span class="th-reversed">Reversed</span>
+                }
+              }
+              <span class="th-status-dot" [class]="statusClass(t.transactionStatus ?? t.status)"></span>
+              <span class="th-status-text" [class]="statusClass(t.transactionStatus ?? t.status)">
+                {{ formatStatus(t.transactionStatus ?? t.status) }}
+              </span>
+              <div class="th-amount" [class]="isCreditTxn(t) ? 'credit' : (isFailedTxn(t) ? 'failed' : 'debit')">
+                {{ isCreditTxn(t) ? '+' : '−' }}{{ t.amount | currency:'INR':'₹':'1.2-2' }}
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (totalPages() > 1) {
+      <div class="th-pagination">
+        <button class="th-btn-ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+        <span class="th-page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="th-btn-ghost" [disabled]="page() >= totalPages() - 1" (click)="nextPage()">Next →</button>
+      </div>
+    }
+
+  }
+
+</div>

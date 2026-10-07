@@ -1,0 +1,170 @@
+// ── Keyframes ──────────────────────────────────────────────────
+@keyframes spin-cw  { to { transform: rotate(360deg);  } }
+@keyframes spin-ccw { to { transform: rotate(-360deg); } }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,160,32,0); }
+  50%       { box-shadow: 0 0 32px 8px rgba(232,160,32,0.35); }
+}
+@keyframes shimmer-run {
+  0%   { left: -60%; }
+  100% { left: 110%;  }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+@keyframes letter-pop {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-20deg); }
+  60%  { transform: scale(1.2) rotate(4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+// ── Host ─────────────────────────────────────────────────────────
+:host {
+  display: contents;
+}
+
+// ── Backdrop ────────────────────────────────────────────────────
+.loader-backdrop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+
+  &.fullscreen {
+    // Use position:fixed relative to the initial containing block (the <html> element),
+    // which ignores any overflow:hidden or position:relative ancestors.
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 20, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  &:not(.fullscreen) {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.55);
+    border-radius: inherit;
+  }
+}
+
+// ── Box ─────────────────────────────────────────────────────────
+.loader-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  animation: fade-in 0.4s ease both;
+}
+
+// ── Orbit rings ─────────────────────────────────────────────────
+.orbit-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+
+  &.ring-1 {
+    width: 120px;
+    height: 120px;
+    border-top-color: #e8a020;
+    border-right-color: rgba(232,160,32,0.3);
+    animation: spin-cw 1.2s linear infinite;
+  }
+
+  &.ring-2 {
+    width: 88px;
+    height: 88px;
+    border-bottom-color: #5b5bd6;
+    border-left-color: rgba(91,91,214,0.3);
+    animation: spin-ccw 1.6s linear infinite;
+  }
+
+  &.ring-3 {
+    width: 58px;
+    height: 58px;
+    border-top-color: rgba(232,160,32,0.6);
+    border-right-color: transparent;
+    animation: spin-cw 2s linear infinite;
+  }
+}
+
+// ── Centre logo mark ────────────────────────────────────────────
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8a020 0%, #c47d00 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-glow 2s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+
+  .lm-R {
+    font-size: 20px;
+    font-weight: 900;
+    font-style: italic;
+    color: #0c0e14;
+    line-height: 1;
+    font-family: system-ui, sans-serif;
+    animation: letter-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+  }
+}
+
+// ── Shimmer progress bar ────────────────────────────────────────
+.shimmer-track {
+  width: 180px;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.shimmer-fill {
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(232,160,32,0.4) 30%,
+    #e8a020 50%,
+    rgba(232,160,32,0.4) 70%,
+    transparent 100%
+  );
+  animation: shimmer-run 1.4s ease-in-out infinite;
+}
+
+// ── Text ─────────────────────────────────────────────────────────
+.loader-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+// ── Reduced motion ───────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .ring, .shimmer-fill, .logo-mark { animation: none; }
+}

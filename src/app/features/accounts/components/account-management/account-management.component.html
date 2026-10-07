@@ -1,235 +1,145 @@
-<div class="container">
-  <div class="header">
-    <h2>Account Management</h2>
-    <div class="action-buttons">
-      @if (account && !showUpdateAccountForm && !showCreateAccountForm && !showCheckAccountForm) {
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="showUpdateForm()"
-        >
-          Update Account
-        </button>
-        <button
-          mat-raised-button
-          color="warn"
-          (click)="deleteAccount()"
-        >
-          Delete Account
-        </button>
-      }
-      @if (!account && !showUpdateAccountForm && !showCreateAccountForm && !showCheckAccountForm) {
-        <button
-          mat-raised-button
-          color="primary"
-          class="create-button"
-          (click)="showCreateForm()"
-        >
-          Create New Account
-        </button>
-        <button
-          mat-raised-button
-          color="accent"
-          class="check-button"
-          (click)="showCheckForm()"
-        >
-          Having an account? Click Here.
-        </button>
-      }
+<div class="mgmt-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Account Management</h2>
+      <p class="page-sub">View details and manage your accounts</p>
     </div>
+    <button class="btn-primary" (click)="showCreateForm = !showCreateForm">
+      {{ showCreateForm ? '✕ Cancel' : '+ Open New Account' }}
+    </button>
   </div>
 
-  <div class="content">
-    @if (!showCreateAccountForm && !account && !showUpdateAccountForm && !showCheckAccountForm) {
-      <div class="intro-section">
-        <h3>Welcome to Our Account Management System</h3>
-        <p>
-          Explore our services and benefits. Lorem ipsum dolor sit amet,
-          consectetur adipiscing elit. Nullam ultricies tincidunt massa, a aliquet
-          odio scelerisque vel.
-        </p>
-        <p>
-          For more information about our services, visit
-          <a href="#">www.rewabank.com</a>
-        </p>
+  @if (errorMessage) {
+    <div class="error-box">⚠ {{ errorMessage }}</div>
+  }
+
+  <!-- Create Form -->
+  @if (showCreateForm) {
+    <div class="create-card">
+      <h3 class="create-title">Open a New Account</h3>
+
+      <div class="kyc-notice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Your account will be <strong>PENDING</strong> until KYC is verified.
+        <a routerLink="/kyc">Complete KYC →</a>
+      </div>
+
+      <form [formGroup]="createForm" (ngSubmit)="createNewAccount()">
+        <div class="form-field">
+          <label>Account Type</label>
+          <div class="rb-dd-wrap" (mouseenter)="openHoverDD('accountType')" (mouseleave)="closeHoverDD()">
+            <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'accountType'">
+              <span>{{ createForm.get('accountType')?.value || 'Select type…' }}</span>
+              <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (openDropdown === 'accountType') {
+              <div class="rb-dd-menu">
+                @for (type of accountTypes; track type) {
+                  <div class="rb-dd-item" [class.selected]="createForm.get('accountType')?.value === type" (click)="selectAccountType(type)">
+                    {{ type }}
+                    @if (createForm.get('accountType')?.value === type) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (createForm.get('accountType')?.value) {
+          <div class="min-balance">
+            Min. balance: <strong>{{ minBalanceMap[createForm.get('accountType')?.value] }}</strong>
+          </div>
+        }
+
+        <button type="submit" class="btn-submit" [disabled]="createForm.invalid || customerIdLoading || !customerId">
+          {{ customerIdLoading ? 'Loading…' : 'Create Account' }}
+        </button>
+      </form>
+    </div>
+  }
+
+  <!-- Empty -->
+  @if (accounts.length === 0 && !showCreateForm) {
+    <div class="state-box">
+      <div class="empty-illustration">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="20" width="48" height="30" rx="5" stroke="rgba(52,211,153,0.3)" stroke-width="2" fill="rgba(52,211,153,0.06)"/>
+          <path d="M20 14 L32 8 L44 14" stroke="rgba(52,211,153,0.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="26" y="34" width="12" height="16" rx="2" fill="rgba(52,211,153,0.15)"/>
+        </svg>
+      </div>
+      <h3>No accounts yet</h3>
+      <p>Click "Open New Account" to get started</p>
+    </div>
+  }
+
+  <!-- Accounts Grid -->
+  <div class="accounts-grid">
+    @for (account of accounts; track account.id) {
+      <div class="account-card" [class.selected]="selectedAccount?.id === account.id" (click)="selectAccount(account)">
+
+        <div class="card-top">
+          <span class="type-badge">{{ account.accountType }}</span>
+          <span class="status-badge" [class]="(account.status || account.accountStatus)?.toLowerCase()">
+            {{ account.status || account.accountStatus }}
+          </span>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Account Number</span>
+          <span class="field-value mono">{{ account.accountNumber }}</span>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Available Balance</span>
+          <span class="field-value balance">{{ account.balance | currency:'INR':'symbol':'1.2-2' }}</span>
+        </div>
+
+        @if ((account.status || account.accountStatus) === 'PENDING') {
+          <div class="notice pending-notice">Awaiting KYC verification to activate</div>
+        }
+        @if ((account.status || account.accountStatus) === 'DORMANT') {
+          <div class="notice dormant-notice">Account dormant due to inactivity</div>
+        }
+
+        <!-- Staff-only actions — only when selected and user is staff -->
+        @if (selectedAccount?.id === account.id && authService.isStaff()) {
+          <div class="staff-actions">
+            @if ((account.status || account.accountStatus) === 'PENDING') {
+              <button class="btn-action activate" (click)="activateAccount(); $event.stopPropagation()">Activate</button>
+            }
+            @if ((account.status || account.accountStatus) === 'FROZEN') {
+              <button class="btn-action unfreeze" (click)="unfreezeAccount(); $event.stopPropagation()">Unfreeze</button>
+            } @else if ((account.status || account.accountStatus) === 'ACTIVE') {
+              @if (!showFreezeInput) {
+                <button class="btn-action freeze" (click)="showFreezeInput = true; $event.stopPropagation()">Freeze</button>
+              } @else {
+                <div class="inline-input-row" (click)="$event.stopPropagation()">
+                  <input class="inline-input" type="text" placeholder="Reason for freezing…"
+                         [(ngModel)]="freezeReason" (keydown.enter)="freezeAccount()" />
+                  <button class="btn-action freeze" (click)="freezeAccount()">Confirm</button>
+                  <button class="btn-action close" (click)="showFreezeInput = false; freezeReason = ''">Cancel</button>
+                </div>
+              }
+            }
+            @if ((account.status || account.accountStatus) !== 'CLOSED' && (account.status || account.accountStatus) !== 'PENDING') {
+              @if (!showCloseConfirm) {
+                <button class="btn-action close" (click)="showCloseConfirm = true; $event.stopPropagation()">Close Account</button>
+              } @else {
+                <div class="inline-confirm" (click)="$event.stopPropagation()">
+                  <span class="confirm-text">⚠ Cannot be undone. Confirm close?</span>
+                  <button class="btn-action close" (click)="closeAccount()">Yes, Close</button>
+                  <button class="btn-action unfreeze" (click)="showCloseConfirm = false">Cancel</button>
+                </div>
+              }
+            }
+          </div>
+        }
+
       </div>
     }
-
-    @if (account && !showUpdateAccountForm) {
-      <mat-card class="card">
-        <mat-card-title>Account Details</mat-card-title>
-        <mat-divider></mat-divider>
-        <mat-card-content class="card-content">
-          <div class="detail-item"><strong>Name:</strong> {{ account.name }}</div>
-          <div class="detail-item">
-            <strong>Email:</strong> {{ account.email }}
-          </div>
-          <div class="detail-item">
-            <strong>Mobile Number:</strong> {{ account.mobileNumber }}
-          </div>
-          <div class="detail-item">
-            <strong>Account Number:</strong>
-            {{ account.accountsDto?.accountNumber }}
-          </div>
-          <div class="detail-item">
-            <strong>Branch Address:</strong>
-            {{ account.accountsDto?.branchAddress }}
-          </div>
-          <div class="detail-item">
-            <strong>Account Type:</strong> {{ account.accountsDto?.accountType }}
-          </div>
-          <div class="detail-item">
-            <strong>Account Category:</strong>
-            {{ account.accountsDto?.accountCategory }}
-          </div>
-          <div class="detail-item">
-            <strong>Account Status:</strong>
-            {{ account.accountsDto?.accountStatus }}
-          </div>
-        </mat-card-content>
-      </mat-card>
-    }
-
-    @if (showCreateAccountForm) {
-      <mat-card class="card create-form">
-        <mat-card-title>Create New Account</mat-card-title>
-        <mat-divider></mat-divider>
-        <mat-card-content class="card-content">
-          <form [formGroup]="accountForm" (ngSubmit)="createNewAccount()">
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Name</mat-label>
-              <input matInput formControlName="name" required />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Email</mat-label>
-              <input matInput formControlName="email" required />
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Select Account Type</mat-label>
-              <mat-select formControlName="accountType" required>
-                @for (type of accountTypes; track type) {
-                  <mat-option [value]="type">
-                    {{ type }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Mobile Number</mat-label>
-              <input
-                matInput
-                formControlName="mobileNumber"
-                type="tel"
-                required
-              />
-            </mat-form-field>
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="submit-button"
-            >
-              Create Account
-            </button>
-            <h1></h1>
-            @if (!account && !showUpdateAccountForm && showCreateAccountForm && !showCheckAccountForm) {
-              <button
-                mat-raised-button
-                color="accent"
-                class="check-form-button"
-                (click)="showCheckForm()"
-                type="button"
-              >
-                Having an account? Click Here.
-              </button>
-            }
-          </form>
-        </mat-card-content>
-      </mat-card>
-    }
-
-    @if (showUpdateAccountForm) {
-      <mat-card class="card update-form">
-        <mat-card-title>Update Account details</mat-card-title>
-        <mat-divider></mat-divider>
-        <mat-card-content class="card-content">
-          <form [formGroup]="accountForm" (ngSubmit)="updateAccount()">
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Name</mat-label>
-              <input matInput formControlName="name" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Email</mat-label>
-              <input matInput formControlName="email" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Mobile Number</mat-label>
-              <input matInput formControlName="mobileNumber" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Account Number</mat-label>
-              <input matInput formControlName="accountNumber" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Branch Address</mat-label>
-              <input matInput formControlName="branchAddress" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Account Type</mat-label>
-              <input matInput formControlName="accountType" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Account Category</mat-label>
-              <input matInput formControlName="accountCategory" />
-            </mat-form-field>
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Account Status</mat-label>
-              <input matInput formControlName="accountStatus" />
-            </mat-form-field>
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="submit-button"
-            >
-              Update Account
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    }
-
-    @if (showCheckAccountForm) {
-      <mat-card class="card check-form">
-        <mat-card-title>Check Existing Account</mat-card-title>
-        <mat-divider></mat-divider>
-        <mat-card-content class="card-content">
-          <form
-            [formGroup]="checkAccountForm"
-            (ngSubmit)="checkExistingAccount()"
-          >
-            <mat-form-field appearance="fill" class="form-field">
-              <mat-label>Mobile Number</mat-label>
-              <input
-                matInput
-                formControlName="mobileNumber"
-                type="tel"
-                required
-              />
-            </mat-form-field>
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="submit-button"
-            >
-              Check Existing Account
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    }
   </div>
+
 </div>

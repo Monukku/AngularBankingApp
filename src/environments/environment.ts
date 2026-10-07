@@ -8,8 +8,8 @@ export const environment = {
 
   // API Configuration
   api: {
-    baseUrl: 'http://localhost/api/v1', // ✅ API Gateway via Istio ingress (no port-forward)
-    timeout: 30000,
+    baseUrl: 'http://localhost/api/v1',
+    timeout: 60000,
     endpoints: {
       auth: '/auth',
       accounts: '/accounts',

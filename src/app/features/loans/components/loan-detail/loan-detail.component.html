@@ -1,1 +1,63 @@
-<p>loan-detail works!</p>
+<div class="detail-container">
+  <a routerLink="/loans" class="back-link">← Back to Loans</a>
+
+  @if (loading()) { <app-loader [fullscreen]="false" message="Loading loan…" /> }
+  @if (error())   { <p class="error">{{ error() }}</p> }
+
+  @if (loan()) {
+    <div class="detail-card">
+      <h2>Loan Details</h2>
+
+      <div class="detail-row"><span class="label">Loan ID</span><span class="value">{{ loan().id ?? loan().loanId }}</span></div>
+      <div class="detail-row"><span class="label">Type</span><span class="value">{{ loan().loanType }}</span></div>
+      <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value status" [class]="loan().status?.toLowerCase() ?? loan().loanStatus?.toLowerCase()">
+          {{ loan().status ?? loan().loanStatus }}
+        </span>
+      </div>
+      <div class="detail-row"><span class="label">Requested Amount</span><span class="value">{{ loan().requestedAmount ?? loan().principalAmount | currency:'INR':'symbol':'1.2-2' }}</span></div>
+      <div class="detail-row"><span class="label">Tenure</span><span class="value">{{ loan().tenureMonths }} months</span></div>
+      @if (loan().interestRate) {
+        <div class="detail-row"><span class="label">Interest Rate</span><span class="value">{{ loan().interestRate }}%</span></div>
+      }
+      @if (loan().emiAmount) {
+        <div class="detail-row"><span class="label">EMI</span><span class="value">{{ loan().emiAmount | currency:'INR':'symbol':'1.2-2' }}</span></div>
+      }
+      @if (loan().purpose) {
+        <div class="detail-row"><span class="label">Purpose</span><span class="value">{{ loan().purpose }}</span></div>
+      }
+      @if (loan().disbursedAt ?? loan().disbursementDate) {
+        <div class="detail-row"><span class="label">Disbursed On</span><span class="value">{{ (loan().disbursedAt ?? loan().disbursementDate) | date:'mediumDate' }}</span></div>
+      }
+      <div class="detail-row"><span class="label">Applied On</span><span class="value">{{ (loan().createdAt ?? loan().createdDate) | date:'mediumDate' }}</span></div>
+
+      <!-- Staff actions -->
+      @if (isStaff) {
+        @if (actionError()) {
+          <div class="action-error">{{ actionError() }}</div>
+        }
+        <div class="staff-actions">
+          @if (loan().status === 'PENDING') {
+            <button class="sa-btn sa-review" [disabled]="actionLoading()" (click)="startReview()">
+              {{ actionLoading() === 'review' ? 'Starting…' : 'Start Review' }}
+            </button>
+          }
+          @if (loan().status === 'UNDER_REVIEW') {
+            <button class="sa-btn sa-approve" [disabled]="actionLoading()" (click)="approveLoan()">
+              {{ actionLoading() === 'approve' ? 'Approving…' : 'Approve' }}
+            </button>
+            <button class="sa-btn sa-reject" [disabled]="actionLoading()" (click)="rejectLoan()">
+              {{ actionLoading() === 'reject' ? 'Rejecting…' : 'Reject' }}
+            </button>
+          }
+          @if (loan().status === 'APPROVED') {
+            <button class="sa-btn sa-disburse" [disabled]="actionLoading()" (click)="disburseLoan()">
+              {{ actionLoading() === 'disburse' ? 'Disbursing…' : 'Disburse Loan' }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

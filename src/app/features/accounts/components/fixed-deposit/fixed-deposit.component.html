@@ -1,0 +1,164 @@
+<div class="fd-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Fixed Deposits</h2>
+      <p class="page-sub">Earn guaranteed returns with our FD plans</p>
+    </div>
+    <button class="btn-primary" (click)="showForm.set(!showForm())">
+      {{ showForm() ? '✕ Cancel' : '+ Open FD' }}
+    </button>
+  </div>
+
+  <!-- Open FD form -->
+  @if (showForm()) {
+    <div class="form-card">
+      <h3 class="form-title">Open Fixed Deposit</h3>
+
+      <form [formGroup]="form" (ngSubmit)="open()">
+
+        <!-- Source account -->
+        <div class="form-field">
+          <label>Source Account</label>
+          @if (accounts().length === 0) {
+            <p class="field-hint warn">No eligible ACTIVE savings/current/business account found.</p>
+          } @else {
+            <div class="rb-dd-wrap" (mouseenter)="openHoverDD('account')" (mouseleave)="closeHoverDD()">
+              <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'account'">
+                <span [class.rb-dd-placeholder]="!form.get('sourceAccountId')?.value">{{ selectedAccountLabel }}</span>
+                <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (openDropdown === 'account') {
+                <div class="rb-dd-menu">
+                  @for (a of accounts(); track a.id) {
+                    <div class="rb-dd-item" [class.selected]="form.get('sourceAccountId')?.value === a.id" (click)="selectAccount(a.id)">
+                      {{ a.accountType }} · {{ a.accountNumber }} (₹{{ a.balance | number:'1.2-2' }})
+                      @if (form.get('sourceAccountId')?.value === a.id) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Deposit amount -->
+        <div class="form-field">
+          <label>Deposit Amount (₹)</label>
+          <input type="number" formControlName="depositAmount" placeholder="Min ₹1,000 — Max ₹1,00,00,000" />
+          @if (form.get('depositAmount')?.invalid && form.get('depositAmount')?.dirty) {
+            <p class="field-error">Amount must be between ₹1,000 and ₹1,00,00,000</p>
+          }
+        </div>
+
+        <!-- Tenure -->
+        <div class="form-field">
+          <label>Tenure (months)</label>
+          <div class="rb-dd-wrap" (mouseenter)="openHoverDD('tenure')" (mouseleave)="closeHoverDD()">
+            <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'tenure'">
+              <span>{{ selectedTenureLabel }}</span>
+              <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (openDropdown === 'tenure') {
+              <div class="rb-dd-menu">
+                @for (t of tenureOptions; track t) {
+                  <div class="rb-dd-item" [class.selected]="form.get('tenureMonths')?.value === t" (click)="selectTenure(t)">
+                    {{ t }} months{{ t >= 12 ? ' (' + (t/12 | number:'1.0-1') + ' yr)' : '' }}
+                    @if (form.get('tenureMonths')?.value === t) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Preview -->
+        @if (form.value.depositAmount > 0 && form.value.tenureMonths) {
+          <div class="maturity-preview">
+            <div class="preview-row">
+              <span class="preview-label">Interest Rate</span>
+              <span class="preview-val highlight">{{ interestRate }}% p.a.</span>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">Est. Maturity Amount</span>
+              <span class="preview-val big">{{ estimatedMaturity | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+            <p class="preview-note">Quarterly compounding. Amount credited to source account on maturity.</p>
+          </div>
+        }
+
+        <button type="submit" class="btn-submit"
+                [disabled]="form.invalid || !customerId || accounts().length === 0 || submitting()">
+          {{ submitting() ? 'Opening…' : 'Confirm & Open FD' }}
+        </button>
+
+      </form>
+    </div>
+  }
+
+  <!-- FD list -->
+  @if (loading()) {
+    <div class="fd-loading">
+      <div class="fd-spinner"></div>
+      Loading your Fixed Deposits…
+    </div>
+  } @else if (fds().length === 0 && !showForm()) {
+    <div class="state-box">
+      <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+        <rect x="8" y="16" width="44" height="28" rx="6" stroke="rgba(251,191,36,0.3)" stroke-width="2" fill="rgba(251,191,36,0.05)"/>
+        <path d="M20 28 h20 M20 34 h12" stroke="rgba(251,191,36,0.4)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h3>No Fixed Deposits</h3>
+      <p>Click "Open FD" above to start earning guaranteed returns</p>
+    </div>
+  } @else {
+    <div class="fd-grid">
+      @for (fd of fds(); track fd.id) {
+        <div class="fd-card">
+          <div class="fd-top">
+            <span class="type-badge">FIXED DEPOSIT</span>
+            <span class="status-badge" [class]="(fd.status ?? fd.accountStatus)?.toLowerCase()">
+              {{ fd.status ?? fd.accountStatus }}
+            </span>
+          </div>
+
+          <div class="fd-field">
+            <span class="fd-label">Account Number</span>
+            <span class="fd-value mono">{{ fd.accountNumber }}</span>
+          </div>
+
+          <div class="fd-field">
+            <span class="fd-label">Deposit Amount</span>
+            <span class="fd-value amount">{{ fd.depositAmount | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="fd-row-2">
+            <div class="fd-field">
+              <span class="fd-label">Tenure</span>
+              <span class="fd-value">{{ fd.tenureMonths }} months</span>
+            </div>
+            <div class="fd-field">
+              <span class="fd-label">Interest Rate</span>
+              <span class="fd-value highlight">{{ fd.interestRate ?? '—' }}% p.a.</span>
+            </div>
+          </div>
+
+          @if (fd.maturityDate) {
+            <div class="fd-field">
+              <span class="fd-label">Maturity Date</span>
+              <span class="fd-value">{{ fd.maturityDate | date:'dd MMM yyyy' }}</span>
+            </div>
+          }
+
+          @if (fd.maturedAt) {
+            <div class="fd-notice matured">
+              Matured on {{ fd.maturedAt | date:'dd MMM yyyy' }} — payout sent to source account
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+</div>

@@ -1,217 +1,181 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountService } from '../../services/account.service';
+import { UserService } from '../../../../core/services/user.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from '../../../../shared/components/ConfirmationDialogComponent/confirmation-dialog.component';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatOption, MatOptionModule } from '@angular/material/core';
-import { MatSelect } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-account-management',
   standalone: true,
   imports: [
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatToolbarModule,
     CommonModule,
-    MatIconModule,
     ReactiveFormsModule,
-    MatDividerModule,
-    MatOption,
-    MatSelect,
-    MatLabel,
+    FormsModule,
+    RouterLink,
   ],
   templateUrl: './account-management.component.html',
   styleUrls: ['./account-management.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccountManagementComponent implements OnInit {
-  accountForm: FormGroup;
-  checkAccountForm: FormGroup;
-  account: any;
-  showCreateAccountForm = false;
-  showUpdateAccountForm = false;
-  showCheckAccountForm = false;
+  private accountService = inject(AccountService);
+  private userService = inject(UserService);
+  private snackBar = inject(MatSnackBar);
+  private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+  protected authService = inject(AuthService);
 
-  accountTypes: string[] = ['SAVINGS', 'CHECKING', 'BUSINESS']; // Available account types
+  accountTypes = ['SAVINGS', 'CURRENT', 'BUSINESS'];
+  minBalanceMap: Record<string, string> = {
+    SAVINGS: '₹1,000',
+    CURRENT: '₹10,000',
+    BUSINESS: '₹10,000',
+  };
+  openDropdown: 'accountType' | null = null;
 
-  errorMessage: any; // For displaying errors
-  constructor(
-    private formBuilder: FormBuilder,
-    private accountService: AccountService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
-  ) {
-    this.accountForm = this.formBuilder.group({
-      name: [''],
-      email: [''],
-      accountType: [this.accountTypes[0], Validators.required], // Default to first type
-      mobileNumber: [
-        '',
-        [Validators.required, Validators.pattern(/^[0-9]{10}$/)],
-      ],
-      accountNumber: [''],
-      branchAddress: [''],
-      accountCategory: [''],
-      accountStatus: [''],
+  openHoverDD(name: 'accountType') { this.openDropdown = name; this.cdr.markForCheck(); }
+  closeHoverDD() { this.openDropdown = null; this.cdr.markForCheck(); }
+
+  selectAccountType(type: string) {
+    this.createForm.get('accountType')?.setValue(type);
+    this.openDropdown = null;
+    this.cdr.markForCheck();
+  }
+
+  createForm: FormGroup = this.fb.group({
+    accountType: [this.accountTypes[0], Validators.required],
+  });
+
+  accounts: any[] = [];
+  selectedAccount: any = null;
+  showCreateForm = false;
+  errorMessage: string | null = null;
+  customerIdLoading = true;
+  protected customerId: string | null = null;
+
+  @HostListener('document:click')
+  onDocumentClick(): void { this.openDropdown = null; this.cdr.markForCheck(); }
+
+  ngOnInit(): void {
+    this.userService.getCustomerProfile().subscribe({
+      next: (profile) => {
+        this.customerId = profile?.id ?? profile?.customerId ?? null;
+        this.customerIdLoading = false;
+        if (!this.customerId) {
+          this.errorMessage = 'Could not determine your customer ID. Please contact support.';
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.customerIdLoading = false;
+        this.errorMessage = 'Could not load customer profile. Please refresh and try again.';
+        this.cdr.markForCheck();
+      },
     });
+    this.loadAccounts();
+  }
 
-    this.checkAccountForm = this.formBuilder.group({
-      mobileNumber: [
-        '',
-        [Validators.required, Validators.pattern(/^[0-9]{10}$/)],
-      ],
+  loadAccounts(): void {
+    const targetId = this.route.snapshot.queryParamMap.get('accountId');
+    this.accountService.getMyAccounts().subscribe({
+      next: (accounts) => {
+        this.accounts = accounts;
+        if (targetId) {
+          this.selectedAccount = accounts.find((a: any) => a.id === targetId) ?? null;
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => this.handleError(err),
     });
   }
 
-  ngOnInit(): void {}
-
-  showCreateForm(): void {
-    this.showCreateAccountForm = true;
-    this.showUpdateAccountForm = false;
-    this.showCheckAccountForm = false;
-  }
-
-  showUpdateForm(): void {
-    if (this.account) {
-      this.accountForm.patchValue({
-        name: this.account.name,
-        email: this.account.email,
-        mobileNumber: this.account.mobileNumber,
-        accountNumber: this.account.accountsDto.accountNumber,
-        branchAddress: this.account.accountsDto.branchAddress,
-        accountType: this.account.accountsDto.accountType,
-        accountCategory: this.account.accountsDto.accountCategory,
-        accountStatus: this.account.accountsDto.accountStatus,
-      });
-      this.showUpdateAccountForm = true;
-      this.showCreateAccountForm = false;
-      this.showCheckAccountForm = false;
-    }
-  }
-
-  showCheckForm(): void {
-    this.showCheckAccountForm = true;
-    this.showCreateAccountForm = false;
-    this.showUpdateAccountForm = false;
+  selectAccount(account: any): void {
+    this.selectedAccount = account;
   }
 
   createNewAccount(): void {
-    if (this.accountForm.valid) {
-      const accountData = this.accountForm.value;
-      const selectedAccountType = accountData.accountType;
-      this.accountService
-        .createAccount(accountData, selectedAccountType)
-        .subscribe(
-          () => {
-            this.handleSuccess('Account created successfully');
-            this.showCreateAccountForm = false;
-          },
-          (error) => this.handleError(error)
-        );
+    if (this.createForm.invalid) return;
+    if (!this.customerId) {
+      this.handleError({ message: 'Customer profile not loaded. Please refresh and try again.' });
+      return;
     }
+    const payload = { accountType: this.createForm.value.accountType, customerId: this.customerId };
+    this.accountService.createAccount(payload).subscribe({
+      next: () => {
+        this.handleSuccess('Account created successfully');
+        this.showCreateForm = false;
+        this.loadAccounts();
+      },
+      error: (err) => this.handleError(err),
+    });
   }
 
-  updateAccount(): void {
-    if (this.accountForm.valid && this.account) {
-      const updatePayload = {
-        name: this.accountForm.value.name,
-        email: this.accountForm.value.email,
-        mobileNumber: this.accountForm.value.mobileNumber,
-        accountsDto: {
-          accountNumber: this.accountForm.value.accountNumber,
-          branchAddress: this.accountForm.value.branchAddress,
-          accountType: this.accountForm.value.accountType,
-          accountCategory: this.accountForm.value.accountCategory,
-          accountStatus: this.accountForm.value.accountStatus,
-        },
-      };
-
-      this.accountService
-        .updateAccount(this.account.mobileNumber, updatePayload)
-        .subscribe(
-          () => {
-            this.handleSuccess('Account updated successfully');
-            this.showUpdateAccountForm = false;
-            this.checkExistingAccount(); // Refresh account details
-          },
-          (error) => this.handleError(error)
-        );
-    }
+  activateAccount(): void {
+    if (!this.selectedAccount) return;
+    this.accountService.activateAccount(this.selectedAccount.id).subscribe({
+      next: () => {
+        this.handleSuccess('Account activated successfully');
+        this.loadAccounts();
+      },
+      error: (err) => this.handleError(err),
+    });
   }
 
-  checkExistingAccount(): void {
-    if (this.checkAccountForm.valid) {
-      const { mobileNumber } = this.checkAccountForm.value;
-      this.accountService.fetchAccountDetails(mobileNumber).subscribe(
-        (account) => {
-          if (account) {
-            this.account = account;
-            this.showCheckAccountForm = false;
-          } else {
-            this.handleError(
-              new Error('The account you are looking for does not exist')
-            );
-          }
-        },
-        (error) => this.handleError(error)
-      );
-    }
+  freezeReason = '';
+  showFreezeInput = false;
+  showCloseConfirm = false;
+
+  freezeAccount(): void {
+    if (!this.selectedAccount) return;
+    const reason = this.freezeReason.trim() || 'Frozen by user';
+    this.showFreezeInput = false;
+    this.freezeReason = '';
+    this.accountService.freezeAccount(this.selectedAccount.id, reason).subscribe({
+      next: () => {
+        this.handleSuccess('Account frozen');
+        this.loadAccounts();
+      },
+      error: (err) => this.handleError(err),
+    });
   }
 
-  deleteAccount(): void {
-    if (this.account) {
-      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-        width: '300px',
-        data: { message: 'Are you sure you want to delete this account?' },
-      });
+  unfreezeAccount(): void {
+    if (!this.selectedAccount) return;
+    this.accountService.unfreezeAccount(this.selectedAccount.id).subscribe({
+      next: () => {
+        this.handleSuccess('Account unfrozen');
+        this.loadAccounts();
+      },
+      error: (err) => this.handleError(err),
+    });
+  }
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.accountService
-            .deleteAccount(this.account.mobileNumber)
-            .subscribe(
-              () => {
-                this.handleSuccess('Account deleted successfully');
-                this.account = null;
-                this.showUpdateAccountForm = false;
-                this.showCreateAccountForm = false;
-              },
-              (error) => this.handleError(error)
-            );
-        }
-      });
-    }
+  closeAccount(): void {
+    if (!this.selectedAccount) return;
+    this.showCloseConfirm = false;
+    this.accountService.closeAccount(this.selectedAccount.id).subscribe({
+      next: () => {
+        this.handleSuccess('Account closed');
+        this.selectedAccount = null;
+        this.loadAccounts();
+      },
+      error: (err) => this.handleError(err),
+    });
   }
 
   private handleSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar'],
-    });
-    this.errorMessage = null; // Clear any previous error messages
+    this.errorMessage = null;
+    this.snackBar.open(message, 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
   }
 
   private handleError(error: any): void {
-    console.error('Error details:', error);
-    this.errorMessage = error?.message || 'An unknown error occurred'; // Set the error message to be displayed
-    this.snackBar.open(this.errorMessage, 'Close', {
-      duration: 3000,
-      panelClass: ['error-snackbar'],
-    });
+    this.errorMessage = error?.message || 'An unknown error occurred';
+    this.snackBar.open(this.errorMessage!, 'Close', { duration: 3000, panelClass: ['error-snackbar'] });
+    this.cdr.markForCheck();
   }
 }

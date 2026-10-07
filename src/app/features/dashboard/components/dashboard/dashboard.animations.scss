@@ -1,13 +1,13 @@
-// ============================================================
-// dashboard.animations.scss — All keyframes (shared/global)
+﻿// ============================================================
+// dashboard.animations.scss â€” All keyframes (shared/global)
 // ============================================================
 
 // Accent colours
-$violet:   #7c3aed;
+$violet:   #0d4f6c;
 $em-light: #34d399;
 $rose:     #f43f5e;
 
-// ─── Keyframes ────────────────────────────────────────────────
+// â”€â”€â”€ Keyframes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @keyframes orbDrift1  { 0%,100%{transform:translate(0,0) scale(1);opacity:.2} 33%{transform:translate(55px,-70px) scale(1.12);opacity:.28} 66%{transform:translate(-25px,35px) scale(.9);opacity:.14} }
 @keyframes orbDrift2  { 0%,100%{transform:translate(0,0) scale(1);opacity:.15} 40%{transform:translate(-65px,55px) scale(1.2);opacity:.2} 75%{transform:translate(40px,-25px) scale(.88);opacity:.1} }
 @keyframes orbDrift3  { 0%,100%{transform:translate(0,0);opacity:.1} 50%{transform:translate(50px,-45px);opacity:.18} }
@@ -35,4 +35,5 @@ $rose:     #f43f5e;
 @keyframes barGrow    { from{height:0 !important} }
 @keyframes donutDraw  { from{stroke-dashoffset:283} }
 @keyframes goalFill   { from{width:0 !important} }
+
 

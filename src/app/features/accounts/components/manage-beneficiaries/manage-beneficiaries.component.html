@@ -1,24 +1,62 @@
-<!-- src/app/components/manage-beneficiaries/manage-beneficiaries.component.html -->
-<div class="manage-beneficiaries-container">
-  <div class="manage-beneficiaries">
-    <h2>Manage Beneficiaries</h2>
-    <ul>
-      @for (beneficiary of beneficiaries; track beneficiary.beneficiaryId) {
-        <li>{{ beneficiary.name }} ({{ beneficiary.accountNumber }})</li>
-      }
-    </ul>
-    <form (ngSubmit)="addBeneficiary(newBeneficiary)">
-      <mat-form-field appearance="fill">
-        <mat-label>Name</mat-label>
-        <input matInput id="name" [(ngModel)]="newBeneficiary.name" name="name" required>
-      </mat-form-field>
+<div class="beneficiaries-page">
 
-      <mat-form-field appearance="fill">
-        <mat-label>Account Number</mat-label>
-        <input matInput id="accountNumber" [(ngModel)]="newBeneficiary.accountNumber" name="accountNumber" required>
-      </mat-form-field>
+  <div class="page-header">
+    <h2 class="page-title">Manage Beneficiaries</h2>
+    <p class="page-sub">Add and manage your saved payees</p>
+  </div>
 
-      <button mat-raised-button color="primary" type="submit">Add Beneficiary</button>
+  <!-- Add Beneficiary Form -->
+  <div class="form-card">
+    <h3 class="form-title">Add New Beneficiary</h3>
+    <form (ngSubmit)="addBeneficiary(newBeneficiary)" #beneficiaryForm="ngForm" class="add-form">
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="name">Full Name</label>
+          <input id="name" [(ngModel)]="newBeneficiary.name" name="name" required placeholder="Beneficiary name" />
+        </div>
+        <div class="form-field">
+          <label for="accountNumber">Account Number</label>
+          <input id="accountNumber" [(ngModel)]="newBeneficiary.accountNumber" name="accountNumber" required placeholder="Account number" />
+        </div>
+      </div>
+
+      <div class="form-submit">
+        <button type="submit" class="btn-primary" [disabled]="beneficiaryForm.invalid">
+          + Add Beneficiary
+        </button>
+      </div>
     </form>
   </div>
+
+  <!-- Beneficiaries List -->
+  <div class="section-header">
+    <h3 class="section-title">Saved Beneficiaries</h3>
+    @if (beneficiaries.length > 0) {
+      <span class="count-badge">{{ beneficiaries.length }}</span>
+    }
+  </div>
+
+  @if (beneficiaries.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <p>No beneficiaries saved yet</p>
+    </div>
+  }
+
+  @if (beneficiaries.length > 0) {
+    <div class="beneficiaries-list">
+      @for (b of beneficiaries; track b.beneficiaryId) {
+        <div class="beneficiary-item">
+          <div class="b-avatar">{{ (b.name ? b.name.charAt(0) : '?').toUpperCase() }}</div>
+          <div class="b-info">
+            <div class="b-name">{{ b.name }}</div>
+            <div class="b-account">{{ b.accountNumber }}</div>
+          </div>
+          <button class="btn-send" type="button" (click)="sendMoney(b)">Send Money</button>
+        </div>
+      }
+    </div>
+  }
+
 </div>

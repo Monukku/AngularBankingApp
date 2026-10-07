@@ -5,7 +5,6 @@ import { UserProfile } from '../../core/models/user.model';
 export interface AuthState {
   authenticated: boolean;
   user: UserProfile | null;
-  token: string | null;
   loading: boolean;
   error: string | null;
 }
@@ -13,7 +12,6 @@ export interface AuthState {
 export const initialState: AuthState = {
   authenticated: false,
   user: null,
-  token: null,
   loading: false,
   error: null,
 };
@@ -56,7 +54,6 @@ export const authReducer = createReducer(
     ...state,
     authenticated: false,
     user: null,
-    token: null,
     loading: false,
     error: null,
   })),
@@ -83,20 +80,4 @@ export const authReducer = createReducer(
     error,
   })),
 
-  // Refresh token
-  on(AuthActions.refreshToken, (state) => ({
-    ...state,
-    loading: true,
-  })),
-  on(AuthActions.refreshTokenSuccess, (state, { token }) => ({
-    ...state,
-    token,
-    loading: false,
-    error: null,
-  })),
-  on(AuthActions.refreshTokenFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error,
-  }))
 );

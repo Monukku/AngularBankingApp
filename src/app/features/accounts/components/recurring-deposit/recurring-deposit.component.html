@@ -1,0 +1,174 @@
+<div class="rd-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Recurring Deposits</h2>
+      <p class="page-sub">Build wealth with monthly deposits</p>
+    </div>
+    <button class="btn-primary" (click)="showForm.set(!showForm())">
+      {{ showForm() ? '✕ Cancel' : '+ Open RD' }}
+    </button>
+  </div>
+
+  <!-- Open RD form -->
+  @if (showForm()) {
+    <div class="form-card">
+      <h3 class="form-title">Open Recurring Deposit</h3>
+
+      <form [formGroup]="form" (ngSubmit)="open()">
+
+        <!-- Source account -->
+        <div class="form-field">
+          <label>Auto-Debit Account</label>
+          @if (accounts().length === 0) {
+            <p class="field-hint warn">No eligible ACTIVE savings/current/business account found.</p>
+          } @else {
+            <div class="rb-dd-wrap" (mouseenter)="openHoverDD('account')" (mouseleave)="closeHoverDD()">
+              <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'account'">
+                <span [class.rb-dd-placeholder]="!form.get('sourceAccountId')?.value">{{ selectedAccountLabel }}</span>
+                <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (openDropdown === 'account') {
+                <div class="rb-dd-menu">
+                  @for (a of accounts(); track a.id) {
+                    <div class="rb-dd-item" [class.selected]="form.get('sourceAccountId')?.value === a.id" (click)="selectAccount(a.id)">
+                      {{ a.accountType }} · {{ a.accountNumber }} (₹{{ a.balance | number:'1.2-2' }})
+                      @if (form.get('sourceAccountId')?.value === a.id) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Monthly installment -->
+        <div class="form-field">
+          <label>Monthly Installment (₹)</label>
+          <input type="number" formControlName="installmentAmount" placeholder="Min ₹500 per month" />
+          @if (form.get('installmentAmount')?.invalid && form.get('installmentAmount')?.dirty) {
+            <p class="field-error">Minimum installment is ₹500</p>
+          }
+        </div>
+
+        <!-- Tenure -->
+        <div class="form-field">
+          <label>Tenure (months)</label>
+          <div class="rb-dd-wrap" (mouseenter)="openHoverDD('tenure')" (mouseleave)="closeHoverDD()">
+            <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'tenure'">
+              <span>{{ selectedTenureLabel }}</span>
+              <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (openDropdown === 'tenure') {
+              <div class="rb-dd-menu">
+                @for (t of tenureOptions; track t) {
+                  <div class="rb-dd-item" [class.selected]="form.get('tenureMonths')?.value === t" (click)="selectTenure(t)">
+                    {{ t }} months{{ t >= 12 ? ' (' + (t/12 | number:'1.0-1') + ' yr)' : '' }}
+                    @if (form.get('tenureMonths')?.value === t) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Preview -->
+        @if (form.value.installmentAmount > 0 && form.value.tenureMonths) {
+          <div class="maturity-preview">
+            <div class="preview-row">
+              <span class="preview-label">Interest Rate</span>
+              <span class="preview-val highlight">{{ interestRate }}% p.a. (monthly compounding)</span>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">Total Invested</span>
+              <span class="preview-val">{{ totalInvested | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="preview-row">
+              <span class="preview-label">Est. Maturity Amount</span>
+              <span class="preview-val big">{{ estimatedMaturity | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+            <p class="preview-note">First installment debited today. Subsequent debits monthly.</p>
+          </div>
+        }
+
+        <button type="submit" class="btn-submit"
+                [disabled]="form.invalid || !customerId || accounts().length === 0 || submitting()">
+          {{ submitting() ? 'Opening…' : 'Confirm & Open RD' }}
+        </button>
+
+      </form>
+    </div>
+  }
+
+  <!-- RD list -->
+  @if (loading()) {
+    <div class="rd-loading">
+      <div class="rd-spinner"></div>
+      Loading your Recurring Deposits…
+    </div>
+  } @else if (rds().length === 0 && !showForm()) {
+    <div class="state-box">
+      <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+        <circle cx="30" cy="30" r="22" stroke="rgba(52,211,153,0.3)" stroke-width="2" fill="rgba(52,211,153,0.05)"/>
+        <path d="M30 18 v12 l8 4" stroke="rgba(52,211,153,0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3>No Recurring Deposits</h3>
+      <p>Click "Open RD" above to start building wealth monthly</p>
+    </div>
+  } @else {
+    <div class="rd-grid">
+      @for (rd of rds(); track rd.id) {
+        <div class="rd-card">
+          <div class="rd-top">
+            <span class="type-badge">RECURRING DEPOSIT</span>
+            <span class="status-badge" [class]="(rd.status ?? rd.accountStatus)?.toLowerCase()">
+              {{ rd.status ?? rd.accountStatus }}
+            </span>
+          </div>
+
+          <div class="rd-field">
+            <span class="rd-label">Account Number</span>
+            <span class="rd-value mono">{{ rd.accountNumber }}</span>
+          </div>
+
+          <div class="rd-field">
+            <span class="rd-label">Monthly Installment</span>
+            <span class="rd-value amount">{{ rd.installmentAmount | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="rd-row-2">
+            <div class="rd-field">
+              <span class="rd-label">Tenure</span>
+              <span class="rd-value">{{ rd.tenureMonths }} months</span>
+            </div>
+            <div class="rd-field">
+              <span class="rd-label">Current Balance</span>
+              <span class="rd-value highlight">{{ rd.balance | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+
+          @if (rd.nextInstallmentDate) {
+            <div class="rd-field">
+              <span class="rd-label">Next Installment</span>
+              <span class="rd-value">{{ rd.nextInstallmentDate | date:'dd MMM yyyy' }}</span>
+            </div>
+          }
+
+          @if ((rd.status ?? rd.accountStatus) === 'FROZEN') {
+            <div class="rd-notice frozen">
+              Auto-debit failed. Please ensure sufficient balance in source account.
+            </div>
+          }
+
+          @if ((rd.status ?? rd.accountStatus) === 'CLOSED') {
+            <div class="rd-notice closed">
+              Matured — payout sent to source account
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+</div>

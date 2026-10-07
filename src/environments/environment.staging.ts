@@ -28,7 +28,7 @@ export const environment = {
   // API Configuration
   api: {
     baseUrl: 'https://api-staging.rewabank.com',
-    timeout: 30000,
+    timeout: 60000,
     retryAttempts: 3,
     retryDelay: 1000,
     

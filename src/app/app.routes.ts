@@ -6,7 +6,7 @@ import { NotFoundComponent } from './shared/components/not-found/not-found.compo
 
 export const routes: Routes = [
 
-  // ✅ Auth Routes (public - no guard needed)
+  // Auth Routes (public - no guard needed)
   {
     path: 'auth',
     loadChildren: () =>
@@ -23,12 +23,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/dashboard/components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadChildren: () =>
-      import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
   },
   {
     path: 'profile',
@@ -48,26 +42,36 @@ export const routes: Routes = [
   },
   {
     path: 'accounts',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ACCOUNTS'] },
+    canActivate: [authGuard],
     loadChildren: () =>
       import('./features/accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
   },
   {
     path: 'loans',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['LOANS'] },
+    canActivate: [authGuard],
     loadChildren: () =>
       import('./features/loans/loans.routes').then((m) => m.LOANS_ROUTES),
   },
   {
     path: 'cards',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['CARDS'] },
+    canActivate: [authGuard],
     loadChildren: () =>
       import('./features/cards/cards.routes').then((m) => m.CARDS_ROUTES),
   },
-  // ✅ Add unauthorized route
+  {
+    path: 'kyc',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/kyc/kyc.routes').then((m) => m.KYC_ROUTES),
+  },
+  {
+    path: 'staff',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['TELLER', 'RELATIONSHIP_MANAGER', 'BRANCH_MANAGER', 'CREDIT_OFFICER', 'AUDITOR', 'SUPER_ADMIN'] },
+    loadChildren: () =>
+      import('./features/staff/staff.routes').then((m) => m.STAFF_ROUTES),
+  },
+  // Add unauthorized route
   {
     path: 'unauthorized',
     component: NotFoundComponent, // Or create UnauthorizedComponent

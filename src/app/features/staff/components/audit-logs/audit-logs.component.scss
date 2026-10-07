@@ -1,0 +1,333 @@
+$gold:      #F2B33D;
+$gold-soft: rgba(242,179,61,0.12);
+$t1:        #E8ECF4;
+$t2:        #8A97AD;
+$t3:        #5B6579;
+$line:      rgba(148,163,184,0.08);
+$line-s:    rgba(148,163,184,0.18);
+$red:       #f87171;
+$ease:      cubic-bezier(0.4,0,0.2,1);
+
+:host { display: block; background: #0A0E19; min-height: 100%; }
+
+// ── Top gold accent bar
+.al-topbar {
+  height: 2px;
+  background: $gold;
+  opacity: 0.35;
+}
+
+// ── Page shell
+.al-page { min-height: 100%; background: #0A0E19; }
+
+.al-inner {
+  padding: 40px 32px 70px;
+  color: $t1;
+  font-size: 14.5px;
+
+  @media (max-width: 600px) { padding: 24px 16px 50px; }
+}
+
+// ── Header
+.al-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.al-header-left { display: flex; flex-direction: column; gap: 6px; }
+
+.al-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.al-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: $t1;
+  letter-spacing: -0.3px;
+}
+
+.al-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: $gold;
+  background: $gold-soft;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.al-sub {
+  margin: 0;
+  font-size: 13.5px;
+  color: $t2;
+}
+
+.al-btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px solid $line-s;
+  color: $t2;
+  border-radius: 8px;
+  padding: 9px 15px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s $ease, border-color 0.15s $ease;
+
+  &:hover { color: $t1; border-color: rgba(148,163,184,0.35); }
+  &:active { transform: scale(0.97); }
+}
+
+// ── Mode tabs (underline style)
+.al-tabs {
+  display: flex;
+  gap: 26px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid $line;
+  margin-bottom: 24px;
+}
+
+.al-tab {
+  font-size: 13.5px;
+  font-weight: 400;
+  color: $t2;
+  cursor: pointer;
+  padding-bottom: 14px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s $ease, border-color 0.15s $ease;
+  white-space: nowrap;
+
+  &:hover { color: $t1; }
+
+  &--active {
+    font-weight: 600;
+    color: $gold;
+    border-bottom-color: $gold;
+  }
+}
+
+// ── Filter row
+.al-filters { margin-bottom: 36px; }
+
+.al-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+
+// ── Fields — flat underline style matching transfer/KYC pages
+.al-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &--wide { flex: 1; max-width: 320px; }
+}
+
+.al-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $t3;
+}
+
+.al-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $line-s;
+  color: $t1;
+  font-size: 14.5px;
+  font-family: inherit;
+  padding: 7px 2px;
+  outline: none;
+  transition: border-color 0.18s $ease;
+  color-scheme: dark;
+
+  &:focus { border-bottom-color: $gold; }
+  &::placeholder { color: $t3; }
+
+  &--date { min-width: 200px; }
+
+  // style the calendar picker icon amber
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(60%) sepia(50%) saturate(400%) hue-rotate(0deg);
+    opacity: 0.55;
+    cursor: pointer;
+  }
+}
+
+.al-dd-trigger {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13.5px;
+}
+
+// ── Search button — amber, flat
+.al-btn-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: $gold;
+  color: #1A1205;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: opacity 0.15s $ease, transform 0.1s $ease;
+
+  &:hover   { opacity: 0.85; }
+  &:active  { transform: scale(0.97); }
+}
+
+// ── Empty / offline state — centered with gold icon
+.al-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px 20px 20px;
+  border-top: 1px solid $line;
+  margin-top: 0;
+}
+
+.al-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: $gold-soft;
+  color: $gold;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.al-empty-title {
+  font-size: 16.5px;
+  font-weight: 600;
+  color: $t1;
+  margin: 0 0 8px;
+}
+
+.al-empty-desc {
+  font-size: 13.5px;
+  color: $t2;
+  max-width: 400px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+// ── Error box
+.al-error-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.2);
+  color: $red;
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: 13.5px;
+  margin-bottom: 24px;
+}
+
+// ── Table
+.al-table-wrap {
+  border-top: 1px solid $line;
+  overflow-x: auto;
+  margin-top: 0;
+}
+
+.al-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    background: transparent;
+    color: $t3;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 14px 16px 12px;
+    text-align: left;
+    border-bottom: 1px solid $line-s;
+  }
+
+  td { padding: 13px 16px; border-bottom: 1px solid $line; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+}
+
+.al-row {
+  transition: background 0.12s $ease;
+  &:hover td { background: rgba(242,179,61,0.03); }
+}
+
+.al-cell {
+  color: $t1;
+  &--mono   { font-family: 'Courier New', monospace; letter-spacing: 0.3px; }
+  &--dim    { color: $t2; font-size: 12px; }
+  &--detail { max-width: 260px; word-break: break-word; font-size: 12px; color: $t2; }
+}
+
+.al-event-badge {
+  display: inline-block;
+  background: $gold-soft;
+  border: 1px solid rgba(242,179,61,0.2);
+  color: $gold;
+  border-radius: 6px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+// ── Pagination
+.al-pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  padding-top: 24px;
+}
+
+.al-btn-page {
+  background: none;
+  border: 1px solid $line-s;
+  color: $t2;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s $ease, border-color 0.15s $ease;
+
+  &:hover:not(:disabled) { color: $t1; border-color: rgba(148,163,184,0.35); }
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
+}
+
+.al-page-info { font-size: 13px; color: $t3; }

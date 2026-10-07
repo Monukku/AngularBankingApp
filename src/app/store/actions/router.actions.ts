@@ -2,7 +2,7 @@ import { createAction, props } from '@ngrx/store';
 import { NavigationExtras } from '@angular/router';
 
 /**
- * ✅ ROUTER ACTIONS
+ * ROUTER ACTIONS
  */
 
 export const navigate = createAction(

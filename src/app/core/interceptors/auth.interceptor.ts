@@ -17,7 +17,6 @@ import { LoggerService } from '../services/logger.service';
  * Configuration for auth interceptor
  */
 interface AuthInterceptorConfig {
-  excludedUrls: string[];
   excludedUrlPatterns: RegExp[];
   loginRoute: string;
   autoRefreshToken: boolean;
@@ -25,11 +24,10 @@ interface AuthInterceptorConfig {
 }
 
 const defaultConfig: AuthInterceptorConfig = {
-  excludedUrls: ['/assets', '/api/public', '/auth/register', '/auth/login', '/api/v1/auth/register', '/api/v1/auth/login'],
-  excludedUrlPatterns: [/\.json$/, /\/public\//, /\/auth\/(register|login)/],
+  excludedUrlPatterns: [/\.json$/, /\/public\//, /\/api\/v1\/auth\/(register|login)$/],
   loginRoute: '/auth/login',
   autoRefreshToken: true,
-  tokenMinValiditySeconds: 30, // Refresh if token expires in less than 30 seconds
+  tokenMinValiditySeconds: 30,
 };
 
 /**
@@ -67,15 +65,7 @@ function shouldExcludeRequest(
   req: HttpRequest<unknown>,
   config: AuthInterceptorConfig
 ): boolean {
-  // Check URL strings
-  const matchesUrl = config.excludedUrls.some((url) => req.url.includes(url));
-
-  // Check URL patterns
-  const matchesPattern = config.excludedUrlPatterns.some((pattern) =>
-    pattern.test(req.url)
-  );
-
-  return matchesUrl || matchesPattern;
+  return config.excludedUrlPatterns.some((pattern) => pattern.test(req.url));
 }
 
 /**
@@ -161,136 +151,3 @@ function handleAuthError(
   return throwError(() => error);
 }
 
-/**
- * Factory function to create a configurable auth interceptor
- */
-export function createAuthInterceptor(
-  config: Partial<AuthInterceptorConfig> = {}
-): HttpInterceptorFn {
-  const mergedConfig = { ...defaultConfig, ...config };
-
-  return (req, next) => {
-    const keycloakService = inject(KeycloakService);
-    const router = inject(Router);
-    const logger = inject(LoggerService);
-
-    // Skip auth for excluded URLs
-    if (shouldExcludeRequest(req, mergedConfig)) {
-      logger.debug('Skipping auth for excluded URL', req.url);
-      return next(req);
-    }
-
-    return from(getValidToken(keycloakService, mergedConfig, logger)).pipe(
-      switchMap((token) => {
-        const authReq = addAuthHeader(req, token, logger);
-        return next(authReq);
-      }),
-      catchError((error) => handleAuthError(error, router, logger, mergedConfig))
-    );
-  };
-}
-
-/**
- * Auth interceptor with custom header name
- */
-export function createCustomAuthInterceptor(
-  headerName: string = 'Authorization',
-  tokenPrefix: string = 'Bearer',
-  config: Partial<AuthInterceptorConfig> = {}
-): HttpInterceptorFn {
-  const mergedConfig = { ...defaultConfig, ...config };
-
-  return (req, next) => {
-    const keycloakService = inject(KeycloakService);
-    const router = inject(Router);
-    const logger = inject(LoggerService);
-
-    if (shouldExcludeRequest(req, mergedConfig)) {
-      return next(req);
-    }
-
-    return from(getValidToken(keycloakService, mergedConfig, logger)).pipe(
-      switchMap((token) => {
-        logger.debug(`Adding ${headerName} header to request`, req.url);
-
-        const authReq = req.clone({
-          setHeaders: {
-            [headerName]: `${tokenPrefix} ${token}`,
-          },
-        });
-
-        return next(authReq);
-      }),
-      catchError((error) => handleAuthError(error, router, logger, mergedConfig))
-    );
-  };
-}
-
-/**
- * Auth interceptor that only applies to specific domains
- */
-export function createDomainSpecificAuthInterceptor(
-  allowedDomains: string[],
-  config: Partial<AuthInterceptorConfig> = {}
-): HttpInterceptorFn {
-  const mergedConfig = { ...defaultConfig, ...config };
-
-  return (req, next) => {
-    const keycloakService = inject(KeycloakService);
-    const router = inject(Router);
-    const logger = inject(LoggerService);
-
-    // Check if request is to an allowed domain
-    const isAllowedDomain = allowedDomains.some((domain) =>
-      req.url.includes(domain)
-    );
-
-    if (!isAllowedDomain || shouldExcludeRequest(req, mergedConfig)) {
-      return next(req);
-    }
-
-    return from(getValidToken(keycloakService, mergedConfig, logger)).pipe(
-      switchMap((token) => {
-        const authReq = addAuthHeader(req, token, logger);
-        return next(authReq);
-      }),
-      catchError((error) => handleAuthError(error, router, logger, mergedConfig))
-    );
-  };
-}
-
-/**
- * Auth interceptor with additional custom headers
- */
-export function createAuthInterceptorWithHeaders(
-  additionalHeaders: Record<string, string> = {},
-  config: Partial<AuthInterceptorConfig> = {}
-): HttpInterceptorFn {
-  const mergedConfig = { ...defaultConfig, ...config };
-
-  return (req, next) => {
-    const keycloakService = inject(KeycloakService);
-    const router = inject(Router);
-    const logger = inject(LoggerService);
-
-    if (shouldExcludeRequest(req, mergedConfig)) {
-      return next(req);
-    }
-
-    return from(getValidToken(keycloakService, mergedConfig, logger)).pipe(
-      switchMap((token) => {
-        logger.debug('Adding Authorization and custom headers', req.url);
-
-        const authReq = req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`,
-            ...additionalHeaders,
-          },
-        });
-
-        return next(authReq);
-      }),
-      catchError((error) => handleAuthError(error, router, logger, mergedConfig))
-    );
-  };
-}

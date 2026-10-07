@@ -11,16 +11,9 @@ export class ThemeService {
     if (!isPlatformBrowser(this.platformId)) return; // 👈 stop here on server
 
     const stored = localStorage.getItem(this.THEME_KEY);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    this.isDarkMode = stored ? stored === 'dark' : prefersDark;
+    // Default to dark — the dashboard and all pages are designed dark-first
+    this.isDarkMode = stored ? stored === 'dark' : true;
     this.apply();
-
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem(this.THEME_KEY)) {
-        this.isDarkMode = e.matches;
-        this.apply();
-      }
-    });
   }
 
   toggle(): void {

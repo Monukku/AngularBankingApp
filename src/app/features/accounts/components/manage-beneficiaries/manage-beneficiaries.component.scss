@@ -1,65 +1,192 @@
-/* src/app/components/manage-beneficiaries/manage-beneficiaries.component.scss */
-.manage-beneficiaries-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(to bottom right, #000509, #0066cc); /* Page background color as blue gradient */
-    padding: 20px;
+﻿:host { display: block; background: #0a0f1e; min-height: 100%; }
+
+.beneficiaries-page {
+  padding: 32px;
+  color: #f1f5f9;
+  max-width: 700px;
+}
+
+.page-header { margin-bottom: 28px; }
+.page-title  { font-size: 28px; font-weight: 700; margin: 0 0 4px; }
+.page-sub    { font-size: 14px; color: #94a3b8; margin: 0; }
+
+/* â”€â”€ Form Card â”€â”€ */
+.form-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(13, 79, 108,0.2);
+  border-radius: 18px;
+  padding: 28px;
+  margin-bottom: 32px;
+}
+
+.form-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a7a9e;
+  margin: 0 0 20px;
+}
+
+.add-form { display: flex; flex-direction: column; gap: 16px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 500px) { grid-template-columns: 1fr; }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
-  
-  .manage-beneficiaries {
-    width: 100%;
-    max-width: 350px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgb(254, 253, 253);
-    border-radius: 8px;
-    background-color: #050113;
+
+  input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+
+    &:focus {
+      border-color: rgba(13, 79, 108,0.6);
+      background: rgba(13, 79, 108,0.06);
+    }
+
+    &::placeholder { color: #4b5563; }
   }
-  
-  h2 {
-    text-align: center;
-    font-size: 1.8em;
-    color: #3c8bd0;
-    margin-bottom: 20px;
-  }
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin-bottom: 20px;
-  }
-  
-  li {
-    padding: 10px;
-    background-color: #f9f9f9;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  mat-form-field {
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  
-  button[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    font-size: 1em;
-    font-weight: bold;
-    background-color: #3c8bd0;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #2b6ca3;
-  }
-  
+}
+
+.form-submit { display: flex; }
+
+.btn-primary {
+  background: linear-gradient(135deg, #0d4f6c, #0ea5e9);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(13, 79, 108,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(13, 79, 108,0.5); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+}
+
+/* â”€â”€ Section Header â”€â”€ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.count-badge {
+  background: rgba(13, 79, 108,0.15);
+  color: #1a7a9e;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+/* â”€â”€ Empty State â”€â”€ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #4b5563;
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  p { font-size: 14px; }
+}
+
+/* â”€â”€ Beneficiaries List â”€â”€ */
+.beneficiaries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.beneficiary-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover { border-color: rgba(13, 79, 108,0.3); background: rgba(13, 79, 108,0.04); }
+}
+
+.b-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d4f6c, #0ea5e9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.b-info { flex: 1; min-width: 0; }
+
+.b-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.b-account {
+  font-size: 12px;
+  color: #64748b;
+  font-family: monospace;
+  margin-top: 2px;
+}
+
+.btn-send {
+  padding: 7px 16px;
+  background: rgba(52,211,153,0.1);
+  color: #34d399;
+  border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  &:hover { background: rgba(52,211,153,0.2); }
+}
+
+@media (max-width: 600px) {
+  .beneficiaries-page { padding: 16px; }
+}
+

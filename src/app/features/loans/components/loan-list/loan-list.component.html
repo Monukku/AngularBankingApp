@@ -1,19 +1,200 @@
-<div class="loan-list">
-  @for (loan of (loans$ | async)?.data; track trackByLoanId($index, loan)) {
-    <div class="loan-card">
-      <mat-card>
-        <mat-card-title>{{ loan.loanType }} Loan</mat-card-title>
-        <mat-card-content>
-          <p>Amount: {{ loan.principalAmount | currency }}</p>
-          <p>Interest Rate: {{ loan.interestRate }}%</p>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button (click)="viewLoan(loan.loanId)">View</button>
-          <button mat-button (click)="editLoan(loan.loanId)">Edit</button>
-          <button mat-button (click)="deleteLoan(loan.loanId)">Delete</button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  }
+<div class="ll-page">
+
+  <!-- Gold top bar -->
+  <div class="ll-topbar"></div>
+
+  <div class="ll-inner">
+
+    <!-- ══ STAFF VIEW ══ -->
+    @if (isStaff) {
+
+      <!-- Header -->
+      <div class="ll-header">
+        <div class="ll-header-left">
+          <h2 class="ll-title">Loan applications</h2>
+          <p class="ll-sub">Review, approve, reject and disburse customer loans</p>
+        </div>
+        <button class="ll-btn-refresh" (click)="loadStaffLoans(activeFilter())">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Underline status tabs -->
+      <div class="ll-tabs">
+        @for (s of STATUSES; track s) {
+          <span class="ll-tab" [class.ll-tab--active]="activeFilter() === s"
+                [attr.data-status]="s"
+                (mouseenter)="activeFilter.set(s)" (click)="activeFilter.set(s)">
+            @if (s !== 'ALL') {
+              <span class="ll-tab-dot" [attr.data-status]="s"></span>
+            }
+            {{ s === 'UNDER_REVIEW' ? 'IN REVIEW' : s }}
+          </span>
+        }
+      </div>
+
+      <!-- Error -->
+      @if (staffError()) {
+        <div class="ll-error-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          {{ staffError() }}
+        </div>
+      }
+
+      <!-- Service unavailable (error and no data) -->
+      @if (staffError() && !staffLoading() && staffLoans().length === 0) {
+        <div class="ll-unavailable">
+          <div class="ll-unavailable-icon">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          </div>
+          <div class="ll-unavailable-title">Loans service is temporarily unavailable</div>
+          <div class="ll-unavailable-desc">We're having trouble reaching loans-service. Try refreshing in a moment.</div>
+        </div>
+      }
+
+      <!-- Loading -->
+      @if (staffLoading()) {
+        <div class="ll-loading">
+          <span class="ll-spinner"></span>
+          Loading loan applications…
+        </div>
+      }
+
+      <!-- Empty -->
+      @if (!staffLoading() && !staffError() && staffLoans().length === 0) {
+        <div class="ll-empty">
+          <div class="ll-empty-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+          </div>
+          <p class="ll-empty-title">No applications in "{{ activeFilter() === 'UNDER_REVIEW' ? 'IN REVIEW' : activeFilter() }}"</p>
+          <p class="ll-empty-desc">Try a different status filter.</p>
+        </div>
+      }
+
+      <!-- Loan rows -->
+      @if (!staffLoading() && staffLoans().length > 0) {
+        <div class="ll-list">
+          @for (loan of staffLoans(); track trackByLoanId($index, loan)) {
+            <div class="ll-row" (click)="viewLoan(loan.id)">
+
+              <!-- Icon -->
+              <span class="ll-row-icon">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+              </span>
+
+              <!-- Name + meta -->
+              <div class="ll-row-info">
+                <div class="ll-row-name">{{ loan.loanType }}</div>
+                <div class="ll-row-meta">{{ loan.id }} · {{ loan.purpose || 'No purpose specified' }} · {{ loan.tenureMonths }} mo</div>
+              </div>
+
+              <!-- Status badge -->
+              <span class="ll-status-badge" [attr.data-status]="loan.status">
+                {{ loan.status === 'UNDER_REVIEW' ? 'In review' : (loan.status | titlecase) }}
+              </span>
+
+              <!-- Amount -->
+              <div class="ll-row-amount">{{ loan.requestedAmount | currency:'INR':'symbol':'1.0-0' }}</div>
+
+              <!-- Actions -->
+              <div class="ll-row-actions" (click)="$event.stopPropagation()">
+                <button class="ll-btn-action ll-btn-view" (click)="viewLoan(loan.id)">View</button>
+
+                @if (loan.status === 'PENDING') {
+                  <button class="ll-btn-action ll-btn-review"
+                          [disabled]="actionLoading() === loan.id"
+                          (click)="startReview(loan)">
+                    @if (actionLoading() === loan.id) { <span class="ll-spinner"></span> } @else { Start review }
+                  </button>
+                }
+                @if (loan.status === 'UNDER_REVIEW') {
+                  <button class="ll-btn-action ll-btn-approve"
+                          [disabled]="actionLoading() === loan.id"
+                          (click)="approveLoan(loan)">
+                    @if (actionLoading() === loan.id) { <span class="ll-spinner"></span> } @else { Approve }
+                  </button>
+                  <button class="ll-btn-action ll-btn-reject"
+                          [disabled]="actionLoading() === loan.id"
+                          (click)="rejectLoan(loan)">
+                    @if (actionLoading() === loan.id) { <span class="ll-spinner"></span> } @else { Reject }
+                  </button>
+                }
+                @if (loan.status === 'APPROVED') {
+                  <button class="ll-btn-action ll-btn-disburse"
+                          [disabled]="actionLoading() === loan.id"
+                          (click)="disburseLoan(loan)">
+                    @if (actionLoading() === loan.id) { <span class="ll-spinner"></span> } @else { Disburse }
+                  </button>
+                }
+              </div>
+
+              <!-- Chevron -->
+              <svg class="ll-row-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+          }
+        </div>
+      }
+
+    }
+
+    <!-- ══ CUSTOMER VIEW ══ -->
+    @if (!isStaff) {
+
+      <!-- Header -->
+      <div class="ll-header">
+        <div class="ll-header-left">
+          <h2 class="ll-title">My loans</h2>
+          <p class="ll-sub">Track and manage your loan applications</p>
+        </div>
+        <a routerLink="/loans/create" class="ll-btn-apply">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Apply for loan
+        </a>
+      </div>
+
+      <!-- Empty -->
+      @if ((loans$ | async)?.length === 0) {
+        <div class="ll-empty">
+          <div class="ll-empty-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+          </div>
+          <p class="ll-empty-title">No loan applications</p>
+          <p class="ll-empty-desc">Apply for a loan to get started</p>
+          <a routerLink="/loans/create" class="ll-btn-apply" style="margin-top:8px">Apply now</a>
+        </div>
+      }
+
+      <!-- Loan rows -->
+      <div class="ll-list">
+        @for (loan of (loans$ | async); track trackByLoanId($index, loan)) {
+          <div class="ll-row" (click)="viewLoan(loan.id)">
+
+            <span class="ll-row-icon">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            </span>
+
+            <div class="ll-row-info">
+              <div class="ll-row-name">{{ loan.loanType }}</div>
+              <div class="ll-row-meta">{{ loan.id }} · {{ loan.tenureMonths }} mo@if (loan.interestRate) { · {{ loan.interestRate }}% p.a.}</div>
+            </div>
+
+            <span class="ll-status-badge" [attr.data-status]="loan.status">
+              {{ loan.status === 'UNDER_REVIEW' ? 'In review' : (loan.status | titlecase) }}
+            </span>
+
+            <div class="ll-row-amount">{{ loan.requestedAmount | currency:'INR':'symbol':'1.0-0' }}</div>
+
+            <div class="ll-row-actions" (click)="$event.stopPropagation()">
+              <button class="ll-btn-action ll-btn-view" (click)="viewLoan(loan.id)">View details</button>
+            </div>
+
+            <svg class="ll-row-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+        }
+      </div>
+
+    }
+
+  </div>
 </div>
-  

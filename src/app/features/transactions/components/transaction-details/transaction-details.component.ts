@@ -1,47 +1,32 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { TransactionService } from '../../services/transaction.service';
-import { Transaction } from '../../models/transaction.model'; 
+import { Component, OnInit, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TransactionService } from '../../services/transaction.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 
 @Component({
   selector: 'app-transaction-details',
   standalone: true,
-  imports: [CommonModule], // Include CommonModule here
+  imports: [CommonModule, RouterLink, LoaderComponent],
   templateUrl: './transaction-details.component.html',
   styleUrls: ['./transaction-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionDetailsComponent implements OnInit {
-  transaction: Transaction = {
-    id: '2',
-    amount: 0,
-    date: '',
-    accountNumber: '',
-    description: '',
-    createdAt: '',
-    updatedAt: '',
-    category: undefined,
-    transactionType: 'TRANSFER',
-    transactionStatus: 'PENDING'
-  };
-       
+  private route = inject(ActivatedRoute);
+  private transactionService = inject(TransactionService);
 
-  constructor(private route: ActivatedRoute, private transactionService: TransactionService) { }
+  transaction = signal<any>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.loadTransactionDetails(id);
+      this.transactionService.getTransactionById(id).subscribe({
+        next: (t) => { this.transaction.set(t); this.loading.set(false); },
+        error: () => { this.error.set('Transaction not found.'); this.loading.set(false); },
+      });
     }
   }
-
-  loadTransactionDetails(id: string): void {
-    this.transactionService.getTransactionById(id).subscribe(transaction => {
-      // this.transaction = transaction;    uncomment it later
-    });
-  }
 }
-
-
-

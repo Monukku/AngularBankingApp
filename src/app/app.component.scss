@@ -20,7 +20,7 @@ $shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 html,
 body {
   height: 100%;
-  background: $bg-light;
+  background: #0a0f1e;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -30,8 +30,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow: hidden;
-  background: $bg-light;
+  overflow: clip; // clip (not hidden) so position:fixed children still escape to viewport
+  background: #0a0f1e;
 
   // When not authenticated (landing page), allow full height expansion
   &:not(.authenticated) {
@@ -44,9 +44,6 @@ body {
     height: 100vh;
     .app-header {
       display: flex;
-      box-shadow: $shadow-sm;
-      background: $white;
-      border-bottom: 1px solid $border-color;
     }
 
     .main-wrapper {
@@ -55,26 +52,16 @@ body {
       overflow: hidden;
 
       .app-sidebar {
-        width: 280px;
-        background: $white;
-        box-shadow: $shadow-sm;
-        border-right: 1px solid $border-color;
-
-        @media (max-width: 1024px) {
-          width: 240px;
-        }
+        // Fixed 64px spacer — sidebar-container overlays content when expanded
+        flex-shrink: 0;
+        overflow: visible;
 
         @media (max-width: 768px) {
           position: fixed;
-          left: -280px;
+          left: 0;
           top: 0;
           height: 100vh;
           z-index: 1000;
-          transition: left 0.3s ease;
-
-          &.mobile-open {
-            left: 0;
-          }
         }
       }
 
@@ -92,9 +79,11 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: $bg-light;
+  background: #0a0f1e;
   transition: all 0.3s ease-in-out;
   scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -115,21 +104,19 @@ body {
     }
   }
 
-  // Not authenticated - full width, centered, gradient
+  // Not authenticated - full width, no centering, let landing page control its own layout
   &.full-width {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: block;
     width: 100%;
     padding: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: transparent;
+    overflow-x: hidden;
   }
 }
 
 .app-footer {
-  background: $white;
-  border-top: 1px solid $border-color;
-  box-shadow: $shadow-sm;
+  background: #141626;
+  border-top: 1px solid rgba(255,255,255,0.06);
   height: 15vh;
   overflow-y: auto;
 }

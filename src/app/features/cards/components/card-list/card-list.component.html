@@ -1,19 +1,178 @@
-<div class="card-list">
-  @for (card of cards; track trackByCardId($index, card)) {
-    <div class="card-card">
-      <mat-card>
-        <mat-card-title>{{ card.name }}</mat-card-title>
-        <mat-card-content>
-          <p>Card Number: {{ card.number }}</p>
-          <p>Expiration Date: {{ card.expirationDate }}</p>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button (click)="viewCard(card.id)">View</button>
-          <button mat-button (click)="editCard(card.id)">Edit</button>
-          <button mat-button (click)="deleteCard(card.id)">Delete</button>
-        </mat-card-actions>
-      </mat-card>
+<div class="card-list-page">
+
+  <!-- Staff: cards are a customer feature -->
+  @if (isStaff) {
+    <div class="staff-feature-page">
+
+      <div class="sfp-hero">
+        <div class="sfp-illustration">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+            <rect x="8" y="24" width="80" height="52" rx="10" fill="rgba(96,165,250,0.07)" stroke="rgba(96,165,250,0.2)" stroke-width="1.5"/>
+            <rect x="8" y="38" width="80" height="14" fill="rgba(96,165,250,0.1)"/>
+            <rect x="20" y="60" width="22" height="7" rx="3" fill="rgba(96,165,250,0.25)"/>
+            <rect x="48" y="60" width="14" height="7" rx="3" fill="rgba(96,165,250,0.15)"/>
+            <circle cx="76" cy="30" r="12" fill="rgba(52,211,153,0.12)" stroke="rgba(52,211,153,0.3)" stroke-width="1.5"/>
+            <path d="M71 30l3 3 6-6" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="sfp-badge">Staff View</div>
+        <h2 class="sfp-title">Cards are Customer-Managed</h2>
+        <p class="sfp-desc">Individual card operations — requesting, blocking, and unblocking — are performed by customers through their own accounts. Staff access card data via the customer account view.</p>
+      </div>
+
+      <div class="sfp-actions-label">What you can do</div>
+      <div class="sfp-actions">
+
+        <a routerLink="/accounts" class="sfp-action-card">
+          <div class="sfp-action-icon sfp-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+          </div>
+          <div class="sfp-action-text">
+            <div class="sfp-action-title">Manage Accounts</div>
+            <div class="sfp-action-sub">View customer accounts, activate, freeze or close them</div>
+          </div>
+          <svg class="sfp-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+        <a routerLink="/staff/kyc-approvals" class="sfp-action-card">
+          <div class="sfp-action-icon sfp-icon-orange">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
+          </div>
+          <div class="sfp-action-text">
+            <div class="sfp-action-title">KYC Approvals</div>
+            <div class="sfp-action-sub">Review and approve customer identity verification</div>
+          </div>
+          <svg class="sfp-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+        <a routerLink="/staff" class="sfp-action-card">
+          <div class="sfp-action-icon sfp-icon-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <div class="sfp-action-text">
+            <div class="sfp-action-title">Staff Panel</div>
+            <div class="sfp-action-sub">Access all administrative tools and operations</div>
+          </div>
+          <svg class="sfp-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+      </div>
     </div>
   }
+
+  @if (!isStaff) {
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Cards</h2>
+      <p class="page-sub">Manage your debit and credit cards</p>
+    </div>
+    <a routerLink="/cards/create" class="btn-primary">
+      <span>+</span> Request New Card
+    </a>
+  </div>
+
+  @if (cards.length === 0) {
+    <div class="empty-state">
+      <div class="empty-illustration">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <rect x="6" y="16" width="52" height="34" rx="6" stroke="rgba(245,168,0,0.3)" stroke-width="2" fill="rgba(245,168,0,0.06)"/>
+          <rect x="6" y="24" width="52" height="8" fill="rgba(245,168,0,0.12)"/>
+          <rect x="14" y="38" width="12" height="4" rx="2" fill="rgba(245,168,0,0.3)"/>
+          <rect x="30" y="38" width="8" height="4" rx="2" fill="rgba(245,168,0,0.2)"/>
+        </svg>
+      </div>
+      <h3>No cards yet</h3>
+      <p>Request your first card to get started</p>
+      <a routerLink="/cards/create" class="btn-primary">Request a Card</a>
+    </div>
+  }
+
+  <div class="cards-grid">
+    @for (card of cards; track trackByCardId($index, card)) {
+      <div class="card-item">
+
+        <!-- Visual Card -->
+        <div class="visual-card" [class.blocked]="card.status === 'BLOCKED'">
+          <div class="vc-overlay"></div>
+          <div class="vc-top">
+            <div class="vc-chip">▣</div>
+            <span class="vc-type">{{ card.cardType ?? 'Card' }}</span>
+          </div>
+          <div class="vc-number">•••• •••• •••• {{ card.cardLastFour ?? '????'}}</div>
+          <div class="vc-bottom">
+            <div>
+              <div class="vc-label">Card Holder</div>
+              <div class="vc-value">{{ card.nameOnCard }}</div>
+            </div>
+            <div>
+              <div class="vc-label">Expires</div>
+              <div class="vc-value">{{ card.expiryDate }}</div>
+            </div>
+            <div class="vc-network">{{ card.cardNetwork ?? 'VISA' }}</div>
+          </div>
+          @if (card.status === 'BLOCKED') {
+            <div class="blocked-overlay"><span>BLOCKED</span></div>
+          }
+        </div>
+
+        <!-- Card Actions -->
+        <div class="card-actions">
+          <div class="status-row">
+            <span class="status-badge" [class]="card.status?.toLowerCase()">{{ card.status }}</span>
+            @if (card.status === 'PENDING') {
+              <span class="pending-hint">Awaiting branch activation</span>
+            }
+          </div>
+          <div class="action-btns">
+            <button class="btn-view" (click)="viewCard(card.id)">View Details</button>
+            @if (card.status === 'ACTIVE') {
+              <button class="btn-block" (click)="openBlockModal(card)">Block</button>
+            }
+            @if (card.status === 'BLOCKED') {
+              <button class="btn-unblock" (click)="unblockCard(card.id)">Unblock</button>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+
+  }<!-- /!isStaff -->
+
+  <!-- OTP Block Modal -->
+  @if (otpModalCard()) {
+    <div class="otp-backdrop" (click)="closeBlockModal()">
+      <div class="otp-modal" (click)="$event.stopPropagation()">
+        <div class="otp-modal-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h3 class="otp-modal-title">Block Card</h3>
+        <p class="otp-modal-sub">Enter the OTP sent to your registered mobile to block card ending in <strong>{{ otpModalCard().lastFourDigits }}</strong></p>
+        <input
+          class="otp-input"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="Enter OTP"
+          [value]="otpValue()"
+          (input)="otpValue.set($any($event.target).value)"
+          (keyup.enter)="confirmBlock()"
+        />
+        @if (otpError()) {
+          <div class="otp-error">{{ otpError() }}</div>
+        }
+        <div class="otp-modal-actions">
+          <button class="otp-btn-cancel" (click)="closeBlockModal()">Cancel</button>
+          <button class="otp-btn-confirm" [disabled]="otpLoading()" (click)="confirmBlock()">
+            {{ otpLoading() ? 'Blocking…' : 'Confirm Block' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>
-  

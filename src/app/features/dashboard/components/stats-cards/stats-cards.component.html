@@ -10,7 +10,7 @@
               @if (card.isPercent) {
                 {{ card.value }}%
               } @else {
-                \${{ card.value | number:'1.0-0' }}
+                ${{ card.value | number:'1.0-0' }}
               }
             </div>
             <div class="stat-change" [class]="card.isPositive ? 'positive' : 'negative'">

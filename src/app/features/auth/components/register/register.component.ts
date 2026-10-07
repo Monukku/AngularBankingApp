@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
@@ -23,35 +23,23 @@ import { trigger, state, style, transition, animate, query, stagger } from '@ang
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-    MatProgressSpinnerModule,
+    LoaderComponent,
     MatSnackBarModule,
     MatIconModule,
   ],
   animations: [
-    trigger('slideDown', [
+    trigger('slideLeft', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(-30px)' }),
-        animate('0.8s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        style({ opacity: 0, transform: 'translateX(-40px)' }),
+        animate('0.7s cubic-bezier(0.16,1,0.3,1)', style({ opacity: 1, transform: 'translateX(0)' }))
       ])
     ]),
-    trigger('fadeUp', [
+    trigger('slideRight', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(30px)' }),
-        animate('0.8s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        style({ opacity: 0, transform: 'translateX(40px)' }),
+        animate('0.7s cubic-bezier(0.16,1,0.3,1)', style({ opacity: 1, transform: 'translateX(0)' }))
       ])
     ]),
-    trigger('staggeredSlide', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(30px)' }),
-        animate('0.6s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ]),
-    trigger('countUp', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(20px)' }),
-        animate('0.8s ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
@@ -110,13 +98,15 @@ export class RegisterComponent {
   constructor() {
     this.registerForm = this.fb.group(
       {
-        fullName: ['', [Validators.required, Validators.minLength(3)]],
+        firstName: ['', [Validators.required, Validators.minLength(2)]],
+        middleName: [''],
+        lastName: [''],
         email: ['', [Validators.required, Validators.email]],
         mobileNumber: [
           '',
           [
             Validators.required,
-            Validators.pattern(/^\+?[0-9]{10,15}$/)
+            Validators.pattern(/^(\+91-?)?[0-9]{10}$/)
           ],
         ],
         password: [
@@ -159,16 +149,20 @@ export class RegisterComponent {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top',
+        panelClass: ['snackbar-error'],
       });
       return;
     }
 
     this.isLoading = true;
+    const { firstName, middleName, lastName, email, mobileNumber, password } = this.registerForm.value;
+    const nameParts = [firstName.trim(), middleName?.trim(), lastName?.trim()].filter(Boolean);
+    const rawMobile = mobileNumber.trim().replace(/^(\+91-?)/, '');
     const registerData = {
-      fullName: this.registerForm.value.fullName,
-      email: this.registerForm.value.email,
-      mobileNumber: this.registerForm.value.mobileNumber,
-      password: this.registerForm.value.password,
+      fullName: nameParts.join(' '),
+      email,
+      mobileNumber: `+91${rawMobile}`,
+      password,
     };
 
     this.authService.register(registerData).subscribe({
@@ -178,10 +172,8 @@ export class RegisterComponent {
         this.snackBar.open(
           'Registration successful! Redirecting to login...',
           'Close',
-          { duration: 3000 }
+          { duration: 3000, panelClass: ['snackbar-success'] }
         );
-
-        // After successful registration, login the user
         setTimeout(() => {
           this.authService.loginAfterRegistration();
         }, 2000);
@@ -189,7 +181,7 @@ export class RegisterComponent {
       error: (error: any) => {
         this.isLoading = false;
         this.logger.error('Registration failed', error);
-        const errorMessage = error.error?.message || 'Registration failed. Please try again.';
+        const errorMessage = error?.message || 'Registration failed. Please try again.';
         this.snackBar.open(errorMessage, 'Close', {
           duration: 3000,
           horizontalPosition: 'end',

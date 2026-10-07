@@ -12,8 +12,8 @@ export function provideHttpConfig() {
       withInterceptors([
         createAuthInterceptor({
           excludedUrls: ['/assets', '/api/public'],
-          autoRefreshToken: !environment.production,
-          tokenMinValiditySeconds: environment.production ? 30 : 300,
+          autoRefreshToken: true,
+          tokenMinValiditySeconds: 30,
         }),
         createLoggingInterceptor({
           logOnlyErrors: environment.production,

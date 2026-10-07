@@ -1,0 +1,24 @@
+<div class="loader-backdrop" [class.fullscreen]="fullscreen()">
+  <div class="loader-box">
+
+    <!-- Orbiting rings -->
+    <div class="orbit-wrap">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+
+      <!-- Centre logo mark -->
+      <div class="logo-mark">
+        <span class="lm-R">R</span>
+      </div>
+    </div>
+
+    <!-- Amber shimmer bar -->
+    <div class="shimmer-track">
+      <div class="shimmer-fill"></div>
+    </div>
+
+    <p class="loader-text">{{ message() }}</p>
+
+  </div>
+</div>

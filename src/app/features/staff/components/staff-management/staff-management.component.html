@@ -1,0 +1,231 @@
+<div class="sm-page">
+  <div class="sm-topbar"></div>
+  <div class="sm-inner">
+
+    <!-- Header -->
+    <div class="sm-header">
+      <div>
+        <h1 class="sm-title">Staff Management</h1>
+        <p class="sm-sub">Create accounts, assign roles, enable or disable staff — SUPER_ADMIN only</p>
+      </div>
+      <div class="sm-header-actions">
+        <button class="btn-refresh" (click)="load()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>
+          Refresh
+        </button>
+        <button class="btn-create" (click)="openCreate()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add Staff
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="sm-filters">
+      <div class="sm-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6579" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round" class="sm-search-icon">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+        </svg>
+        <input class="sm-search-input" type="text" placeholder="Search by name or email…"
+               [(ngModel)]="filterQuery" />
+      </div>
+      <!-- Custom role filter dropdown -->
+      <div class="dd-wrap" (mouseenter)="openHoverDD('filter')" (mouseleave)="closeHoverDD()">
+        <button class="dd-trigger" [class.open]="openDropdown === 'filter'">
+          <span>{{ filterRole || 'All roles' }}</span>
+          <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        @if (openDropdown === 'filter') {
+          <div class="dd-menu">
+            <div class="dd-item" [class.selected]="filterRole === ''" (click)="selectFilterRole('')">
+              All roles
+              @if (filterRole === '') { <svg class="dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> }
+            </div>
+            @for (r of allRoles; track r) {
+              <div class="dd-item" [class.selected]="filterRole === r" (click)="selectFilterRole(r)">
+                {{ r }}
+                @if (filterRole === r) { <svg class="dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="sm-loading"><div class="sm-spinner"></div>Loading staff…</div>
+    }
+
+    <!-- Empty -->
+    @if (!loading() && filtered.length === 0) {
+      <div class="sm-empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(242,179,61,0.3)" stroke-width="1.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>
+        </svg>
+        <p>No staff found</p>
+      </div>
+    }
+
+    <!-- Staff list -->
+    @if (!loading() && filtered.length > 0) {
+      <div class="staff-list">
+        @for (staff of filtered; track staff.keycloakUserId) {
+          <div class="staff-row">
+
+            <!-- Avatar -->
+            <div class="staff-avatar" [class.disabled]="!staff.enabled">
+              {{ staff.fullName?.charAt(0) ?? '?' }}
+            </div>
+
+            <!-- Info -->
+            <div class="staff-info">
+              <div class="staff-name">{{ staff.fullName || '—' }}</div>
+              <div class="staff-email">{{ staff.email }}</div>
+            </div>
+
+            <!-- Roles -->
+            <div class="staff-roles">
+              @for (role of (staff.roles ?? [staff.role]); track role) {
+                <span class="role-pill" [class]="roleBadgeClass(role)">{{ role }}</span>
+              }
+            </div>
+
+            <!-- Status -->
+            <span class="status-dot" [class.active]="staff.enabled" [class.inactive]="!staff.enabled">
+              {{ staff.enabled ? 'Active' : 'Disabled' }}
+            </span>
+
+            <!-- Actions -->
+            <div class="staff-actions">
+              <button class="btn-sm btn-role" [disabled]="actionId() === staff.keycloakUserId"
+                      (click)="openRoleModal(staff)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z"/>
+                </svg>
+                Change Role
+              </button>
+              <button class="btn-sm" [class]="staff.enabled ? 'btn-disable' : 'btn-enable'"
+                      [disabled]="actionId() === staff.keycloakUserId"
+                      (click)="toggleStatus(staff)">
+                @if (staff.enabled) {
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>
+                  </svg>
+                  Disable
+                } @else {
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 017.6-1.8"/>
+                  </svg>
+                  Enable
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Create Staff Modal -->
+@if (showCreate) {
+  <div class="modal-backdrop" (click)="showCreate = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">Add Staff Account</h3>
+      <p class="modal-sub">Creates a Keycloak account with the selected staff role. The staff member can log in immediately.</p>
+
+      <label class="modal-label">Full Name *</label>
+      <input class="modal-input" type="text" placeholder="e.g. Priya Sharma" [(ngModel)]="createForm.fullName" />
+
+      <label class="modal-label mt">Email *</label>
+      <input class="modal-input" type="email" placeholder="e.g. priya@rewabank.com" [(ngModel)]="createForm.email" />
+
+      <label class="modal-label mt">Role *</label>
+      <div class="dd-wrap" (mouseenter)="openHoverDD('create')" (mouseleave)="closeHoverDD()">
+        <button class="dd-trigger dd-trigger--modal" [class.open]="openDropdown === 'create'">
+          <span [class.placeholder]="!createForm.role">{{ createForm.role || 'Select role…' }}</span>
+          <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        @if (openDropdown === 'create') {
+          <div class="dd-menu">
+            @for (r of allRoles; track r) {
+              <div class="dd-item" [class.selected]="createForm.role === r" (click)="selectCreateRole(r)">
+                {{ r }}
+                @if (createForm.role === r) { <svg class="dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <label class="modal-label mt">Temporary Password</label>
+      <input class="modal-input" type="text" [(ngModel)]="createForm.password" />
+      <p class="modal-hint">Staff should change this after first login via their profile.</p>
+
+      @if (createError) {
+        <p class="modal-error">{{ createError }}</p>
+      }
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="showCreate = false">Cancel</button>
+        <button class="btn-modal-confirm" (click)="submitCreate()" [disabled]="createLoading">
+          {{ createLoading ? 'Creating…' : 'Create Account' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Role Change Modal -->
+@if (roleModal) {
+  <div class="modal-backdrop" (click)="roleModal = null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">Change Role</h3>
+      <p class="modal-sub">
+        Changing role for <strong>{{ roleModal.fullName || roleModal.email }}</strong>.
+        Previous staff role will be removed.
+      </p>
+      <label class="modal-label">New Role *</label>
+      <div class="dd-wrap" (mouseenter)="openHoverDD('roleModal')" (mouseleave)="closeHoverDD()">
+        <button class="dd-trigger dd-trigger--modal" [class.open]="openDropdown === 'roleModal'">
+          <span [class.placeholder]="!newRole">{{ newRole || 'Select role…' }}</span>
+          <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        @if (openDropdown === 'roleModal') {
+          <div class="dd-menu">
+            @for (r of allRoles; track r) {
+              <div class="dd-item" [class.selected]="newRole === r" (click)="selectNewRole(r)">
+                {{ r }}
+                @if (newRole === r) { <svg class="dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> }
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="roleModal = null">Cancel</button>
+        <button class="btn-modal-confirm" (click)="confirmRoleChange()" [disabled]="!newRole">
+          Confirm Change
+        </button>
+      </div>
+    </div>
+  </div>
+}

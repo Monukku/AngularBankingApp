@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -12,6 +12,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BrandAnimationService } from '../../../core/services/brand-animation.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -29,73 +31,46 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  isAuthenticated$: Observable<boolean>;
-  currentUser$: Observable<any>;
-  notificationCount = 3;
-  isDarkMode = false;
+  private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
+  private brandAnim = inject(BrandAnimationService);
+  public themeService = inject(ThemeService);
+
+  isAuthenticated$: Observable<boolean> = this.store.select(selectIsAuthenticated);
+  currentUser$: Observable<any> = this.store.select(selectCurrentUser);
+
+  get isDarkMode(): boolean { return this.themeService.isDarkMode; }
+
+  brandLetters:   { char: string; visible: boolean }[] = [];
+  taglineLetters: { char: string; visible: boolean }[] = [];
+
+  private readonly brandText   = 'REWA BANK';
+  private readonly taglineText = 'PRIVATE BANKING';
+  private timeouts: ReturnType<typeof setTimeout>[] = [];
 
   @Output() sidebarToggle = new EventEmitter<void>();
   @Output() themeToggled  = new EventEmitter<boolean>();
 
-  private readonly THEME_KEY = 'rewa-theme';
-  private mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  private mediaQueryListener = (e: MediaQueryListEvent) => this.onSystemThemeChange(e);
-
-  constructor(private store: Store) {
-    this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
-    this.currentUser$     = this.store.select(selectCurrentUser);
-  }
-
   ngOnInit(): void {
-    this.initTheme();
-    this.mediaQuery.addEventListener('change', this.mediaQueryListener);
+    this.brandLetters   = this.brandAnim.buildLetters(this.brandText);
+    this.taglineLetters = this.brandAnim.buildLetters(this.taglineText);
+    this.brandAnim.startLoop(this.brandLetters, this.taglineLetters, this.timeouts, () => this.cdr.markForCheck());
   }
 
   ngOnDestroy(): void {
-    this.mediaQuery.removeEventListener('change', this.mediaQueryListener);
+    this.brandAnim.clearTimeouts(this.timeouts);
   }
 
-  login(): void {
-    this.store.dispatch(AuthActions.login());
-  }
-
-  logout(): void {
-    this.store.dispatch(AuthActions.logout());
-  }
-
-  toggleSidebar(): void {
-    this.sidebarToggle.emit();
-  }
+  login(): void  { this.store.dispatch(AuthActions.login()); }
+  logout(): void { this.store.dispatch(AuthActions.logout()); }
+  toggleSidebar(): void { this.sidebarToggle.emit(); }
 
   toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.applyTheme();
-    localStorage.setItem(this.THEME_KEY, this.isDarkMode ? 'dark' : 'light');
-    this.themeToggled.emit(this.isDarkMode);
-  }
-
-  private initTheme(): void {
-    const stored = localStorage.getItem(this.THEME_KEY);
-    // Stored preference wins; fall back to OS preference
-    this.isDarkMode = stored ? stored === 'dark' : this.mediaQuery.matches;
-    this.applyTheme();
-  }
-
-  private applyTheme(): void {
-    // Toggle .dark on <html> — this is the single source of truth
-    // All CSS variables in styles.scss react to :root.dark
-    document.documentElement.classList.toggle('dark', this.isDarkMode);
-    // Also stamp .light so the OS @media block stays suppressed
-    document.documentElement.classList.toggle('light', !this.isDarkMode);
-  }
-
-  private onSystemThemeChange(e: MediaQueryListEvent): void {
-    // Only follow OS change if user hasn't set a manual preference
-    if (!localStorage.getItem(this.THEME_KEY)) {
-      this.isDarkMode = e.matches;
-      this.applyTheme();
-    }
+    this.themeService.toggle();
+    this.themeToggled.emit(this.themeService.isDarkMode);
+    this.cdr.markForCheck();
   }
 }

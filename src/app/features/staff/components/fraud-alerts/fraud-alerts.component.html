@@ -1,0 +1,114 @@
+<div class="staff-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Fraud Alerts</h2>
+      <p class="page-sub">Review and resolve open fraud alerts</p>
+    </div>
+    <button class="btn-refresh" (click)="load()">↻ Refresh</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="sf-bar">
+    <div class="sf-search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6579" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="sf-search-icon">
+        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+      </svg>
+      <input class="sf-search-input" type="text" placeholder="Search by account or alert ID…" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+    </div>
+    <div class="rb-dd-wrap sf-dd" (mouseenter)="openHoverDD('severity')" (mouseleave)="closeHoverDD()">
+      <button class="rb-dd-trigger" [class.open]="openDropdown() === 'severity'">
+        <span>{{ severityLabel }}</span>
+        <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      @if (openDropdown() === 'severity') {
+        <div class="rb-dd-menu">
+          @for (opt of severityOptions; track opt.value) {
+            <div class="rb-dd-item" [class.selected]="severityFilter() === opt.value" (click)="selectSeverity(opt.value)">
+              {{ opt.label }}
+              @if (severityFilter() === opt.value) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-loader [fullscreen]="false" message="Loading fraud alerts…" />
+  }
+
+  @if (error()) {
+    <div class="error-box">⚠ {{ error() }}</div>
+  }
+
+  @if (!loading() && filteredAlerts().length === 0 && !error()) {
+    <div class="state-box empty">
+      <div class="empty-icon">🛡️</div>
+      <h3>No open fraud alerts</h3>
+      <p>All alerts have been resolved</p>
+    </div>
+  }
+
+  @if (filteredAlerts().length > 0) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Alert ID</th>
+            <th>Account ID</th>
+            <th>Transaction ID</th>
+            <th>Score</th>
+            <th>Reason</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of filteredAlerts(); track a.id) {
+            <tr>
+              <td class="mono small">{{ a.id | slice:0:8 }}…</td>
+              <td class="mono small">{{ a.accountId | slice:0:8 }}…</td>
+              <td class="mono small">{{ a.transactionId ? (a.transactionId | slice:0:8) + '…' : '—' }}</td>
+              <td>
+                <span class="score-badge" [class]="severityClass(a.fraudScore ?? a.score ?? 0)">
+                  {{ a.fraudScore ?? a.score ?? 0 }}
+                </span>
+              </td>
+              <td class="reason">{{ a.reason || a.triggeredRules || '—' }}</td>
+              <td>{{ a.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+              <td>
+                <span class="badge" [class]="(a.status || '').toLowerCase()">
+                  {{ a.status || 'OPEN' }}
+                </span>
+              </td>
+              <td>
+                @if (actionMsg()?.id === a.id) {
+                  <span [class]="actionMsg()!.ok ? 'msg-ok' : 'msg-err'">
+                    {{ actionMsg()!.msg }}
+                  </span>
+                } @else if ((a.status || 'OPEN') !== 'RESOLVED') {
+                  <button class="btn-resolve"
+                          [disabled]="processing() === a.id"
+                          (click)="openResolveModal(a.id)">
+                    {{ processing() === a.id ? '…' : 'Resolve' }}
+                  </button>
+                } @else {
+                  <span class="msg-ok">Resolved</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="btn-page" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="btn-page" [disabled]="page() >= totalPages() - 1" (click)="nextPage()">Next →</button>
+      </div>
+    }
+  }
+</div>

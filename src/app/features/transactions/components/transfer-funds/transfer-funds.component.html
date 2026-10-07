@@ -1,24 +1,258 @@
-<!-- src/app/components/transfer-funds/transfer-funds.component.html -->
-<div class="transfer-funds-container">
-  <mat-card class="transfer-funds">
-    <h2>Transfer Funds</h2>
-    <form (ngSubmit)="transfer()">
-      <mat-form-field appearance="fill">
-        <mat-label>From Account</mat-label>
-        <input matInput id="fromAccount" [(ngModel)]="fromAccount" name="fromAccount" required>
-      </mat-form-field>
+<!-- ══════════ SUCCESS (full-page, outside tf-page) ══════════ -->
+@if (step() === 'success') {
+  <div class="tf-success-page">
+    <div class="tf-success">
+      <div class="tf-success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="tf-success-title">Transfer successful</h2>
+      <p class="tf-success-amount">{{ formatInr(amountValue()) }}</p>
+      <p class="tf-success-to">sent to {{ recipientForm.value.beneficiaryName || 'Recipient' }} · •••• {{ (recipientForm.value.toAccountNumber || '').slice(-4) }}</p>
 
-      <mat-form-field appearance="fill">
-        <mat-label>To Account</mat-label>
-        <input matInput id="toAccount" [(ngModel)]="toAccount" name="toAccount" required>
-      </mat-form-field>
+      <div class="tf-divider"></div>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Amount</mat-label>
-        <input matInput type="number" id="amount" [(ngModel)]="amount" name="amount" required>
-      </mat-form-field>
+      <div class="tf-success-rows">
+        @if (successTxn()?.referenceNumber || successTxn()?.transactionId) {
+          <div class="tf-success-row">
+            <span class="tf-review-lbl">Reference ID</span>
+            <span class="tf-review-val mono">{{ successTxn().referenceNumber ?? successTxn().transactionId }}</span>
+          </div>
+        }
+        <div class="tf-success-row">
+          <span class="tf-review-lbl">Mode</span>
+          <span class="tf-review-val">{{ selectedMethod() }}</span>
+        </div>
+        <div class="tf-success-row">
+          <span class="tf-review-lbl">Date</span>
+          <span class="tf-review-val">{{ successTxn()?.createdAt | date:'d MMM yyyy, h:mm a' }}</span>
+        </div>
+        <div class="tf-success-row">
+          <span class="tf-review-lbl">Note</span>
+          <span class="tf-review-val">{{ noteText || '—' }}</span>
+        </div>
+      </div>
 
-      <button mat-raised-button color="primary" type="submit">Transfer</button>
-    </form>
-  </mat-card>
-</div>
+      <div class="tf-success-actions">
+        <button class="tf-btn-primary" (click)="newTransfer()">New transfer</button>
+        <a class="tf-btn-ghost" routerLink="/transactions/list">View receipt</a>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════ WIZARD (hidden on success) ══════════ -->
+@if (step() !== 'success') {
+  <div class="tf-page">
+
+    <!-- Step wizard header -->
+    <div class="tf-header">
+      <h2 class="tf-title">Transfer money</h2>
+      <p class="tf-sub">Send money instantly to any bank account.</p>
+    </div>
+
+    <div class="tf-wizard">
+      @for (s of steps; track s; let i = $index) {
+        <div class="tw-item" [class.tw-active]="stepIndex() === i" [class.tw-done]="stepIndex() > i">
+          <div class="tw-circle">
+            @if (stepIndex() > i) {
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            } @else { {{ i + 1 }} }
+          </div>
+          <span class="tw-label">{{ s }}</span>
+        </div>
+        @if (i < steps.length - 1) {
+          <div class="tw-line" [class.tw-line--done]="stepIndex() > i"></div>
+        }
+      }
+    </div>
+
+    <!-- ══════════ STEP 1: RECIPIENT ══════════ -->
+    @if (step() === 'recipient') {
+      <form [formGroup]="recipientForm" (ngSubmit)="continueToAmount()" class="tf-card" novalidate>
+
+        <!-- Source account -->
+        @if (!accountsLoading() && accounts().length > 0) {
+          <div class="tf-field tf-field--hidden">
+            <select formControlName="fromAccountId" class="tf-select-hidden">
+              @for (acc of accounts(); track acc.id || acc.accountId) {
+                <option [value]="acc.id || acc.accountId">{{ acc.accountType }} · {{ acc.accountNumber }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <!-- Manual entry -->
+        <p class="tf-section-label">Or enter account details manually</p>
+
+        <div class="tf-field">
+          <label class="tf-label">Account holder name</label>
+          <input class="tf-input" formControlName="beneficiaryName" placeholder="e.g. Ankita Sharma" />
+        </div>
+
+        <div class="tf-row">
+          <div class="tf-field">
+            <label class="tf-label">Account number</label>
+            <input class="tf-input" formControlName="toAccountNumber" placeholder="Enter account number" autocomplete="off" />
+            @if (hasRecipientError('toAccountNumber', 'required')) {
+              <span class="tf-err">Account number is required.</span>
+            }
+          </div>
+          <div class="tf-field">
+            <label class="tf-label">IFSC code</label>
+            <input class="tf-input tf-upper" formControlName="toIfsc" placeholder="e.g. REWA0001234" />
+          </div>
+        </div>
+
+        <div class="tf-actions">
+          <button type="button" class="tf-btn-back" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+          <button type="submit" class="tf-btn-primary">
+            Continue
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- ══════════ STEP 2: AMOUNT ══════════ -->
+    @if (step() === 'amount') {
+      <form [formGroup]="amountForm" (ngSubmit)="continueToReview()" class="tf-card" novalidate>
+
+        <!-- Recipient summary -->
+        <div class="tf-recipient-summary">
+          <div class="tf-rs-avatar">{{ (recipientForm.value.beneficiaryName || 'R').charAt(0).toUpperCase() }}</div>
+          <div class="tf-rs-info">
+            <span class="tf-rs-name">{{ recipientForm.value.beneficiaryName || 'Recipient' }}</span>
+            <span class="tf-rs-acct">•••• {{ (recipientForm.value.toAccountNumber || '').slice(-4) }}</span>
+          </div>
+          <button type="button" class="tf-rs-change" (click)="goBack()">Change</button>
+        </div>
+
+        <div class="tf-divider"></div>
+
+        <!-- Big amount input -->
+        <p class="tf-section-label">Amount to send</p>
+        <div class="tf-amount-display">
+          <span class="tf-amount-symbol">₹</span>
+          <input
+            class="tf-amount-big"
+            type="number"
+            formControlName="amount"
+            placeholder="0"
+            min="1"
+            [class.tf-amount-big--error]="!!amountError()"
+          />
+        </div>
+        <div class="tf-amount-meta">
+          @if (fromAccount()) {
+            <span class="tf-bal-info">Available balance: {{ formatInr(fromAccount()!.balance ?? 0) }}</span>
+            <button type="button" class="tf-send-max" (click)="setMaxAmount()">Send max</button>
+          }
+        </div>
+        @if (hasAmountError('amount', 'required')) { <span class="tf-err">Amount is required.</span> }
+        @if (amountError()) { <span class="tf-err">{{ amountError() }}</span> }
+
+        <!-- Quick amounts -->
+        <div class="tf-quick-amounts">
+          @for (qa of QUICK_AMOUNTS; track qa) {
+            <button type="button" class="tf-quick-chip"
+              [class.tf-quick-chip--active]="amountValue() === qa"
+              (click)="setQuickAmount(qa)">
+              ₹{{ qa.toLocaleString('en-IN') }}
+            </button>
+          }
+        </div>
+
+        <!-- Transfer mode -->
+        <div class="tf-field" style="margin-top:20px">
+          <p class="tf-section-label" style="margin-bottom:10px">Transfer mode</p>
+          <div class="tf-method-tabs">
+            @for (m of methods; track m) {
+              <button type="button" class="tf-method-tab"
+                [class.tf-method-tab--active]="selectedMethod() === m"
+                (click)="setMethod(m)">
+                {{ m }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div class="tf-field" style="margin-top:20px">
+          <label class="tf-label">Note (optional)</label>
+          <input class="tf-input" [(ngModel)]="noteText" [ngModelOptions]="{standalone:true}" placeholder="What's this for?" />
+        </div>
+
+        <div class="tf-actions">
+          <button type="button" class="tf-btn-back" (click)="goBack()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+          <button type="submit" class="tf-btn-primary">
+            Continue
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- ══════════ STEP 3: REVIEW ══════════ -->
+    @if (step() === 'review') {
+      <div class="tf-card">
+
+        <!-- Big amount -->
+        <div class="tf-review-hero">
+          <p class="tf-review-sending">You're sending</p>
+          <p class="tf-review-amount">{{ formatInr(amountValue()) }}</p>
+          <p class="tf-review-to">to {{ recipientForm.value.beneficiaryName || 'Recipient' }} · •••• {{ (recipientForm.value.toAccountNumber || '').slice(-4) }}</p>
+        </div>
+
+        <div class="tf-divider"></div>
+
+        <!-- Summary rows -->
+        <div class="tf-review-rows">
+          <div class="tf-review-row">
+            <span class="tf-review-lbl">Transfer mode</span>
+            <span class="tf-review-val">{{ selectedMethod() }}</span>
+          </div>
+          <div class="tf-review-row">
+            <span class="tf-review-lbl">Estimated arrival</span>
+            <span class="tf-review-val">{{ METHOD_META[selectedMethod()].arrival }}</span>
+          </div>
+          <div class="tf-review-row">
+            <span class="tf-review-lbl">Fee</span>
+            <span class="tf-review-val">₹0.00</span>
+          </div>
+          <div class="tf-review-row">
+            <span class="tf-review-lbl">Note</span>
+            <span class="tf-review-val">{{ noteText || '—' }}</span>
+          </div>
+        </div>
+
+        <!-- Warning -->
+        <div class="tf-warning">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Double-check the recipient's account number — transfers can't be reversed once processed.
+        </div>
+
+        <div class="tf-actions">
+          <button type="button" class="tf-btn-back" (click)="goBack()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+          <button class="tf-btn-confirm" [disabled]="transferring()" (click)="confirmTransfer()">
+            @if (transferring()) {
+              <span class="tf-spinner"></span> Processing…
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Confirm &amp; send
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+}

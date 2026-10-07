@@ -5,11 +5,10 @@ import {
   isDevMode,
   importProvidersFrom,
   APP_INITIALIZER,
-  PLATFORM_ID,
-  Inject,
+  PLATFORM_ID
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
@@ -30,9 +29,9 @@ import { KeycloakService } from 'keycloak-angular';
 import { routes } from './app.routes';
 
 // Interceptors
-import { createAuthInterceptor } from './core/interceptors/auth.interceptor';
-import { createLoggingInterceptor } from './core/interceptors/logging.interceptor';
-import { createErrorInterceptor } from './core/interceptors/error.interceptor';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { loggingInterceptor } from './core/interceptors/logging.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 // Error Handler
 import { GlobalErrorHandler } from './core/handlers/global-error.handler';
@@ -46,7 +45,7 @@ import { CustomRouterSerializer } from './store/router/custom-router-serializer'
 import { environment } from '../environments/environment';
 import { NgxEchartsModule } from 'ngx-echarts';
 
-// ✅ Keycloak initialization function
+//  Keycloak initialization function
 function initializeKeycloak(keycloak: KeycloakService, platformId: Object) {
   return () => {
     // Only initialize Keycloak in browser, not on server
@@ -70,7 +69,7 @@ function initializeKeycloak(keycloak: KeycloakService, platformId: Object) {
     }).then(() => {
       return Promise.resolve();
     }).catch((error) => {
-      // ✅ Handle 3p-cookies check timeout gracefully
+      //  Handle 3p-cookies check timeout gracefully
       console.warn('Keycloak initialization warning:', error);
       // Allow app to continue even if 3p-cookies check fails
       return Promise.resolve();
@@ -84,7 +83,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
 
     // 2. Router - Handles navigation between views
-    provideRouter(routes),
+    provideRouter(routes,withComponentInputBinding()),
 
     // 3. Client Hydration - Enables Server-Side Rendering (SSR) support
     provideClientHydration(),
@@ -102,25 +101,7 @@ export const appConfig: ApplicationConfig = {
     // - Error interceptor handles errors and implements retry logic
     provideHttpClient(
       withFetch(), // Use modern Fetch API instead of XMLHttpRequest
-      withInterceptors([
-        // Auth Interceptor - Adds Bearer token and handles token refresh
-        createAuthInterceptor({
-          excludedUrls: ['/assets', '/api/public'], // URLs that don't need auth
-          autoRefreshToken: !environment.production, // Auto-refresh in dev only
-          tokenMinValiditySeconds: environment.production ? 30 : 300, // Refresh threshold
-        }),
-        // Logging Interceptor - Logs requests/responses for debugging
-        createLoggingInterceptor({
-          logOnlyErrors: environment.production, // In prod, only log errors
-          logRequestBody: !environment.production, // Log request body in dev
-          logResponseBody: !environment.production, // Log response body in dev
-        }),
-        // Error Interceptor - Handles errors and retries failed requests
-        createErrorInterceptor({
-          maxRetries: environment.production ? 2 : 0, // Retry in prod, not in dev
-          retryDelay: 1000, // Wait 1 second between retries
-        }),
-      ])
+      withInterceptors([authInterceptor, loggingInterceptor, errorInterceptor])
     ),
 
     // 6. NgRx Store - Central state management
@@ -173,7 +154,7 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeKeycloak,
       multi: true,
-      deps: [KeycloakService, PLATFORM_ID], // ✅ Added PLATFORM_ID to check browser context
+      deps: [KeycloakService, PLATFORM_ID], //  Added PLATFORM_ID to check browser context
     },
   ],
 };

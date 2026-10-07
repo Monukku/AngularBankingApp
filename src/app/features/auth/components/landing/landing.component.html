@@ -1,61 +1,206 @@
 <div class="page">
+
+  <!-- Animated background layers -->
   <div class="bg-orb bg-orb--1"></div>
   <div class="bg-orb bg-orb--2"></div>
+  <div class="bg-orb bg-orb--3"></div>
   <div class="bg-grid"></div>
 
+  <!-- Floating particles -->
+  <div class="particles" aria-hidden="true">
+    <span class="p p1"></span><span class="p p2"></span><span class="p p3"></span>
+    <span class="p p4"></span><span class="p p5"></span><span class="p p6"></span>
+    <span class="p p7"></span><span class="p p8"></span><span class="p p9"></span>
+    <span class="p p10"></span><span class="p p11"></span><span class="p p12"></span>
+  </div>
+
   <!-- NAV -->
-  <nav class="nav" [@fadeDown]>
+  <nav class="nav">
     <div class="nav__brand">
-      <mat-icon class="nav__icon">account_balance</mat-icon>
-      <span class="nav__name">RewaBank</span>
+      <svg class="nav__logo" width="28" height="28" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="#F2B33D" fill-opacity="0.15"/>
+        <path d="M8 22V10l5 7 3-4 3 4 5-7v12" stroke="#F2B33D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="nav__name">Rewa<span class="nav__name--amber">Bank</span></span>
     </div>
     <div class="nav__actions">
-      <button mat-button class="btn-nav-ghost" (click)="login()">
-        <mat-icon>login</mat-icon>
+      <button class="btn-nav-ghost" (click)="login()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         Login
       </button>
-      <button mat-raised-button routerLink="/auth/register" class="btn-nav-primary">
-        <mat-icon>person_add</mat-icon>
+      <button class="btn-nav-primary" routerLink="/auth/register">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Register
       </button>
     </div>
   </nav>
 
+  <!-- Live ticker bar -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span class="ticker__item"><span class="ticker__dot"></span> NIFTY 50 &nbsp;24,832.15 &nbsp;<span class="ticker__up">▲ 1.2%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> SENSEX &nbsp;81,455.40 &nbsp;<span class="ticker__up">▲ 0.9%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> USD/INR &nbsp;83.42 &nbsp;<span class="ticker__dn">▼ 0.1%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> GOLD &nbsp;₹71,240/10g &nbsp;<span class="ticker__up">▲ 0.5%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> RBI REPO &nbsp;6.50%</span>
+      <span class="ticker__item"><span class="ticker__dot"></span> RewaBank FD &nbsp;8.1% p.a.</span>
+      <span class="ticker__item"><span class="ticker__dot"></span> NIFTY 50 &nbsp;24,832.15 &nbsp;<span class="ticker__up">▲ 1.2%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> SENSEX &nbsp;81,455.40 &nbsp;<span class="ticker__up">▲ 0.9%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> USD/INR &nbsp;83.42 &nbsp;<span class="ticker__dn">▼ 0.1%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> GOLD &nbsp;₹71,240/10g &nbsp;<span class="ticker__up">▲ 0.5%</span></span>
+      <span class="ticker__item"><span class="ticker__dot"></span> RBI REPO &nbsp;6.50%</span>
+      <span class="ticker__item"><span class="ticker__dot"></span> RewaBank FD &nbsp;8.1% p.a.</span>
+    </div>
+  </div>
+
   <!-- MAIN -->
   <main class="main">
 
-    <!-- Welcome -->
-    <div class="welcome" [@fadeUp]>
-      <p class="welcome__eyebrow">Welcome to RewaBank</p>
-      <h1 class="welcome__title">
-        Your premium
-        <span class="welcome__accent">banking experience</span>
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        Trusted by 50,000+ customers across India
+      </div>
+      <p class="hero__eyebrow">WELCOME TO REWABANK</p>
+      <h1 class="hero__title">
+        Your premium <span class="hero__accent">banking experience</span>
       </h1>
-      <p class="welcome__subtitle">
-        Experience secure, fast, and intuitive banking with cutting-edge technology
+      <!-- Typewriter cycling subtitle -->
+      <p class="hero__typewriter">
+        <span class="tw-text" [class.tw-fade]="twFade">{{ twLines[twIndex] }}</span>
       </p>
-      <!-- CTA Buttons -->
+      <p class="hero__sub">Experience secure, fast, and intuitive banking with cutting-edge technology.</p>
+      <div class="hero__cta">
+        <button class="btn-cta-primary" routerLink="/auth/register">Open an account →</button>
+        <button class="btn-cta-ghost" (click)="login()">See how it works</button>
+      </div>
 
+      <!-- Floating trust badges -->
+      <div class="trust-badges">
+        <div class="trust-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          RBI Regulated
+        </div>
+        <div class="trust-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          256-bit SSL
+        </div>
+        <div class="trust-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          DICGC Insured
+        </div>
+      </div>
     </div>
 
     <!-- Feature Cards -->
-    <div class="cards" [@staggerCards]>
-      <div class="feature-card" *ngFor="let f of features">
+    <div class="cards">
+
+      <div class="feature-card anim-card" style="--i:0">
         <div class="feature-card__icon">
-          <mat-icon>{{ f.icon }}</mat-icon>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <h3 class="feature-card__title">{{ f.title }}</h3>
-        <p class="feature-card__desc">{{ f.description }}</p>
+        <h3 class="feature-card__title">Bank-grade security</h3>
+        <p class="feature-card__desc">Military-grade encryption, 24/7.</p>
       </div>
+
+      <div class="feature-card anim-card" style="--i:1">
+        <div class="feature-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3 class="feature-card__title">Lightning fast</h3>
+        <p class="feature-card__desc">Instant transfers, real-time updates.</p>
+      </div>
+
+      <div class="feature-card anim-card" style="--i:2">
+        <div class="feature-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Global access</h3>
+        <p class="feature-card__desc">Send money across 15+ countries.</p>
+      </div>
+
+      <div class="feature-card anim-card" style="--i:3">
+        <div class="feature-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <h3 class="feature-card__title">24/7 support</h3>
+        <p class="feature-card__desc">Expert help any hour of the day.</p>
+      </div>
+
+      <div class="feature-card feature-card--highlight anim-card" style="--i:4">
+        <div class="feature-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Smart savings</h3>
+        <p class="feature-card__desc">Save automatically without effort.</p>
+      </div>
+
+      <div class="feature-card anim-card" style="--i:5">
+        <div class="feature-card__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <h3 class="feature-card__title">Investments</h3>
+        <p class="feature-card__desc">Grow wealth with smart options.</p>
+      </div>
+
     </div>
 
-    <!-- Stats -->
-    <div class="stats" [@fadeUp]>
-      <div class="stat" *ngFor="let s of stats">
-        <span class="stat__num">{{ s.number }}</span>
-        <span class="stat__label">{{ s.label }}</span>
-      </div>
+    <!-- Stats with counting animation -->
+    <div class="stats">
+      @for (s of stats; track s.label) {
+        <div class="stat">
+          <span class="stat__num">{{ s.number }}</span>
+          <span class="stat__label">{{ s.label }}</span>
+        </div>
+      }
     </div>
 
   </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span class="footer__copy">© 2026 RewaBank</span>
+    <div class="footer__links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Security</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <!-- Floating notification toasts -->
+  <div class="toast-stack" aria-hidden="true">
+    <div class="toast toast--1">
+      <div class="toast__icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="toast__body">
+        <span class="toast__title">Transfer successful</span>
+        <span class="toast__sub">₹12,500 sent to Rahul S.</span>
+      </div>
+    </div>
+    <div class="toast toast--2">
+      <div class="toast__icon toast__icon--amber">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div class="toast__body">
+        <span class="toast__title">New reward earned!</span>
+        <span class="toast__sub">250 RewaPoints added</span>
+      </div>
+    </div>
+    <div class="toast toast--3">
+      <div class="toast__icon toast__icon--blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div class="toast__body">
+        <span class="toast__title">FD matured</span>
+        <span class="toast__sub">₹1,00,000 + ₹8,100 interest</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+
 </div>

@@ -1,40 +1,31 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Transaction, TransactionDetails, TransactionListResponse, CreateTransactionRequest } from '../models/transaction.model';
-import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ApiService, PagedResponse } from '../../../core/services/api.service';
+import { Transaction } from '../models/transaction.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class TransactionService {
-  private http = inject(HttpClient);
-  
-  // Dummy transactions
-  transactions: Transaction[] = [
-    { id: '1', accountNumber: '1001', amount: 100, transactionType: 'DEBIT', transactionStatus: 'COMPLETED', date: '2024-06-01' },
-    { id: '2', accountNumber: '1001', amount: 200, transactionType: 'CREDIT', transactionStatus: 'COMPLETED', date: '2024-06-02' },
-    { id: '3', accountNumber: '1001', amount: 300, transactionType: 'TRANSFER', transactionStatus: 'COMPLETED', date: '2024-06-03' }
-  ];
+  private api = inject(ApiService);
 
-  getTransactions(): Observable<Transaction[]> {
-    return of(this.transactions);
+  getTransactions(params?: { page?: number; size?: number }): Observable<PagedResponse<Transaction>> {
+    return this.api.getMyTransactions(params);
   }
 
-  getTransactionById(id: string): Observable<Transaction | undefined> {
-    return of(this.transactions.find(transaction => transaction.id === id));
-  }
- 
-  getTransactionHistory(): Observable<TransactionListResponse> {
-    return this.http.get<TransactionListResponse>('/api/transactions/history');
+  getTransactionHistory(params?: { page?: number; size?: number }): Observable<PagedResponse<Transaction>> {
+    return this.api.getMyTransactions(params);
   }
 
-  transferFunds(fromAccount: string, toAccount: string, amount: number): Observable<TransactionDetails> {
-    const transferDetails: CreateTransactionRequest = { 
-      toAccountNumber: toAccount, 
-      amount, 
-      transactionType: 'TRANSFER',
-      counterpartyName: 'Bank Transfer'
-    };
-    return this.http.post<TransactionDetails>('/api/transactions/transfer', transferDetails);
+  getTransactionById(id: string): Observable<Transaction> {
+    return this.api.getTransaction(id);
+  }
+
+  transferFunds(data: {
+    fromAccountId: string;
+    toAccountNumber: string;
+    amount: number;
+    description?: string;
+    paymentMethod?: string;
+  }): Observable<Transaction> {
+    return this.api.transfer(data, crypto.randomUUID());
   }
 }

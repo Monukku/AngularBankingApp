@@ -1,306 +1,296 @@
-// Define color variables for easy theme management
-$primary-color: #1976d2;
-$secondary-color: #ff4081;
-$text-color: #333333;
-$error-color: #f44336;
-$button-hover-color: darken($primary-color, 10%);
-$font-family: "Roboto", sans-serif;
-$box-shadow-color: rgba(0, 0, 0, 0.2);
+:host { display: block; background: #0a0f1e; min-height: 100%; }
 
-// Basic styling for html and body
-html,
-body {
-  height: 100%;
-  margin: 0;
-  font-family: $font-family;
-  background-color: #f0f0f0;
+.mgmt-page {
+  padding: 32px;
+  min-height: 100%;
+  background: #0a0f1e;
+  color: #f1f5f9;
 }
 
-// Container styling
-.container {
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.page-title { font-size: 28px; font-weight: 700; margin: 0 0 4px; }
+.page-sub   { font-size: 14px; color: #94a3b8; margin: 0; }
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 20, 40, 0.6);
+  color: #34d399;
+  border: 1.5px solid #34d399;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 0 10px rgba(52,211,153,0.15), inset 0 0 8px rgba(52,211,153,0.05);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+
+  &:hover {
+    background: rgba(52,211,153,0.08);
+    box-shadow: 0 0 18px rgba(52,211,153,0.3), inset 0 0 10px rgba(52,211,153,0.08);
+    transform: translateY(-1px);
+  }
+}
+
+.error-box {
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.25);
+  color: #f87171;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* ── Create Form ── */
+.create-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 32px;
+  animation: slideDown 0.3s ease;
+}
+
+.create-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 16px;
+}
+
+.kyc-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+  background: rgba(96,165,250,0.07);
+  border: 1px solid rgba(96,165,250,0.15);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+
+  a { color: #60a5fa; text-decoration: none; margin-left: 4px; &:hover { text-decoration: underline; } }
+  strong { color: #f1f5f9; }
+}
+
+.form-field {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: linear-gradient(
-    to bottom right,
-    #000509,
-    #0066cc
-  ); // Page background color as blue gradient
-  color: #fff;
-  animation: fadeIn 1.5s ease-in-out;
+  gap: 6px;
+  margin-bottom: 16px;
 
-  // Header styling
-  .header {
-    background-color: $primary-color;
-    color: #fff;
-    padding: 10px 20px;
-    text-align: center;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .error-message {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-      border-radius: 4px;
-      padding: 10px;
-      margin-bottom: 20px;
-    }
+  .rb-dd-wrap { width: 100%; }
+  .rb-dd-trigger { padding: 11px 14px; font-size: 14px; }
+}
 
-    .action-buttons {
-      display: flex;
-      align-items: center;
+.min-balance {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 20px;
+  strong { color: #94a3b8; }
+}
 
-      // Button styling
-      button {
-        margin: 5px;
-        font-size: 16px;
-        font-weight: 500;
-        padding: 12px 24px;
-        border-radius: 8px;
-        cursor: pointer;
-        border: none;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        position: relative;
-        overflow: hidden;
+.btn-submit {
+  background: rgba(10, 20, 40, 0.6);
+  color: #34d399;
+  border: 1.5px solid #34d399;
+  border-radius: 999px;
+  padding: 11px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 0 10px rgba(52,211,153,0.15);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  width: 100%;
 
-        // Common hover effect
-        &:hover {
-          transform: translateY(-3px);
-        }
-
-        // Common focus effect
-        &:focus {
-          outline: none;
-          box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
-        }
-
-        // Button animations
-        &:after {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.2);
-          transition: transform 0.3s ease;
-          transform: scaleX(0);
-          transform-origin: bottom left;
-          z-index: 0;
-        }
-
-        &:hover::after {
-          transform: scaleX(1);
-        }
-
-        span {
-          position: relative;
-          z-index: 1;
-        }
-      }
-
-      // Styling for the Create New Account button
-      .create-button {
-        background-color: $secondary-color;
-        color: #fff;
-
-        &:hover {
-          background-color: darken($secondary-color, 10%);
-        }
-      }
-
-      // Styling for the Check Existing Account button
-      .check-button {
-        background-color: lighten($primary-color, 10%);
-        color: $text-color;
-
-        &:hover {
-          background-color: $primary-color;
-          color: #fff;
-        }
-      }
-
-      // Styling for the Update Account button
-      .update-button {
-        background-color: $primary-color;
-        color: #fff;
-
-        &:hover {
-          background-color: $button-hover-color;
-        }
-      }
-
-      // Styling for the Delete Account button
-      .delete-button {
-        background-color: $error-color;
-        color: #fff;
-
-        &:hover {
-          background-color: darken($error-color, 10%);
-        }
-      }
-
-      // Styling for the Having an Account button
-      .check-form-button {
-        background-color: lighten($primary-color, 10%);
-        color: $text-color;
-
-        &:hover {
-          background-color: $primary-color;
-          color: #fff;
-        }
-      }
-    }
+  &:hover:not(:disabled) {
+    background: rgba(52,211,153,0.08);
+    box-shadow: 0 0 18px rgba(52,211,153,0.3);
+    transform: translateY(-1px);
   }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
 
-  // Content styling
-  .content {
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+/* ── Empty State ── */
+.state-box {
+  text-align: center;
+  padding: 80px 20px;
+  color: #94a3b8;
 
-    .card {
-      width: 100%;
-      max-width: 500px; // Adjusted maximum width for the card
-      background-color: #09090975; // Form card background color as black with transparency
-      padding: 40px 30px;
-      box-shadow: 0 8px 16px $box-shadow-color;
-      border-radius: 12px;
-      animation: slideIn 1s ease-in-out;
+  .empty-illustration { width: 64px; height: 64px; margin: 0 auto 20px; }
+  h3 { font-size: 18px; color: #f1f5f9; margin: 0 0 8px; }
+  p  { font-size: 14px; margin: 0; }
+}
 
-      @media (max-width: 480px) {
-        padding: 30px 20px;
-      }
+/* ── Accounts Grid ── */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
 
-      &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 20px $box-shadow-color; // Enhanced shadow on hover
-      }
+.account-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 
-      .mat-card-title {
-        color: $primary-color;
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 20px;
-      }
-
-      .mat-divider {
-        margin-bottom: 20px;
-      }
-
-      .card-content {
-        padding-top: 10px;
-      }
-
-      .detail-item {
-        margin-bottom: 10px;
-        font-size: 16px;
-        color: #fff;
-      }
-
-      .form-field {
-        width: 100%;
-        margin-bottom: 25px;
-
-        .mat-input-element {
-          color: $text-color;
-          font-size: 16px;
-          background-color: #f0f4f8; // Light blue background for input fields
-          border-radius: 8px;
-          padding: 10px;
-          transition: background-color 0.3s, box-shadow 0.3s;
-
-          &:hover {
-            background-color: #e6ecf0; // Darker blue background on hover
-          }
-
-          &:focus {
-            background-color: #e0e7ee; // Even darker blue background when focused
-          }
-        }
-
-        .mat-form-field-label {
-          color: $primary-color;
-          font-weight: 500;
-        }
-
-        .mat-error {
-          color: $error-color;
-          font-size: 14px;
-        }
-      }
-
-      .submit-button,
-      .delete-button {
-        width: 100%;
-        padding: 12px;
-        font-size: 18px;
-        border-radius: 8px;
-        margin-top: 20px;
-        transition: background-color 0.3s ease, transform 0.3s ease; // Transition for background color and transform
-
-        &:hover {
-          transform: translateY(-3px); // Lift effect on hover
-        }
-      }
-
-      .submit-button {
-        background-color: $primary-color;
-        color: #fff;
-
-        &:hover {
-          background-color: $button-hover-color;
-        }
-      }
-
-      .delete-button {
-        background-color: $error-color;
-        color: #fff;
-
-        &:hover {
-          background-color: darken($error-color, 10%);
-        }
-      }
-    }
+  &:hover { border-color: rgba(52,211,153,0.2); transform: translateY(-2px); }
+  &.selected {
+    border-color: rgba(52,211,153,0.4);
+    box-shadow: 0 0 0 1px rgba(52,211,153,0.15);
   }
 }
 
-// Responsive design adjustments
-@media (min-width: 600px) {
-  .card {
-    max-width: 600px;
-  }
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-@media (min-width: 960px) {
-  .card {
-    max-width: 800px;
-  }
+.type-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a7a9e;
+  background: rgba(13, 79, 108,0.15);
+  border-radius: 6px;
+  padding: 4px 10px;
+  letter-spacing: 0.5px;
 }
 
-// Fade-in animation
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+
+  &.active  { background: rgba(52,211,153,0.15); color: #34d399; }
+  &.frozen  { background: rgba(96,165,250,0.15);  color: #60a5fa; }
+  &.pending { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  &.closed  { background: rgba(248,113,113,0.15); color: #f87171; }
+  &.dormant { background: rgba(100,116,139,0.15); color: #94a3b8; }
 }
 
-// Slide-in animation
-@keyframes slideIn {
-  from {
-    transform: translateY(-20px);
-    opacity: 0; // Start with opacity 0 for slide-in effect
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.field-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+.field-value {
+  font-size: 14px;
+  color: #cbd5e1;
+  &.mono    { font-family: monospace; font-size: 15px; }
+  &.balance { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+}
+
+.notice {
+  font-size: 12px;
+  border-radius: 7px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.pending-notice { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.dormant-notice { background: rgba(100,116,139,0.08); color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+
+/* ── Staff Actions ── */
+.staff-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.btn-action {
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid;
+  transition: background 0.2s;
+
+  &.activate  { background: rgba(52,211,153,0.1);  color: #34d399; border-color: rgba(52,211,153,0.3);  &:hover { background: rgba(52,211,153,0.2); } }
+  &.freeze    { background: rgba(96,165,250,0.1);   color: #60a5fa; border-color: rgba(96,165,250,0.3);  &:hover { background: rgba(96,165,250,0.2); } }
+  &.unfreeze  { background: rgba(52,211,153,0.1);  color: #34d399; border-color: rgba(52,211,153,0.3);  &:hover { background: rgba(52,211,153,0.2); } }
+  &.close     { background: rgba(248,113,113,0.1); color: #f87171; border-color: rgba(248,113,113,0.3); &:hover { background: rgba(248,113,113,0.2); } }
+}
+
+/* ── Inline freeze / close confirm ── */
+.inline-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.inline-input {
+  flex: 1;
+  min-width: 160px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 7px 12px;
+  color: #f1f5f9;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  &:focus { border-color: rgba(96,165,250,0.4); }
+  &::placeholder { color: #475569; }
+}
+
+.inline-confirm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding: 10px 12px;
+  background: rgba(248,113,113,0.05);
+  border: 1px solid rgba(248,113,113,0.2);
+  border-radius: 10px;
+}
+
+.confirm-text {
+  font-size: 12px;
+  color: #f87171;
+  flex: 1;
+  min-width: 160px;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .mgmt-page { padding: 16px; }
+  .page-header { flex-direction: column; gap: 16px; }
+  .accounts-grid { grid-template-columns: 1fr; }
 }

@@ -11,8 +11,8 @@ export const environment = {
 
   // API Configuration
   api: {
-    baseUrl: 'https://api-dev.rewabank.com',
-    timeout: 30000,
+    baseUrl: 'http://localhost/api/v1',
+    timeout: 60000,
     retryAttempts: 3,
     retryDelay: 1000,
     

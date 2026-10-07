@@ -1,1 +1,148 @@
-<p>card-detail works!</p>
+<div class="cd-wrap">
+  <a routerLink="/cards" class="cd-back">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+    Back to cards
+  </a>
+
+  @if (loading()) { <app-loader [fullscreen]="false" message="Loading card…" /> }
+  @if (error())   { <p class="cd-error">{{ error() }}</p> }
+
+  @if (card()) {
+
+    <!-- ── Card preview ── -->
+    <div class="cd-preview">
+      <div class="cd-preview-glow"></div>
+      <div class="cd-preview-top">
+        <div class="cd-preview-brand">
+          Rewa<span class="cd-preview-gold">Bank</span>
+          <div class="cd-preview-acct">{{ card().cardType }}</div>
+        </div>
+        <div class="cd-preview-top-right">
+          @if (card().status === 'BLOCKED') {
+            <span class="cd-preview-frozen-badge">FROZEN</span>
+          }
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="3"/>
+            <path d="M4 10h16M4 14h16M10 4v16M14 4v16"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="cd-preview-number">{{ card().maskedCardNumber ?? ('•••• •••• •••• ' + card().cardLastFour) }}</div>
+        <div class="cd-preview-footer">
+          <span class="cd-preview-name">{{ (card().nameOnCard ?? card().cardHolderName ?? 'CARD HOLDER').toUpperCase() }}</span>
+          <span class="cd-preview-network">{{ card().cardNetwork }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Detail rows ── -->
+    <div class="cd-card">
+      <div class="cd-row"><span class="cd-lbl">Status</span>
+        <span class="cd-status" [class]="statusClass(card().status)">{{ card().status }}</span>
+      </div>
+      <div class="cd-row"><span class="cd-lbl">Card Number</span><span class="cd-val mono">{{ card().maskedCardNumber ?? ('•••• •••• •••• ' + card().cardLastFour) }}</span></div>
+      <div class="cd-row"><span class="cd-lbl">Network</span><span class="cd-val">{{ card().cardNetwork }}</span></div>
+      <div class="cd-row"><span class="cd-lbl">Type</span><span class="cd-val">{{ card().cardType }}</span></div>
+      <div class="cd-row"><span class="cd-lbl">Expires</span><span class="cd-val">{{ card().expiryDate ?? '—' }}</span></div>
+      @if (card().status === 'BLOCKED' && card().blockReason) {
+        <div class="cd-row"><span class="cd-lbl">Freeze reason</span><span class="cd-val">{{ card().blockReason }}</span></div>
+      }
+    </div>
+
+    <!-- ── Pending notice ── -->
+    @if (card().status === 'PENDING') {
+      <div class="cd-notice cd-notice--blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+        This card is awaiting activation at your nearest branch.
+      </div>
+    }
+
+    <!-- ── Freeze / Unfreeze actions (only for ACTIVE or BLOCKED) ── -->
+    @if (card().status === 'ACTIVE' || card().status === 'BLOCKED') {
+
+      <!-- Freeze/Unfreeze panel -->
+      @if (!showFreezePanel() && !showUnfreezePanel()) {
+        <div class="cd-actions">
+
+          @if (card().status === 'ACTIVE') {
+            <button class="cd-btn cd-btn--freeze" (click)="openFreezePanel()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Freeze card
+            </button>
+          }
+
+          @if (card().status === 'BLOCKED') {
+            <button class="cd-btn cd-btn--unfreeze" (click)="openUnfreezePanel()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="8" y1="15" x2="16" y2="15"/></svg>
+              Unfreeze card
+            </button>
+          }
+
+        </div>
+      }
+
+      <!-- ── Freeze confirmation panel ── -->
+      @if (showFreezePanel()) {
+        <div class="cd-panel cd-panel--freeze" [formGroup]="blockForm">
+          <div class="cd-panel-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Freeze this card?</span>
+          </div>
+          <p class="cd-panel-desc">
+            @if (isCustomer) {
+              The card will be instantly locked. No transactions will be processed until you unfreeze it. An OTP has been sent to your registered mobile.
+            } @else {
+              As staff you can freeze this card immediately. Provide a reason for audit purposes.
+            }
+          </p>
+
+          <!-- Customer: OTP field -->
+          @if (isCustomer) {
+            <div class="cd-field">
+              <label class="cd-field-label">OTP <span class="cd-field-req">*</span></label>
+              <input class="cd-input" formControlName="otp" placeholder="Enter OTP sent to your mobile" maxlength="6" inputmode="numeric" />
+            </div>
+          }
+
+          <!-- Both: optional reason -->
+          <div class="cd-field">
+            <label class="cd-field-label">Reason <span class="cd-field-opt">(optional)</span></label>
+            <input class="cd-input" formControlName="reason" placeholder="e.g. Lost card, suspicious activity…" />
+          </div>
+
+          <div class="cd-panel-actions">
+            <button class="cd-btn cd-btn--ghost" (click)="cancelPanel()" [disabled]="acting()">Cancel</button>
+            <button class="cd-btn cd-btn--freeze-confirm" (click)="confirmFreeze()" [disabled]="acting()">
+              @if (acting()) { <span class="cd-spinner"></span> Freezing… }
+              @else { Confirm freeze }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ── Unfreeze confirmation panel ── -->
+      @if (showUnfreezePanel()) {
+        <div class="cd-panel cd-panel--unfreeze">
+          <div class="cd-panel-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Unfreeze this card?</span>
+          </div>
+          <p class="cd-panel-desc">
+            The card will be reactivated and can be used for transactions immediately.
+            @if (isStaff) { As staff, no OTP is required. }
+          </p>
+          <div class="cd-panel-actions">
+            <button class="cd-btn cd-btn--ghost" (click)="cancelPanel()" [disabled]="acting()">Cancel</button>
+            <button class="cd-btn cd-btn--unfreeze-confirm" (click)="confirmUnfreeze()" [disabled]="acting()">
+              @if (acting()) { <span class="cd-spinner"></span> Unfreezing… }
+              @else { Confirm unfreeze }
+            </button>
+          </div>
+        </div>
+      }
+
+    }
+
+  }
+</div>

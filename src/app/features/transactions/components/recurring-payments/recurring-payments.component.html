@@ -1,60 +1,18 @@
-<div class="recurring-payments-container">
-  <h2>Recurring Payments</h2>
-  <form #recurringForm="ngForm" (ngSubmit)="addRecurringPayment()">
-    <div>
-      <label for="payee">Payee</label>
-      <input id="payee" name="payee" [(ngModel)]="newPayment.payee" required />
-    </div>
-    <div>
-      <label for="amount">Amount</label>
-      <input id="amount" name="amount" type="number" [(ngModel)]="newPayment.amount" required min="1" />
-    </div>
-    <div>
-      <label for="frequency">Frequency</label>
-      <select id="frequency" name="frequency" [(ngModel)]="newPayment.frequency" required>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-        <option value="yearly">Yearly</option>
-      </select>
-    </div>
-    <div>
-      <label for="startDate">Start Date</label>
-      <input id="startDate" name="startDate" type="date" [(ngModel)]="newPayment.startDate" required />
-    </div>
-    <button type="submit" [disabled]="recurringForm.invalid">Add Payment</button>
-  </form>
-
-  <hr />
-
-  <h3>Scheduled Recurring Payments</h3>
-  @if (recurringPayments.length > 0) {
-    <table>
-      <thead>
-        <tr>
-          <th>Payee</th>
-          <th>Amount</th>
-          <th>Frequency</th>
-          <th>Start Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (payment of recurringPayments; track $index) {
-          <tr>
-            <td>{{ payment.payee }}</td>
-            <td>{{ payment.amount | currency }}</td>
-            <td>{{ payment.frequency }}</td>
-            <td>{{ payment.startDate | date }}</td>
-            <td>
-              <button (click)="editPayment($index)">Edit</button>
-              <button (click)="deletePayment($index)">Delete</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  }
-  @if (recurringPayments.length === 0) {
-    <p>No recurring payments scheduled.</p>
-    }
+<div class="recurring-page">
+  <div class="page-header">
+    <h2 class="page-title">Recurring Payments</h2>
+    <p class="page-sub">Automate your regular payments and subscriptions</p>
   </div>
+
+  <div class="coming-soon-card">
+    <div class="cs-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    <h3 class="cs-title">Coming Soon</h3>
+    <p class="cs-body">Scheduled recurring payments are being built. You'll be able to automate rent, subscriptions, and regular transfers from here once the feature goes live.</p>
+    <a routerLink="/transactions/transfer-funds" class="cs-link">Make a one-time transfer instead →</a>
+  </div>
+</div>

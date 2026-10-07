@@ -1,4 +1,4 @@
-$primary-color: #6366f1;
+﻿$primary-color: #0d4f6c;
 $success-color: #10b981;
 $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 
@@ -43,6 +43,80 @@ $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 
     .footer-logo { color: $primary-color; font-size: 24px; width: 24px; height: 24px; }
     .footer-name { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; }
+
+    .footer-wordmark {
+      display: flex;
+      align-items: flex-end;
+      line-height: 1;
+      gap: 0;
+
+      .fwm-R-bg {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        padding: 0 2px 0 0;
+      }
+
+      .fwm-R {
+        font-size: 42px;
+        font-weight: 900;
+        font-style: italic;
+        letter-spacing: -3px;
+        line-height: 0.82;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(160deg, #ffd166 0%, #f5a800 40%, #c47d00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        filter:
+          drop-shadow(0 0 8px rgba(0,0,0,0.95))
+          drop-shadow(0 0 16px rgba(0,0,0,0.85))
+          drop-shadow(2px 3px 6px rgba(0,0,0,0.9));
+      }
+
+      .fwm-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-bottom: 5px;
+        padding-left: 2px;
+        gap: 2px;
+      }
+
+      .fwm-ewa {
+        font-size: 16px;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: -0.6px;
+        color: var(--text-primary);
+        line-height: 1;
+        font-family: system-ui, sans-serif;
+      }
+
+      .fwm-bank {
+        font-size: 6px;
+        font-weight: 600;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        line-height: 1;
+        padding-left: 2px;
+        padding-top: 2px;
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -3px;
+          left: 2px;
+          width: 70%;
+          height: 1.5px;
+          background: linear-gradient(90deg, #f5a800, transparent);
+          border-radius: 1px;
+        }
+      }
+    }
   }
 
   .footer-description { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 24px 0; }
@@ -90,7 +164,7 @@ $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     &:hover {
       background: rgba($primary-color, 0.08);
       color: $primary-color;
-      border-color: rgba(99, 102, 241, 0.2);
+      border-color: rgba(13, 79, 108, 0.2);
       transform: translateY(-2px);
       box-shadow: $shadow-sm;
     }
@@ -178,7 +252,7 @@ $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     &:hover {
       background: rgba($primary-color, 0.08);
       color: $primary-color;
-      border-color: rgba(99, 102, 241, 0.2);
+      border-color: rgba(13, 79, 108, 0.2);
       transform: translateY(-2px);
     }
 

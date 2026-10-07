@@ -1,0 +1,152 @@
+<div class="staff-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">KYC Approvals</h2>
+      <p class="page-sub">Review and approve customer KYC submissions</p>
+    </div>
+    <button class="btn-refresh" (click)="load()">↻ Refresh</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="sf-bar">
+    <div class="sf-search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6579" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="sf-search-icon">
+        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+      </svg>
+      <input class="sf-search-input" type="text" placeholder="Search by name or email…" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+    </div>
+    <div class="rb-dd-wrap sf-dd" (mouseenter)="openHoverDD('status')" (mouseleave)="closeHoverDD()">
+      <button class="rb-dd-trigger" [class.open]="openDropdown() === 'status'">
+        <span>{{ statusLabel }}</span>
+        <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      @if (openDropdown() === 'status') {
+        <div class="rb-dd-menu">
+          @for (opt of statusOptions; track opt.value) {
+            <div class="rb-dd-item" [class.selected]="statusFilter() === opt.value" (click)="selectStatus(opt.value)">
+              {{ opt.label }}
+              @if (statusFilter() === opt.value) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-loader [fullscreen]="false" message="Loading KYC queue…" />
+  }
+
+  @if (error()) {
+    <div class="error-box">⚠ {{ error() }}</div>
+  }
+
+  @if (!loading() && filtered().length === 0 && !error()) {
+    <div class="state-box empty">
+      <div class="empty-illustration">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" stroke="rgba(52,211,153,0.2)" stroke-width="2"/>
+          <circle cx="32" cy="32" r="22" fill="rgba(52,211,153,0.08)"/>
+          <path d="M20 32l8 8 16-16" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>All clear</h3>
+      <p>No pending KYC submissions — all requests have been reviewed</p>
+    </div>
+  }
+
+  @if (filtered().length > 0) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>KYC Status</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of pagedItems(); track c.id) {
+            <tr>
+              <td class="name">
+                {{ c.fullName }}
+                @if (c.documents?.length) {
+                  <div class="doc-links">
+                    @for (doc of c.documents; track doc.id) {
+                      <button class="btn-view-doc" type="button" (click)="viewDocument(doc.id)">
+                        {{ doc.documentType || 'Doc' }}
+                      </button>
+                    }
+                  </div>
+                }
+              </td>
+              <td>{{ c.email }}</td>
+              <td class="mono">{{ c.maskedMobile }}</td>
+              <td>
+                <span class="badge" [class]="c.kycStatus === 'SUBMITTED' ? 'submitted' : 'review'">
+                  {{ c.kycStatus }}
+                </span>
+              </td>
+              <td>{{ c.kycSubmittedAt | date:'dd MMM yyyy, HH:mm' }}</td>
+              <td>
+                @if (actionMsg()?.id === c.id) {
+                  <span [class]="actionMsg()!.ok ? 'msg-ok' : 'msg-err'">
+                    {{ actionMsg()!.msg }}
+                  </span>
+                } @else {
+                  <div class="action-btns">
+                    @if (c.kycStatus === 'SUBMITTED') {
+                      <button class="btn-review"
+                              [disabled]="isProcessing(c.id)"
+                              (click)="startReview(c.id)">
+                        {{ processing() === c.id ? '…' : 'Start Review' }}
+                      </button>
+                    }
+                    <button class="btn-approve"
+                            [disabled]="isProcessing(c.id) || c.kycStatus !== 'UNDER_REVIEW'"
+                            [title]="c.kycStatus !== 'UNDER_REVIEW' ? 'Start Review before approving' : ''"
+                            (click)="approve(c.id)">
+                      {{ processing() === c.id + '_approve' ? '…' : '✓ Approve' }}
+                    </button>
+                    <button class="btn-reject"
+                            [disabled]="isProcessing(c.id) || c.kycStatus !== 'UNDER_REVIEW'"
+                            [title]="c.kycStatus !== 'UNDER_REVIEW' ? 'Start Review before rejecting' : ''"
+                            (click)="openRejectModal(c.id)">
+                      {{ processing() === c.id + '_reject' ? '…' : '✕ Reject' }}
+                    </button>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="ka-pagination">
+        <span class="ka-page-count">Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filtered().length }} records</span>
+        <div class="ka-page-btns">
+          <button class="ka-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(1)" title="First">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+          </button>
+          <button class="ka-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" title="Previous">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          @for (p of pageNumbers(); track p) {
+            <button class="ka-btn-page ka-btn-num" [class.ka-btn-page--active]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
+          }
+          <button class="ka-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" title="Next">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="ka-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())" title="Last">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

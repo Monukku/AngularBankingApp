@@ -1,41 +1,35 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
-import { UserDetails } from '../models/user.model';
+import { Observable, shareReplay } from 'rxjs';
+import { ApiService } from './api.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
-  private apiUrl = 'https://api.example.com/users'; // Replace with your API URL
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
 
-  // Cache user details to prevent multiple HTTP requests
-  private userDetailsCache$: Observable<UserDetails> | null = null;
+  // Cache to avoid repeated calls on the same session
+  private authProfile$: Observable<any> | null = null;
+  private customerProfile$: Observable<any> | null = null;
 
-  /**
-   * Fetch user details with caching via shareReplay
-   * Multiple subscribers will share the same request result
-   */
-  getUserDetails(): Observable<UserDetails> {
-    if (!this.userDetailsCache$) {
-      this.userDetailsCache$ = this.http.get<UserDetails>(`${this.apiUrl}/details`).pipe(
-        shareReplay(1) // Share the same response among all subscribers, cache last value
-      );
+  // GET /api/v1/auth/me — Keycloak-backed banking profile (roles, email, userId)
+  getAuthProfile(): Observable<any> {
+    if (!this.authProfile$) {
+      this.authProfile$ = this.api.getProfile().pipe(shareReplay(1));
     }
-    return this.userDetailsCache$;
+    return this.authProfile$;
   }
 
-  /**
-   * Clear the cache when user updates
-   */
-  invalidateUserCache(): void {
-    this.userDetailsCache$ = null;
+  // GET /api/v1/customers/me — customer record (KYC status, contact details)
+  getCustomerProfile(): Observable<any> {
+    if (!this.customerProfile$) {
+      this.customerProfile$ = this.api.getMyCustomerProfile().pipe(shareReplay(1));
+    }
+    return this.customerProfile$;
   }
 
-  // Update user details
-  updateUserDetails(user: UserDetails): Observable<UserDetails> {
-    return this.http.put<UserDetails>(`${this.apiUrl}/details`, user);
+  invalidateCache(): void {
+    this.authProfile$ = null;
+    this.customerProfile$ = null;
   }
 }

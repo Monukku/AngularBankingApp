@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, map, delay, of, interval, switchMap } from 'rxjs';
+import { Observable, forkJoin, map, delay, of, shareReplay } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ApiService } from '../../../core/services/api.service';
 import {
   BalanceData,
   QuickUser,
@@ -33,6 +34,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private http = inject(HttpClient);
+  private api = inject(ApiService);
   private readonly useMock  = environment.api.mock.enabled;
   private readonly apiBase  = environment.api.baseUrl;
   private readonly mockBase = environment.api.mock.baseUrl;
@@ -42,6 +44,19 @@ export class DashboardService {
     return this.useMock ? `${this.mockBase}/${path}.json` : `${this.apiBase}/${path}`;
   }
 
+  // Shared transaction stream — avoids duplicate HTTP calls within same render cycle
+  private _txnCache$: Observable<any> | null = null;
+  private getRawTransactions(size = 200): Observable<any> {
+    if (!this._txnCache$) {
+      this._txnCache$ = this.api.getMyTransactions({ size }).pipe(shareReplay(1));
+    }
+    return this._txnCache$;
+  }
+
+  clearTransactionCache(): void {
+    this._txnCache$ = null;
+  }
+
   private withDelay<T>(ms: number) {
     return (source: Observable<T>): Observable<T> =>
       this.useMock ? source.pipe(delay(ms)) : source;
@@ -49,61 +64,127 @@ export class DashboardService {
 
   // ─── Existing fetchers (unchanged) ───────────────────────────
 
+  // GET /api/v1/accounts/my-accounts — sum all account balances
   getBalance(): Observable<BalanceData> {
-    return this.http.get<BalanceData>(this.url('balance'))
-      .pipe(this.withDelay(this.delays.balance));
-  }
-
-  getQuickUsers(): Observable<QuickUser[]> {
-    return this.http.get<QuickUser[]>(this.url('quick-users'))
-      .pipe(this.withDelay(this.delays.quickUsers));
-  }
-
-  getTransactions(period?: string, searchQuery?: string): Observable<Transaction[]> {
-    const url = this.useMock
-      ? this.url('transactions')
-      : `${this.apiBase}/transactions${period ? `?period=${period}` : ''}${searchQuery ? `&q=${searchQuery}` : ''}`;
-
-    return this.http.get<Transaction[]>(url).pipe(
-      this.withDelay(this.delays.transactions),
-      map(transactions => {
-        if (searchQuery && this.useMock) {
-          const q = searchQuery.toLowerCase();
-          return transactions.filter(t =>
-            t.name.toLowerCase().includes(q) ||
-            t.category.toLowerCase().includes(q) ||
-            t.invoice.toLowerCase().includes(q)
-          );
-        }
-        return transactions;
+    if (this.useMock) {
+      return this.http.get<BalanceData>(this.url('balance')).pipe(this.withDelay(this.delays.balance));
+    }
+    return this.api.getMyAccounts().pipe(
+      map((accounts: any[]) => {
+        const total = (accounts ?? []).reduce((sum: number, a: any) => sum + (a.balance ?? 0), 0);
+        return {
+          totalBalance: total,
+          currency: 'INR',
+          lastUpdated: new Date().toISOString(),
+          changePercentage: 0,
+          savingsGoalPercent: 0,
+        } as BalanceData;
       })
     );
   }
 
-  getIncomeData(period?: string): Observable<IncomeData> {
-    const url = this.useMock
-      ? this.url('income-data')
-      : `${this.apiBase}/income?period=${period || '30'}`;
-    return this.http.get<IncomeData>(url).pipe(this.withDelay(this.delays.income));
+  // Compute income/spending from real transactions
+  getIncomeSpending(): Observable<{ income: IncomeData; spending: SpendingData }> {
+    if (this.useMock) {
+      return of({ income: {} as IncomeData, spending: {} as SpendingData });
+    }
+    return this.getRawTransactions(200).pipe(
+      map((res: any) => {
+        const txns: any[] = res?.content ?? (Array.isArray(res) ? res : []);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        let totalIncome = 0, totalSpent = 0;
+        let prevIncome = 0, prevSpent = 0;
+
+        txns.forEach((t: any) => {
+          const date = new Date(t.createdAt ?? t.date ?? 0);
+          const amount = t.amount ?? 0;
+          const isCredit = t.transactionType === 'CREDIT' || t.type === 'credit';
+          if (date >= monthStart) {
+            if (isCredit) totalIncome += amount; else totalSpent += amount;
+          } else {
+            if (isCredit) prevIncome += amount; else prevSpent += amount;
+          }
+        });
+
+        const incomeChange = prevIncome > 0 ? +((totalIncome - prevIncome) / prevIncome * 100).toFixed(1) : 0;
+        const spentChange  = prevSpent  > 0 ? +((totalSpent  - prevSpent)  / prevSpent  * 100).toFixed(1) : 0;
+
+        return {
+          income: { total: totalIncome, changePercentage: Math.abs(incomeChange), isPositive: incomeChange >= 0 } as IncomeData,
+          spending: { total: totalSpent, changePercentage: Math.abs(spentChange), isPositive: spentChange <= 0 } as SpendingData,
+        };
+      })
+    );
   }
 
-  getSpendingData(period?: string): Observable<SpendingData> {
-    const url = this.useMock
-      ? this.url('spending-data')
-      : `${this.apiBase}/spending?period=${period || '30'}`;
-    return this.http.get<SpendingData>(url).pipe(this.withDelay(this.delays.spending));
+  // No /quick-users endpoint — return empty array in real mode
+  getQuickUsers(): Observable<QuickUser[]> {
+    if (this.useMock) {
+      return this.http.get<QuickUser[]>(this.url('quick-users')).pipe(this.withDelay(this.delays.quickUsers));
+    }
+    return of([]);
   }
 
+  // GET /api/v1/transactions (paginated)
+  getTransactions(_period?: string, searchQuery?: string): Observable<Transaction[]> {
+    if (this.useMock) {
+      return this.http.get<Transaction[]>(this.url('transactions')).pipe(
+        this.withDelay(this.delays.transactions),
+        map(transactions => {
+          if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            return transactions.filter(t =>
+              t.name.toLowerCase().includes(q) ||
+              t.category.toLowerCase().includes(q) ||
+              t.invoice.toLowerCase().includes(q)
+            );
+          }
+          return transactions;
+        })
+      );
+    }
+    return this.getRawTransactions(200).pipe(
+      map((response: any) => {
+        const all: any[] = response?.content ?? (Array.isArray(response) ? response : []);
+        return all.slice(0, 10);
+      })
+    );
+  }
+
+  // No /income or /spending aggregate endpoints — return empty in real mode
+  getIncomeData(_period?: string): Observable<IncomeData> {
+    if (this.useMock) {
+      return this.http.get<IncomeData>(this.url('income-data')).pipe(this.withDelay(this.delays.income));
+    }
+    return of({} as IncomeData);
+  }
+
+  getSpendingData(_period?: string): Observable<SpendingData> {
+    if (this.useMock) {
+      return this.http.get<SpendingData>(this.url('spending-data')).pipe(this.withDelay(this.delays.spending));
+    }
+    return of({} as SpendingData);
+  }
+
+  // GET /api/v1/cards/my-cards
   getCards(): Observable<CreditCard[]> {
-    return this.http.get<CreditCard[]>(this.url('cards'))
-      .pipe(this.withDelay(this.delays.cards));
+    if (this.useMock) {
+      return this.http.get<CreditCard[]>(this.url('cards')).pipe(this.withDelay(this.delays.cards));
+    }
+    return this.api.getMyCards() as Observable<CreditCard[]>;
   }
 
+  // No /workflows endpoint — return empty in real mode
   getWorkflows(): Observable<Workflow[]> {
-    return this.http.get<Workflow[]>(this.url('workflows'))
-      .pipe(this.withDelay(this.delays.workflows));
+    if (this.useMock) {
+      return this.http.get<Workflow[]>(this.url('workflows')).pipe(this.withDelay(this.delays.workflows));
+    }
+    return of([]);
   }
 
+  // No /account/health endpoint — return static computed score in real mode
   getAccountHealth(): Observable<AccountHealthScore> {
     if (this.useMock) {
       return of<AccountHealthScore>({
@@ -116,21 +197,12 @@ export class DashboardService {
         ],
       }).pipe(delay(300));
     }
-    return this.http.get<AccountHealthScore>(`${this.apiBase}/account/health`);
+    return of<AccountHealthScore>({ score: 0, level: 'FAIR', recommendations: [] });
   }
 
   getLiveRates(): Observable<LiveRate[]> {
-    if (this.useMock) {
-      return new Observable<LiveRate[]>(observer => {
-        const emit = () => observer.next(this.generateMockRates());
-        emit();
-        const id = setInterval(emit, 5000);
-        return () => clearInterval(id);
-      });
-    }
-    return interval(5000).pipe(
-      switchMap(() => this.http.get<LiveRate[]>(`${this.apiBase}/rates/live`))
-    );
+    // Return a single snapshot — interval causes NG0506 (app never stabilizes)
+    return of(this.generateMockRates());
   }
 
   private generateMockRates(): LiveRate[] {
@@ -164,31 +236,27 @@ export class DashboardService {
 
   // ─── Mutations (unchanged) ────────────────────────────────────
 
-  sendMoney(userId: string, amount: number): Observable<{ success: boolean; message: string }> {
+  // POST /api/v1/transactions/transfer
+  sendMoney(toAccountNumber: string, amount: number, fromAccountId: string, idempotencyKey: string): Observable<any> {
     if (this.useMock) {
       return new Observable(o => {
         setTimeout(() => { o.next({ success: true, message: 'Transfer successful' }); o.complete(); }, 1000);
       });
     }
-    return this.http.post<{ success: boolean; message: string }>(`${this.apiBase}/transactions/send`, { userId, amount });
+    return this.api.transfer({ fromAccountId, toAccountNumber, amount }, idempotencyKey);
   }
 
-  requestMoney(amount: number): Observable<{ success: boolean; message: string }> {
-    if (this.useMock) {
-      return new Observable(o => {
-        setTimeout(() => { o.next({ success: true, message: 'Request sent' }); o.complete(); }, 1000);
-      });
-    }
-    return this.http.post<{ success: boolean; message: string }>(`${this.apiBase}/transactions/request`, { amount });
+  // requestMoney and topUp have no backend endpoints — mock only
+  requestMoney(_amount: number): Observable<{ success: boolean; message: string }> {
+    return new Observable(o => {
+      setTimeout(() => { o.next({ success: true, message: 'Request sent' }); o.complete(); }, 1000);
+    });
   }
 
-  topUp(amount: number): Observable<{ success: boolean; message: string }> {
-    if (this.useMock) {
-      return new Observable(o => {
-        setTimeout(() => { o.next({ success: true, message: 'Top-up successful' }); o.complete(); }, 1000);
-      });
-    }
-    return this.http.post<{ success: boolean; message: string }>(`${this.apiBase}/transactions/topup`, { amount });
+  topUp(_amount: number): Observable<{ success: boolean; message: string }> {
+    return new Observable(o => {
+      setTimeout(() => { o.next({ success: true, message: 'Top-up successful' }); o.complete(); }, 1000);
+    });
   }
 
   convertCurrency(
@@ -228,7 +296,7 @@ export class DashboardService {
         { id: 4, icon: '🔔', type: 'alert',   tag: 'Bill',     title: 'Electricity bill due in 2 days',   description: 'Estimated $128 due on 21 Feb. Sufficient balance available.' },
       ]).pipe(delay(200));
     }
-    return this.http.get<SmartInsight[]>(`${this.apiBase}/insights/smart`);
+    return of([]); // No /insights/smart endpoint on backend
   }
 
   /**
@@ -246,7 +314,19 @@ export class DashboardService {
         { id: 6, type: 'debit',  title: 'Electricity bill payment',         time: 'Yesterday', amount: 128,   isCredit: false },
       ]).pipe(delay(150));
     }
-    return this.http.get<ActivityEvent[]>(`${this.apiBase}/activity/feed`);
+    // Reuse the same transactions call (getTransactions fetches size:10) to avoid extra HTTP
+    return this.getTransactions().pipe(
+      map((txns: any[]) =>
+        txns.slice(0, 6).map((t: any, i: number) => ({
+          id: i + 1,
+          type: t.transactionType === 'CREDIT' ? 'credit' : 'debit',
+          title: t.description || t.transactionType,
+          time: t.createdAt ?? t.date,
+          amount: t.amount,
+          isCredit: t.transactionType === 'CREDIT',
+        })) as ActivityEvent[]
+      )
+    );
   }
 
   /**
@@ -265,7 +345,7 @@ export class DashboardService {
         { id: 5, icon: '🚗', name: 'Car Insurance', dueDate: d(12), amount: 220,  urgency: 'upcoming' },
       ]).pipe(delay(200));
     }
-    return this.http.get<UpcomingBill[]>(`${this.apiBase}/bills/upcoming`);
+    return of([]); // No /bills/upcoming endpoint on backend
   }
 
   /**
@@ -284,7 +364,7 @@ export class DashboardService {
         { id: 5, icon: '🤖', name: 'ChatGPT Plus',   nextDate: d(18), amount: 20.00 },
       ]).pipe(delay(150));
     }
-    return this.http.get<RecurringSubscription[]>(`${this.apiBase}/subscriptions/recurring`);
+    return of([]); // No /subscriptions/recurring endpoint on backend
   }
 
   /**
@@ -300,7 +380,7 @@ export class DashboardService {
         { id: 4, icon: '🏠', name: 'House Down Payment',  saved: 18000, target: 60000, deadline: '2027-01-01', color: 'amber'   },
       ]).pipe(delay(200));
     }
-    return this.http.get<SavingsGoal[]>(`${this.apiBase}/savings/goals`);
+    return of([]); // No /savings/goals endpoint on backend
   }
 
   /**
@@ -329,7 +409,7 @@ export class DashboardService {
       }
       return of(items).pipe(delay(300));
     }
-    return this.http.get<MonthlyReportItem[]>(`${this.apiBase}/reports/monthly`);
+    return of([]); // No /reports/monthly endpoint on backend
   }
 
   /**
@@ -351,10 +431,7 @@ export class DashboardService {
       ];
       return of(this.buildBreakdownSegments(categories)).pipe(delay(200));
     }
-    // Real API returns raw { label, value, color }[] — map to segments client-side
-    return this.http
-      .get<{ label: string; value: number; color: string }[]>(`${this.apiBase}/spending/breakdown`)
-      .pipe(map(raw => this.buildBreakdownSegments(raw)));
+    return of([]); // No /spending/breakdown endpoint on backend
   }
 
   /** Shared SVG donut calculation — used by both mock and real paths */
@@ -412,9 +489,7 @@ export class DashboardService {
         ],
       }).pipe(delay(250));
     }
-    return this.http.get<{ chartData: any[]; summary: CashflowPoint[] }>(
-      `${this.apiBase}/cashflow/forecast`
-    );
+    return of({ chartData: [], summary: [] }); // No /cashflow/forecast endpoint on backend
   }
 
   /**
@@ -426,9 +501,7 @@ export class DashboardService {
       return of({ netWorth: 84200, change: 1840, assets: 112500, liabilities: 28300 })
         .pipe(delay(200));
     }
-    return this.http.get<{ netWorth: number; change: number; assets: number; liabilities: number }>(
-      `${this.apiBase}/net-worth`
-    );
+    return of({ netWorth: 0, change: 0, assets: 0, liabilities: 0 }); // No /net-worth endpoint on backend
   }
 
   /**
@@ -443,7 +516,7 @@ export class DashboardService {
         { id: 3, deviceIcon: '💻', device: 'Firefox on macOS',  location: 'Mumbai, IN',    time: '5 days ago', isCurrent: false },
       ]).pipe(delay(150));
     }
-    return this.http.get<RecentLogin[]>(`${this.apiBase}/security/logins`);
+    return of([]); // No /security/logins endpoint on backend
   }
 
   /**
@@ -462,9 +535,7 @@ export class DashboardService {
         estimatedTax: 13550,
       }).pipe(delay(200));
     }
-    return this.http.get<{ items: TaxSummaryItem[]; estimatedTax: number }>(
-      `${this.apiBase}/tax/summary`
-    );
+    return of({ items: [], estimatedTax: 0 }); // No /tax/summary endpoint on backend
   }
 
   /**
@@ -486,10 +557,7 @@ export class DashboardService {
         cashbackTotal: 312.45,
       }).pipe(delay(150));
     }
-    return this.http.get<{
-      points: number; tier: string; tierPercent: number; tierCurrent: number; tierNext: number;
-      cashbackMonth: number; cashbackTotal: number;
-    }>(`${this.apiBase}/rewards`);
+    return of({ points: 0, tier: 'Bronze', tierPercent: 0, tierCurrent: 0, tierNext: 5000, cashbackMonth: 0, cashbackTotal: 0 }); // No /rewards endpoint on backend
   }
 
   // ─── FIX 1: Budget categories from service ────────────────────
@@ -506,7 +574,7 @@ export class DashboardService {
         { label: 'Shopping',  icon: '🛍️', spent: 540,  limit: 500,  colorClass: 'rose'    },
       ]).pipe(delay(200));
     }
-    return this.http.get<BudgetCategory[]>(`${this.apiBase}/budget/categories`);
+    return of([]); // No /budget/categories endpoint on backend
   }
 
   // ─── FIX 2: Period options from service ───────────────────────
@@ -519,7 +587,7 @@ export class DashboardService {
     if (this.useMock) {
       return of(['Last 30 days', 'Last 60 days', 'Last 90 days']).pipe(delay(50));
     }
-    return this.http.get<string[]>(`${this.apiBase}/config/period-options`);
+    return of(['Last 30 days', 'Last 60 days', 'Last 90 days']); // No /config/period-options endpoint on backend
   }
 
   // ─── FIX 2: Supported currencies from service ─────────────────
@@ -538,9 +606,12 @@ export class DashboardService {
         { code: 'INR', flag: '🇮🇳', label: 'INR' },
       ]).pipe(delay(50));
     }
-    return this.http.get<{ code: string; flag: string; label: string }[]>(
-      `${this.apiBase}/config/currencies`
-    );
+    return of([
+      { code: 'USD', flag: '🇺🇸', label: 'USD' },
+      { code: 'EUR', flag: '🇪🇺', label: 'EUR' },
+      { code: 'GBP', flag: '🇬🇧', label: 'GBP' },
+      { code: 'INR', flag: '🇮🇳', label: 'INR' },
+    ]); // No /config/currencies endpoint on backend
   }
 
   // ─── Load dashboard data method ───────────────────────────────

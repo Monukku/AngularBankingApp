@@ -1,25 +1,25 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { BeneficiaryService } from '../../services/beneficiary.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 import { Beneficiary } from '../../models/beneficiary.model';
 
 @Component({
   selector: 'app-manage-beneficiaries',
   standalone: true,
-  imports: [ 
+  imports: [
     CommonModule,
-    FormsModule  ,
-    MatFormFieldModule,
-    MatInputModule
+    FormsModule,
   ],
   templateUrl: './manage-beneficiaries.component.html',
   styleUrl: './manage-beneficiaries.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageBeneficiariesComponent implements OnInit {
+  private beneficiaryService = inject(BeneficiaryService);
+  private router = inject(Router);
+
   beneficiaries: Beneficiary[] = [];
   newBeneficiary: Beneficiary = {
     beneficiaryId: '',
@@ -31,7 +31,7 @@ export class ManageBeneficiariesComponent implements OnInit {
     createdAt: new Date()
   };
 
-  constructor(private beneficiaryService: BeneficiaryService) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.loadBeneficiaries();
@@ -46,6 +46,12 @@ export class ManageBeneficiariesComponent implements OnInit {
   addBeneficiary(beneficiary: Beneficiary): void {
     this.beneficiaryService.addBeneficiary(beneficiary).subscribe((newBeneficiary: Beneficiary) => {
       this.beneficiaries.push(newBeneficiary);
+    });
+  }
+
+  sendMoney(b: Beneficiary): void {
+    this.router.navigate(['/transactions/transfer-funds'], {
+      queryParams: { toAccount: b.accountNumber, toName: b.name },
     });
   }
 }

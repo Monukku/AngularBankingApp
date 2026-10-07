@@ -1,0 +1,385 @@
+<!-- ── Done states (full-page, outside kyc-wrap) ── -->
+@if (step() === 'done') {
+  <div class="ks-wrap">
+
+    <!-- Top gold bar -->
+    <div class="ks-topbar"></div>
+
+    <div class="ks-inner">
+
+      <!-- Eyebrow -->
+      <div class="ks-eyebrow">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z"/></svg>
+        IDENTITY VERIFICATION
+      </div>
+
+      <!-- ── VERIFIED ── -->
+      @if (existingKycStatus() === 'VERIFIED') {
+        <div class="ks-icon ks-icon--green">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h2 class="ks-title">KYC verified</h2>
+        <p class="ks-desc">Your identity has been verified. Your accounts are fully active.</p>
+        <div class="ks-actions">
+          <a routerLink="/accounts" class="ks-btn-primary">
+            Go to accounts
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a routerLink="/kyc" class="ks-btn-ghost">View KYC details</a>
+        </div>
+      }
+
+      <!-- ── UNDER REVIEW / SUBMITTED ── -->
+      @if (existingKycStatus() === 'UNDER_REVIEW' || existingKycStatus() === 'SUBMITTED') {
+        <div class="ks-icon ks-icon--amber">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <h2 class="ks-title">Verification in review</h2>
+        <p class="ks-desc">We've received your documents. This usually takes under 24 hours — we'll notify you once it's done.</p>
+
+        <div class="ks-trail">
+          <div class="ks-trail-step ks-trail-step--done">
+            <div class="ks-trail-circle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="ks-trail-line ks-trail-line--done"></div>
+            <span class="ks-trail-label">Submitted</span>
+          </div>
+          <div class="ks-trail-step ks-trail-step--active">
+            <div class="ks-trail-circle"></div>
+            <div class="ks-trail-line"></div>
+            <span class="ks-trail-label">In review</span>
+          </div>
+          <div class="ks-trail-step">
+            <div class="ks-trail-circle"></div>
+            <span class="ks-trail-label">Decision</span>
+          </div>
+        </div>
+
+        <div class="ks-actions">
+          <a routerLink="/dashboard" class="ks-btn-primary">
+            Back to dashboard
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a routerLink="/profile" class="ks-btn-ghost">View submitted details</a>
+        </div>
+      }
+
+      <!-- ── REJECTED ── -->
+      @if (existingKycStatus() === 'REJECTED') {
+        <div class="ks-icon ks-icon--red">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <h2 class="ks-title">Verification unsuccessful</h2>
+        <p class="ks-desc">We couldn't verify your documents. The ID photo may be unclear or details may not match your application.</p>
+        <div class="ks-reason">
+          <div class="ks-reason-head">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+            Reason
+          </div>
+          ID photo did not clearly show the document number. Please retake in good lighting.
+        </div>
+        <div class="ks-actions">
+          <button class="ks-btn-primary" (click)="step.set('personal')">
+            Resubmit documents
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <a routerLink="/profile" class="ks-btn-ghost">Contact support</a>
+        </div>
+      }
+
+      <!-- ── NOT_SUBMITTED fallback ── -->
+      @if (!existingKycStatus() || existingKycStatus() === 'NOT_SUBMITTED') {
+        <div class="ks-icon ks-icon--amber">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h2 class="ks-title">KYC submitted</h2>
+        <p class="ks-desc">Your details have been submitted. Our team will verify them within <strong>2 business days</strong>.</p>
+        <div class="ks-actions">
+          <a routerLink="/dashboard" class="ks-btn-primary">
+            Back to dashboard
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a routerLink="/profile" class="ks-btn-ghost">View submitted details</a>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<!-- ── KYC wizard (hidden when done) ── -->
+@if (step() !== 'done') {
+  <div class="kyc-wrap">
+
+    <!-- Header -->
+    <div class="kyc-header">
+      <span class="kyc-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        IDENTITY VERIFICATION
+      </span>
+      <h1 class="kyc-title">Complete your KYC</h1>
+      <p class="kyc-sub">Takes about 3 minutes. Required once to activate transfers, cards, and loans.</p>
+    </div>
+
+    <!-- Step wizard -->
+    <div class="kyc-wizard">
+      @for (s of steps; track s; let i = $index) {
+        <div class="kw-item" [class.active]="stepIndex() === i" [class.done]="stepIndex() > i">
+          <div class="kw-circle">
+            @if (stepIndex() > i) {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+          <span class="kw-label">{{ s }}</span>
+        </div>
+        @if (i < steps.length - 1) {
+          <div class="kw-line" [class.done]="stepIndex() > i"></div>
+        }
+      }
+    </div>
+
+    <!-- ── Step 1: Personal ── -->
+    @if (step() === 'personal') {
+      <form [formGroup]="personalForm" (ngSubmit)="continuePersonal()" class="kyc-form" novalidate>
+
+        <div class="kf-field kf-full">
+          <label class="kf-label">Full legal name</label>
+          <input class="kf-input" formControlName="fullName" placeholder="As per government ID" />
+          @if (hasError(personalForm, 'fullName', 'required')) {
+            <span class="kf-err">Full name is required.</span>
+          }
+        </div>
+
+        <div class="kf-row">
+          <div class="kf-field">
+            <label class="kf-label">Date of birth</label>
+            <input class="kf-input" type="date" formControlName="dateOfBirth" [max]="todayDate" />
+            @if (hasError(personalForm, 'dateOfBirth', 'required')) {
+              <span class="kf-err">Date of birth is required.</span>
+            }
+          </div>
+          <div class="kf-field">
+            <label class="kf-label">Gender</label>
+            <div class="rb-dd-wrap" (mouseenter)="openHoverDD('gender')" (mouseleave)="closeHoverDD()">
+              <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'gender'">
+                <span [class.rb-dd-placeholder]="!personalForm.get('gender')?.value">{{ genderLabel }}</span>
+                <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (openDropdown === 'gender') {
+                <div class="rb-dd-menu">
+                  @for (opt of genderOptions; track opt.value) {
+                    <div class="rb-dd-item" [class.selected]="personalForm.get('gender')?.value === opt.value" (click)="selectGender(opt.value)">
+                      {{ opt.label }}
+                      @if (personalForm.get('gender')?.value === opt.value) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            @if (hasError(personalForm, 'gender', 'required')) {
+              <span class="kf-err">Gender is required.</span>
+            }
+          </div>
+        </div>
+
+        <div class="kf-field kf-half">
+          <label class="kf-label">Nationality</label>
+          <div class="rb-dd-wrap" (mouseenter)="openHoverDD('nationality')" (mouseleave)="closeHoverDD()">
+            <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'nationality'">
+              <span>{{ personalForm.get('nationality')?.value || 'Select…' }}</span>
+              <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (openDropdown === 'nationality') {
+              <div class="rb-dd-menu">
+                @for (nat of nationalityOptions; track nat) {
+                  <div class="rb-dd-item" [class.selected]="personalForm.get('nationality')?.value === nat" (click)="selectNationality(nat)">
+                    {{ nat }}
+                    @if (personalForm.get('nationality')?.value === nat) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="kf-actions">
+          <button type="button" class="kf-btn-ghost" disabled>‹ Back</button>
+          <button type="submit" class="kf-btn-primary">Continue ›</button>
+        </div>
+      </form>
+    }
+
+    <!-- ── Step 2: Identity ── -->
+    @if (step() === 'identity') {
+      <form [formGroup]="identityForm" (ngSubmit)="continueIdentity()" class="kyc-form" novalidate>
+
+        <div class="kf-field kf-full">
+          <label class="kf-label">Aadhaar number</label>
+          <input class="kf-input" formControlName="aadhaarNumber" placeholder="12-digit Aadhaar" maxlength="12" inputmode="numeric" />
+          @if (hasError(identityForm, 'aadhaarNumber', 'required')) {
+            <span class="kf-err">Aadhaar number is required.</span>
+          }
+          @if (hasError(identityForm, 'aadhaarNumber', 'pattern')) {
+            <span class="kf-err">Enter a valid 12-digit Aadhaar number.</span>
+          }
+        </div>
+
+        <div class="kf-field kf-full">
+          <label class="kf-label">PAN number</label>
+          <input class="kf-input" formControlName="panNumber" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase" />
+          @if (hasError(identityForm, 'panNumber', 'required')) {
+            <span class="kf-err">PAN number is required.</span>
+          }
+          @if (hasError(identityForm, 'panNumber', 'pattern')) {
+            <span class="kf-err">Enter a valid PAN (e.g. ABCDE1234F).</span>
+          }
+        </div>
+
+        <div class="kf-field kf-full">
+          <label class="kf-label">Upload documents</label>
+          <div class="kf-upload-grid">
+            @for (slot of UPLOAD_SLOTS; track slot.type) {
+              <label class="kf-upload-tile" [class.uploaded]="isDocUploaded(slot.type)" [class.disabled]="uploadingDoc()">
+                @if (isDocUploaded(slot.type)) {
+                  <svg class="kf-upload-check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                } @else {
+                  <svg class="kf-upload-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                }
+                <span class="kf-upload-label">{{ slot.label }}</span>
+                <input type="file" accept="image/*,application/pdf" (change)="onFileSelected($event, slot.type)" [disabled]="uploadingDoc()" hidden />
+              </label>
+            }
+          </div>
+          @if (uploadingDoc()) {
+            <p class="kf-uploading">Uploading…</p>
+          }
+        </div>
+
+        <div class="kf-actions">
+          <button type="button" class="kf-btn-ghost" (click)="goBack()">‹ Back</button>
+          <button type="submit" class="kf-btn-primary">Continue ›</button>
+        </div>
+      </form>
+    }
+
+    <!-- ── Step 3: Address ── -->
+    @if (step() === 'address') {
+      <form [formGroup]="addressForm" (ngSubmit)="continueAddress()" class="kyc-form" novalidate>
+
+        <div class="kf-field kf-full">
+          <label class="kf-label">Address line 1</label>
+          <input class="kf-input" formControlName="addressLine1" placeholder="Flat, building, street" />
+          @if (hasError(addressForm, 'addressLine1', 'required')) {
+            <span class="kf-err">Address line 1 is required.</span>
+          }
+        </div>
+
+        <div class="kf-field kf-full">
+          <label class="kf-label">Address line 2</label>
+          <input class="kf-input" formControlName="addressLine2" placeholder="Area, landmark (optional)" />
+        </div>
+
+        <div class="kf-row">
+          <div class="kf-field">
+            <label class="kf-label">City</label>
+            <input class="kf-input" formControlName="city" placeholder="e.g. Bengaluru" />
+            @if (hasError(addressForm, 'city', 'required')) {
+              <span class="kf-err">City is required.</span>
+            }
+          </div>
+          <div class="kf-field">
+            <label class="kf-label">State</label>
+            <div class="rb-dd-wrap" (mouseenter)="openHoverDD('state')" (mouseleave)="closeHoverDD()">
+              <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'state'">
+                <span [class.rb-dd-placeholder]="!addressForm.get('state')?.value">{{ addressForm.get('state')?.value || 'Select state…' }}</span>
+                <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (openDropdown === 'state') {
+                <div class="rb-dd-menu" style="max-height:220px;overflow-y:auto;">
+                  @for (s of STATES; track s) {
+                    <div class="rb-dd-item" [class.selected]="addressForm.get('state')?.value === s" (click)="selectState(s)">
+                      {{ s }}
+                      @if (addressForm.get('state')?.value === s) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            @if (hasError(addressForm, 'state', 'required')) {
+              <span class="kf-err">State is required.</span>
+            }
+          </div>
+        </div>
+
+        <div class="kf-field kf-half">
+          <label class="kf-label">PIN code</label>
+          <input class="kf-input" formControlName="pincode" placeholder="560001" maxlength="6" />
+          @if (hasError(addressForm, 'pincode', 'required')) {
+            <span class="kf-err">PIN code is required.</span>
+          }
+          @if (hasError(addressForm, 'pincode', 'pattern')) {
+            <span class="kf-err">Enter a valid 6-digit PIN code.</span>
+          }
+        </div>
+
+        <div class="kf-actions">
+          <button type="button" class="kf-btn-ghost" (click)="goBack()">‹ Back</button>
+          <button type="submit" class="kf-btn-primary">Continue ›</button>
+        </div>
+      </form>
+    }
+
+    <!-- ── Step 4: Review ── -->
+    @if (step() === 'review') {
+      <div class="kyc-form">
+        <p class="kf-review-intro">Review your details before submitting.</p>
+
+        <div class="kf-review-section">
+          <h4 class="kf-review-heading">Personal</h4>
+          <div class="kf-review-row"><span class="kf-review-lbl">Full name</span><span class="kf-review-val">{{ personalForm.value.fullName || '—' }}</span></div>
+          <div class="kf-review-row"><span class="kf-review-lbl">Date of birth</span><span class="kf-review-val">{{ personalForm.value.dateOfBirth || '—' }}</span></div>
+          <div class="kf-review-row"><span class="kf-review-lbl">Gender</span><span class="kf-review-val">{{ personalForm.value.gender || '—' }}</span></div>
+          <div class="kf-review-row"><span class="kf-review-lbl">Nationality</span><span class="kf-review-val">{{ personalForm.value.nationality || '—' }}</span></div>
+        </div>
+
+        <div class="kf-review-section">
+          <h4 class="kf-review-heading">Identity</h4>
+          <div class="kf-review-row"><span class="kf-review-lbl">Aadhaar number</span><span class="kf-review-val">{{ identityForm.value.aadhaarNumber || '—' }}</span></div>
+          <div class="kf-review-row"><span class="kf-review-lbl">PAN number</span><span class="kf-review-val">{{ (identityForm.value.panNumber || '—') | uppercase }}</span></div>
+          <div class="kf-review-row"><span class="kf-review-lbl">Documents uploaded</span><span class="kf-review-val">{{ uploadedDocs().length }}/{{ REQUIRED_DOCS.length }}</span></div>
+        </div>
+
+        <div class="kf-review-section">
+          <h4 class="kf-review-heading">Address</h4>
+          <div class="kf-review-row">
+            <span class="kf-review-lbl">Address</span>
+            <span class="kf-review-val">{{ addressForm.value.addressLine1 || '—' }}{{ addressForm.value.addressLine2 ? ', ' + addressForm.value.addressLine2 : '' }}</span>
+          </div>
+          <div class="kf-review-row"><span class="kf-review-lbl">City / State</span><span class="kf-review-val">{{ addressForm.value.city || '—' }}{{ addressForm.value.state ? ', ' + addressForm.value.state : '' }}</span></div>
+          <div class="kf-review-row"><span class="kf-review-lbl">PIN code</span><span class="kf-review-val">{{ addressForm.value.pincode || '—' }}</span></div>
+        </div>
+
+        <label class="kf-consent">
+          <input type="checkbox" [(ngModel)]="consentChecked" />
+          <span>I confirm the information provided is accurate and consent to RewaBank verifying it with the relevant authorities.</span>
+        </label>
+
+        <div class="kf-actions">
+          <button type="button" class="kf-btn-ghost" (click)="goBack()">‹ Back</button>
+          <button class="kf-btn-primary" (click)="submitAll()" [disabled]="!consentChecked || submitting()">
+            @if (submitting()) {
+              <span class="kf-spinner"></span> Submitting…
+            } @else {
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Submit for verification
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+}

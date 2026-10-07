@@ -1,4 +1,4 @@
-st// ═══════════════════════════════════════════
+﻿// ═══════════════════════════════════════════
 // Hide Scrollbar Globally
 // ═══════════════════════════════════════════
 
@@ -52,139 +52,360 @@ body {
 }
 
 // ═══════════════════════════════════════════
-// LIGHT MODE (default)
+// DARK MODE (default — app is dark-first)
 // ═══════════════════════════════════════════
 :root {
+  // ── Rewa Brand Tokens ──
+  --brand-amber:       #e8a020;
+  --brand-amber-soft:  rgba(232, 160, 32, 0.12);
+  --brand-amber-border:rgba(232, 160, 32, 0.35);
+  --brand-teal:        #0d4f6c;
+  --brand-teal-light:  #1a7a9e;
+  --brand-teal-soft:   rgba(13, 79, 108, 0.12);
+  --brand-night:       #0c0e14;
+  --brand-cream:       #faf8f4;
+
   // Shell
-  --bg-page:         #f0f2ff;
-  --bg-surface:      #ffffff;
-  --bg-surface-2:    #f9fafb;
-  --bg-surface-3:    #f3f4f6;
-  --bg-input:        #f3f4f6;
-
-  // Header
-  --header-bg:       #ffffff;
-  --header-border:   #e5e7eb;
-  --search-bg:       #f3f4f6;
-  --search-bg-focus: #ffffff;
-
-  // Text
-  --text-primary:    #111827;
-  --text-secondary:  #6b7280;
-  --text-tertiary:   #9ca3af;
-
-  // Borders
-  --border-color:    #e5e7eb;
-  --border-hover:    rgba(99, 102, 241, 0.35);
-
-  // Dashboard surfaces (used in dashboard.component.scss)
-  --dash-bg:         #f0f2ff;
-  --dash-s1:         #ffffff;
-  --dash-s2:         #f4f5ff;
-  --dash-s3:         #ebebf5;
-
-  // Dashboard text
-  --dash-t1:         #111827;
-  --dash-t2:         #4b5563;
-  --dash-t3:         #9ca3af;
-
-  // Dashboard borders
-  --dash-border:     rgba(0, 0, 0, 0.07);
-  --dash-border-h:   rgba(124, 58, 237, 0.3);
-
-  // Shadows
-  --card-shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 18px rgba(0,0,0,.04);
-  --card-shadow-h:   0 10px 36px rgba(0,0,0,.10), 0 0 0 1px rgba(99,102,241,.15);
-
-  // Dropdown menu
-  --menu-item-color:    #111827;
-  --menu-item-bg-hover: rgba(99, 102, 241, 0.08);
-}
-
-// ═══════════════════════════════════════════
-// DARK MODE — .dark class on <html>
-// ═══════════════════════════════════════════
-:root.dark {
   --bg-page:         #0d0f1a;
   --bg-surface:      #141626;
   --bg-surface-2:    #1c1f35;
   --bg-surface-3:    #232640;
   --bg-input:        #232640;
 
+  // Header
   --header-bg:       #1f2937;
   --header-border:   #374151;
   --search-bg:       #374151;
   --search-bg-focus: #111827;
 
+  // Text
   --text-primary:    #f9fafb;
   --text-secondary:  #d1d5db;
   --text-tertiary:   #9ca3af;
 
+  // Borders
   --border-color:    #374151;
   --border-hover:    rgba(124, 58, 237, 0.35);
 
+  // Dashboard surfaces
   --dash-bg:         #0d0f1a;
   --dash-s1:         #141626;
   --dash-s2:         #1c1f35;
   --dash-s3:         #232640;
 
+  // Dashboard text
   --dash-t1:         #f0f2ff;
   --dash-t2:         #8b8fa8;
   --dash-t3:         #5a5e78;
 
+  // Dashboard borders
   --dash-border:     rgba(255, 255, 255, 0.07);
   --dash-border-h:   rgba(124, 58, 237, 0.35);
 
+  // Shadows
   --card-shadow:     0 1px 4px rgba(0,0,0,.4), 0 4px 18px rgba(0,0,0,.25);
   --card-shadow-h:   0 10px 36px rgba(0,0,0,.4), 0 0 0 1px rgba(99,102,241,.18);
 
+  // Dropdown menu
   --menu-item-color:    #f9fafb;
   --menu-item-bg-hover: rgba(99, 102, 241, 0.15);
+
+  // Sidebar
+  --sb-bg:           #10121f;
+  --sb-user-bg:      linear-gradient(160deg, #0e2d3d 0%, #091d2a 100%);
+  --sb-border:       rgba(255,255,255,0.06);
+  --sb-avatar-bg:    linear-gradient(135deg, #4a5168 0%, #2e3347 100%);
+  --sb-avatar-color: #e8eaf5;
+  --sb-avatar-bdr:   rgba(255,255,255,0.12);
+  --sb-online-bdr:   #091d2a;
+  --sb-username:     #e8eaf5;
+  --sb-email:        rgba(255,255,255,0.4);
+  --sb-section-line: #1a1e33;
+  --sb-section-txt:  #F2B33D;
+  --sb-item-color:   #5a6080;
+  --sb-item-hover-bg:#232640;
+  --sb-item-hover-c: #7080a8;
+  --sb-tile-bg:      #1c1f30;
+  --sb-tile-color:   #4a5270;
+  --sb-foot-border:  #161929;
 }
 
 // ═══════════════════════════════════════════
-// OS preference — only when no manual choice has been stored
-// The .light class on <html> suppresses this block after first toggle
+// LIGHT MODE — .light class on <html>
 // ═══════════════════════════════════════════
-@media (prefers-color-scheme: dark) {
-  :root:not(.dark):not(.light) {
-    --bg-page:         #0d0f1a;
-    --bg-surface:      #141626;
-    --bg-surface-2:    #1c1f35;
-    --bg-surface-3:    #232640;
-    --bg-input:        #232640;
-    --header-bg:       #1f2937;
-    --header-border:   #374151;
-    --search-bg:       #374151;
-    --search-bg-focus: #111827;
-    --text-primary:    #f9fafb;
-    --text-secondary:  #d1d5db;
-    --text-tertiary:   #9ca3af;
-    --border-color:    #374151;
-    --border-hover:    rgba(124, 58, 237, 0.35);
-    --dash-bg:         #0d0f1a;
-    --dash-s1:         #141626;
-    --dash-s2:         #1c1f35;
-    --dash-s3:         #232640;
-    --dash-t1:         #f0f2ff;
-    --dash-t2:         #8b8fa8;
-    --dash-t3:         #5a5e78;
-    --dash-border:     rgba(255, 255, 255, 0.07);
-    --dash-border-h:   rgba(124, 58, 237, 0.35);
-    --card-shadow:     0 1px 4px rgba(0,0,0,.4), 0 4px 18px rgba(0,0,0,.25);
-    --card-shadow-h:   0 10px 36px rgba(0,0,0,.4), 0 0 0 1px rgba(99,102,241,.18);
-    --menu-item-color:    #f9fafb;
-    --menu-item-bg-hover: rgba(99, 102, 241, 0.15);
-  }
+:root.light {
+  --bg-page:         #f0f2ff;
+  --bg-surface:      #ffffff;
+  --bg-surface-2:    #f9fafb;
+  --bg-surface-3:    #f3f4f6;
+  --bg-input:        #f3f4f6;
+
+  --header-bg:       #ffffff;
+  --header-border:   #e5e7eb;
+  --search-bg:       #f3f4f6;
+  --search-bg-focus: #ffffff;
+
+  --text-primary:    #111827;
+  --text-secondary:  #6b7280;
+  --text-tertiary:   #9ca3af;
+
+  --border-color:    #e5e7eb;
+  --border-hover:    rgba(99, 102, 241, 0.35);
+
+  --dash-bg:         #f0f2ff;
+  --dash-s1:         #ffffff;
+  --dash-s2:         #f9fafb;
+  --dash-s3:         #f3f4f6;
+
+  --dash-t1:         #111827;
+  --dash-t2:         #4b5563;
+  --dash-t3:         #9ca3af;
+
+  --dash-border:     rgba(0, 0, 0, 0.07);
+  --dash-border-h:   rgba(124, 58, 237, 0.25);
+
+  --card-shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 18px rgba(0,0,0,.04);
+  --card-shadow-h:   0 10px 36px rgba(0,0,0,.10), 0 0 0 1px rgba(99,102,241,.15);
+
+  --menu-item-color:    #111827;
+  --menu-item-bg-hover: rgba(99, 102, 241, 0.08);
+
+  --sb-bg:           #f0f2f8;
+  --sb-user-bg:      linear-gradient(160deg, #1a4a6e 0%, #0e2d45 100%);
+  --sb-border:       rgba(0,0,0,0.08);
+  --sb-avatar-bg:    linear-gradient(135deg, #5a6580 0%, #3e4a60 100%);
+  --sb-avatar-color: #ffffff;
+  --sb-avatar-bdr:   rgba(255,255,255,0.25);
+  --sb-online-bdr:   #0e2d45;
+  --sb-username:     #ffffff;
+  --sb-email:        rgba(255,255,255,0.7);
+  --sb-section-line: #d0d4e8;
+  --sb-section-txt:  #c8861a;
+  --sb-item-color:   #4a5570;
+  --sb-item-hover-bg:#e2e6f2;
+  --sb-item-hover-c: #2a3a60;
+  --sb-tile-bg:      #dde2f0;
+  --sb-tile-color:   #5a6580;
+  --sb-foot-border:  #d0d4e8;
+}
+
+// ═══════════════════════════════════════════
+// .dark class — same as root defaults (dark-first), kept for ThemeService compatibility
+// ═══════════════════════════════════════════
+:root.dark {
+  // intentionally empty — :root already sets dark tokens
 }
 
 // ═══════════════════════════════════════════
 // Global snackbars (rendered outside component trees)
 // ═══════════════════════════════════════════
-.snackbar-success .mdc-snackbar__surface { background: #10b981 !important; }
-.snackbar-error   .mdc-snackbar__surface { background: #f43f5e !important; }
-.snackbar-info    .mdc-snackbar__surface { background: #7c3aed !important; }
-.mat-mdc-snack-bar-label { color: white !important; font-weight: 600 !important; }
+
+// Shared surface base — dark glass panel
+.snackbar-success .mdc-snackbar__surface,
+.success-snackbar .mdc-snackbar__surface,
+.notification-success .mdc-snackbar__surface,
+.snackbar-error   .mdc-snackbar__surface,
+.error-snackbar   .mdc-snackbar__surface,
+.notification-error .mdc-snackbar__surface,
+.snackbar-info    .mdc-snackbar__surface,
+.notification-info .mdc-snackbar__surface,
+.snackbar-dark    .mdc-snackbar__surface,
+.snackbar-copied  .mdc-snackbar__surface,
+.notification-warning .mdc-snackbar__surface {
+  background: #0f1929 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.4) !important;
+  min-width: 280px !important;
+  padding: 2px 6px !important;
+}
+
+// Left accent border per type
+.snackbar-success .mdc-snackbar__surface,
+.success-snackbar .mdc-snackbar__surface,
+.notification-success .mdc-snackbar__surface {
+  border: 1px solid rgba(16,185,129,0.45) !important;
+  border-left: 4px solid #10b981 !important;
+}
+.snackbar-error .mdc-snackbar__surface,
+.error-snackbar .mdc-snackbar__surface,
+.notification-error .mdc-snackbar__surface {
+  border: 1px solid rgba(239,68,68,0.45) !important;
+  border-left: 4px solid #ef4444 !important;
+}
+.snackbar-info .mdc-snackbar__surface,
+.notification-info .mdc-snackbar__surface {
+  border: 1px solid rgba(124,58,237,0.45) !important;
+  border-left: 4px solid #7c3aed !important;
+}
+.snackbar-dark .mdc-snackbar__surface {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-left: 4px solid rgba(255,255,255,0.3) !important;
+}
+.snackbar-copied .mdc-snackbar__surface {
+  border: 1px solid rgba(245,160,0,0.35) !important;
+  border-left: 4px solid #f5a000 !important;
+}
+.notification-warning .mdc-snackbar__surface {
+  border: 1px solid rgba(245,160,0,0.45) !important;
+  border-left: 4px solid #f5a000 !important;
+}
+
+// Label text
+.mat-mdc-snack-bar-label {
+  color: #f0f4ff !important;
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+  letter-spacing: 0.01em !important;
+}
+
+// Success label — green tint
+.snackbar-success .mat-mdc-snack-bar-label,
+.success-snackbar .mat-mdc-snack-bar-label,
+.notification-success .mat-mdc-snack-bar-label { color: #6ee7b7 !important; }
+
+// Error label — red tint
+.snackbar-error .mat-mdc-snack-bar-label,
+.error-snackbar .mat-mdc-snack-bar-label,
+.notification-error .mat-mdc-snack-bar-label { color: #fca5a5 !important; }
+
+// Info label — purple tint
+.notification-info .mat-mdc-snack-bar-label { color: #c4b5fd !important; }
+
+// Warning label — amber tint
+.notification-warning .mat-mdc-snack-bar-label { color: #fcd34d !important; }
+
+// Close/action button
+.mat-mdc-snack-bar-action .mdc-button__label {
+  color: #f5a000 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+}
+
+// ═══════════════════════════════════════════
+// Global filter bar (search + dropdown, like staff-management)
+// ═══════════════════════════════════════════
+.sf-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.sf-search-wrap {
+  flex: 1;
+  min-width: 180px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sf-search-icon {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.sf-search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(148,163,184,0.12);
+  border-radius: 10px;
+  padding: 10px 14px 10px 36px;
+  color: #E8ECF4;
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus { border-color: rgba(242,179,61,0.35); }
+  &::placeholder { color: #334155; }
+}
+
+.sf-dd {
+  flex-shrink: 0;
+  min-width: 160px;
+  .rb-dd-trigger { padding: 10px 14px; font-size: 13.5px; }
+}
+
+// ═══════════════════════════════════════════
+// Global custom dropdown (replaces all <select>)
+// ═══════════════════════════════════════════
+.rb-dd-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.rb-dd-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(148,163,184,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #E8ECF4;
+  font-size: 13.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  text-align: left;
+  width: 100%;
+
+  &:hover   { border-color: rgba(148,163,184,0.28); }
+  &.open    { border-color: rgba(242,179,61,0.45); }
+
+  .rb-dd-placeholder { color: #475569; }
+}
+
+.rb-dd-chevron {
+  flex-shrink: 0;
+  color: #5B6579;
+  transition: transform 0.2s;
+  .open & { transform: rotate(180deg); }
+}
+
+.rb-dd-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  background: #131C2E;
+  border: 1px solid rgba(148,163,184,0.14);
+  border-radius: 12px;
+  padding: 6px;
+  padding-top: 12px;
+  margin-top: 0;
+  z-index: 800;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+  animation: rbDdPop 0.15s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+@keyframes rbDdPop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+.rb-dd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #8A97AD;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+
+  &:hover    { background: rgba(255,255,255,0.06); color: #E8ECF4; }
+  &.selected { color: #F2B33D; }
+}
+
+.rb-dd-check { flex-shrink: 0; }
 
 // ═══════════════════════════════════════════
 // Reduced motion
@@ -194,4 +415,272 @@ body {
     transition: none !important;
     animation: none !important;
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LIGHT MODE COMPONENT OVERRIDES
+// Palette:
+//   page bg   : #F4F6FB  (cool-slate, not stark white)
+//   surface   : #FFFFFF  card/panel
+//   surface-2 : #F8F9FC  subtle inset
+//   text-1    : #0F172A  near-black
+//   text-2    : #475569  slate-600
+//   text-3    : #94A3B8  slate-400
+//   border    : #E2E8F0  slate-200
+//   amber     : #E8A020  brand (unchanged)
+// ═══════════════════════════════════════════════════════════════════════════
+
+:root.light {
+
+  // ── :host element backgrounds ─────────────────────────────────────────
+  app-account-management, app-account-summary, app-fixed-deposit,
+  app-recurring-deposit, app-transfer, app-manage-beneficiaries,
+  app-card-list, app-card-create, app-card-detail,
+  app-loan-list, app-loan-create, app-loan-detail,
+  app-transaction-list, app-transaction-details, app-recurring-payments,
+  app-transfer-funds, app-kyc-submission, app-user-profile,
+  app-audit-logs, app-card-management, app-fraud-alerts, app-kyc-approvals,
+  app-loan-management, app-pending-accounts, app-staff-management,
+  app-not-found, app-access-denied {
+    background: #F1F4F9 !important;
+  }
+
+  // ── App shell ──────────────────────────────────────────────────────────
+  .app-container { background: #F1F4F9 !important; }
+
+  // ── Page wrapper divs ──────────────────────────────────────────────────
+  .mgmt-page, .accounts-page, .fd-page, .rd-page, .tf-page,
+  .card-list-page, .card-create-page, .card-detail-page,
+  .ll-page, .lc-page, .ld-page,
+  .th-page, .td-page, .rp-page, .tf-success-page,
+  .kf-page, .profile-page,
+  .al-page, .cm-page, .fa-page, .ka-page, .lm-page, .pa-page, .sm-page {
+    background: #F1F4F9 !important;
+    color: #0F172A !important;
+  }
+
+  // ── Inner content wrappers ─────────────────────────────────────────────
+  .sa-inner, .ll-inner, .al-inner, .sm-inner, .pa-inner, .lm-inner,
+  .fa-inner, .ka-inner, .cm-inner {
+    color: #0F172A !important;
+  }
+
+  // ── Primary text ───────────────────────────────────────────────────────
+  .th-title, .ll-title, .page-title, .al-title,
+  .sm-title, .pa-title, .fa-title, .ka-title, .lm-title,
+  .th-row-name, .ll-row-name, .sa-stat-value, .profile-name {
+    color: #0F172A !important;
+  }
+
+  // ── Secondary / muted text ─────────────────────────────────────────────
+  .th-sub, .ll-sub, .page-sub, .sa-stat-label,
+  .th-group-label, .th-row-meta, .th-page-info,
+  .ll-row-meta, .profile-label, .al-sub, .sm-sub, .pa-sub,
+  .fa-sub, .ka-sub, .lm-sub, .card-sub, .kf-sub, .tf-hint,
+  .fd-item-label, .rd-item-label, .cd-label, .ld-stat-label,
+  .tf-section-label, .mgmt-label, .empty-state {
+    color: #475569 !important;
+  }
+
+  // ── Filter tabs (All / Credit / Debit etc.) ────────────────────────────
+  .th-tab:not(.active) { color: #475569 !important; }
+
+  // ── Date-range chip ───────────────────────────────────────────────────
+  .th-date-range {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #475569 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  }
+
+  // ── Search inputs ─────────────────────────────────────────────────────
+  .th-search-wrap {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  }
+  .th-search {
+    color: #0F172A !important;
+    &::placeholder { color: #94A3B8 !important; }
+  }
+  .sf-search-input {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #0F172A !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    &::placeholder { color: #94A3B8 !important; }
+    &:focus { border-color: rgba(232,160,32,0.5) !important; }
+  }
+
+  // ── Dividers ──────────────────────────────────────────────────────────
+  .th-divider, .ll-divider, .al-divider, .section-line {
+    background: #E2E8F0 !important;
+    border-color: #E2E8F0 !important;
+  }
+
+  // ── Transaction rows ──────────────────────────────────────────────────
+  .th-row {
+    border-bottom-color: #E2E8F0 !important;
+    &:hover { background: rgba(99,102,241,0.03) !important; }
+  }
+  .th-row-icon {
+    &.credit   { background: rgba(16,185,129,0.10) !important; }
+    &.debit    { background: rgba(239,68,68,0.08)  !important; }
+    &.transfer { background: rgba(232,160,32,0.10) !important; }
+  }
+
+  // ── Ghost / outline buttons ───────────────────────────────────────────
+  .th-btn-ghost, .ll-btn-refresh, .ll-btn-filter,
+  .al-btn-ghost, .sm-btn-ghost, .pa-btn-ghost, .btn-ghost, .btn-outline {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #475569 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    &:hover {
+      border-color: #CBD5E1 !important;
+      color: #0F172A !important;
+      background: #F8FAFC !important;
+    }
+  }
+
+  // ── Cards / panels ────────────────────────────────────────────────────
+  .sa-stat, .sa-table-wrap, .sa-pagination,
+  .ll-card, .ld-card, .ld-section, .ld-stat,
+  .card-item, .card-item-inner, .cc-form-wrap, .cd-card,
+  .td-card, .rp-card, .tf-card,
+  .kf-section, .kf-upload-tile,
+  .profile-card, .profile-section,
+  .al-card, .fa-card, .ka-card, .lm-card, .pa-card, .sm-card,
+  .mgmt-card, .mgmt-form, .mgmt-account-card,
+  .fd-card, .fd-info, .fd-existing-item,
+  .rd-card, .rd-info, .rd-existing-item {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    box-shadow: 0 1px 4px rgba(15,23,42,0.06), 0 4px 12px rgba(15,23,42,0.04) !important;
+    color: #0F172A !important;
+  }
+
+  // ── Data tables ───────────────────────────────────────────────────────
+  .table-wrap {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    box-shadow: 0 1px 4px rgba(15,23,42,0.06) !important;
+  }
+  .data-table {
+    th {
+      background: #F8FAFC !important;
+      color: #475569 !important;
+      border-bottom-color: #E2E8F0 !important;
+      font-weight: 600 !important;
+    }
+    td {
+      border-bottom-color: #F1F4F9 !important;
+      color: #0F172A !important;
+    }
+    tr:hover td { background: rgba(99,102,241,0.02) !important; }
+  }
+
+  // ── Custom dropdown ────────────────────────────────────────────────────
+  .rb-dd-trigger {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #475569 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    &:hover { border-color: #CBD5E1 !important; }
+  }
+  .rb-dd-menu {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    box-shadow: 0 8px 28px rgba(15,23,42,0.12) !important;
+  }
+  .rb-dd-item {
+    color: #475569 !important;
+    &:hover    { background: #F1F4F9 !important; color: #0F172A !important; }
+    &.selected { color: #E8A020 !important; }
+  }
+
+  // ── All form inputs / textareas ───────────────────────────────────────
+  input:not([type=checkbox]):not([type=radio]), textarea, select {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #0F172A !important;
+    &::placeholder { color: #94A3B8 !important; }
+    &:focus {
+      border-color: rgba(232,160,32,0.5) !important;
+      box-shadow: 0 0 0 3px rgba(232,160,32,0.08) !important;
+    }
+  }
+
+  // ── Filter pill tabs ──────────────────────────────────────────────────
+  .ll-filter-pill, .al-pill, .sm-pill, .pa-pill, .lm-pill,
+  .fa-pill, .ka-pill, .sa-pill, .status-pill {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #475569 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+    &.active, &--active, &.sa-pill--active {
+      background: rgba(232,160,32,0.10) !important;
+      border-color: rgba(232,160,32,0.35) !important;
+      color: #A06800 !important;
+    }
+  }
+
+  // ── Modals ────────────────────────────────────────────────────────────
+  .modal-overlay, .confirm-overlay, .detail-overlay, .modal-backdrop {
+    background: rgba(15,23,42,0.4) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+  .modal-panel, .confirm-panel, .detail-panel, .modal,
+  .reverse-modal, .resolve-modal, .reject-modal,
+  .review-modal, .disburse-modal, .block-modal, .cancel-modal {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    box-shadow: 0 20px 60px rgba(15,23,42,0.18) !important;
+    color: #0F172A !important;
+    h3, h4 { color: #0F172A !important; }
+    p, label { color: #475569 !important; }
+  }
+
+  // ── Stat values ───────────────────────────────────────────────────────
+  .sa-stat-value { color: #0F172A !important; }
+  .sa-stat-value--green { color: #059669 !important; }
+  .sa-stat-value--amber { color: #B45309 !important; }
+
+  // ── Feedback banners ──────────────────────────────────────────────────
+  .error-box {
+    background: rgba(239,68,68,0.06) !important;
+    border-color: rgba(239,68,68,0.18) !important;
+    color: #DC2626 !important;
+  }
+  .msg-banner.ok  { background: rgba(16,185,129,0.08) !important; color: #047857 !important; }
+  .msg-banner.err { background: rgba(239,68,68,0.06) !important;  color: #DC2626 !important; }
+  .msg-ok  { color: #059669 !important; }
+  .msg-err { color: #DC2626 !important; }
+
+  // ── Empty / state boxes ───────────────────────────────────────────────
+  .th-empty, .state-box { p, span { color: #475569 !important; } h3 { color: #0F172A !important; } }
+
+  // ── Staff header bars ─────────────────────────────────────────────────
+  .sm-header, .pa-header, .lm-header, .fa-header, .ka-header, .al-header {
+    border-color: #E2E8F0 !important;
+  }
+
+  // ── Loan list rows ─────────────────────────────────────────────────────
+  .ll-row {
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.05) !important;
+    &:hover { box-shadow: 0 4px 14px rgba(15,23,42,0.08) !important; }
+  }
+
+  // ── KYC hints & labels ─────────────────────────────────────────────────
+  .kf-label { color: #374151 !important; }
+  .kf-hint  { color: #94A3B8 !important; }
+
+  // ── Landing / auth nav ─────────────────────────────────────────────────
+  .nav { background: #FFFFFF !important; border-color: #E2E8F0 !important; }
+  .nav-link { color: #475569 !important; }
+
+  // ── Spinners ───────────────────────────────────────────────────────────
+  .ll-spinner, .al-spinner, .sm-spinner { border-color: rgba(0,0,0,0.1) !important; }
 }

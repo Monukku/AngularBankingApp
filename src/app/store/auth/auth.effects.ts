@@ -1,28 +1,28 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map, switchMap, catchError, tap } from 'rxjs/operators';
 import { of, from } from 'rxjs';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../../core/services/auth.service';
 import { LoggerService } from '../../core/services/logger.service';
-import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthEffects {
-  // ✅ Login effect - triggers Keycloak login
+  private readonly actions$ = inject(Actions);
+  private readonly authService = inject(AuthService);
+  private readonly logger = inject(LoggerService);
+
   login$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.login),
         tap(() => {
-          // ✅ This will redirect to Keycloak login page
           this.authService.login('/dashboard');
         })
       ),
-    { dispatch: false } // ✅ No action dispatched, just side effect
+    { dispatch: false }
   );
 
-  // ✅ Logout effect
   logout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.logout),
@@ -42,7 +42,6 @@ export class AuthEffects {
     )
   );
 
-  // ✅ Load user effect
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.loadUser),
@@ -61,33 +60,4 @@ export class AuthEffects {
       )
     )
   );
-
-  // ✅ Refresh token effect
-  refreshToken$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.refreshToken),
-      switchMap(() =>
-        from(this.authService.getToken()).pipe(
-          map((token) => AuthActions.refreshTokenSuccess({ token })),
-          catchError((error) => {
-            this.logger.error('Token refresh effect failed', error);
-            return of(
-              AuthActions.refreshTokenFailure({
-                error: error.message || 'Token refresh failed',
-              })
-            );
-          })
-        )
-      )
-    )
-  );
-
-  constructor(
-    private actions$: Actions,
-    private authService: AuthService,
-    private logger: LoggerService,
-    private router: Router
-  ) {}
 }
-
-

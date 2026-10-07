@@ -1,90 +1,288 @@
-<div class="sidebar-container" *ngIf="isAuthenticated$ | async">
-  <!-- User Section - NO WHITE SPACE -->
+<div class="sidebar-container" *ngIf="isAuthenticated$ | async" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+
+  <!-- User Section -->
   <div class="user-section">
-    <div class="user-avatar">
-      <div class="avatar-circle">
-        {{ (currentUser$ | async)?.username?.[0]?.toUpperCase() || 'U' }}
+  <div class="us-card">
+
+    <!-- Top row: avatar + name/email -->
+    <ng-container *ngIf="currentUser$ | async as user">
+    <div class="us-top">
+      <div class="avatar-wrap">
+        <div class="avatar-circle">{{ getInitial(user) }}</div>
+        <div class="online-dot"></div>
+      </div>
+      <div class="user-info">
+        <div class="username-row">
+          <p class="username">{{ getDisplayName(user) }}</p>
+          <button class="icon-btn" title="Edit profile" (click)="goToProfile()">
+            <mat-icon class="action-icon">edit</mat-icon>
+          </button>
+        </div>
+        <div class="email-row">
+          <p class="email">
+            <mat-icon class="email-icon">mail_outline</mat-icon>
+            {{ user?.email || 'user@rewabank.com' }}
+          </p>
+          <button class="icon-btn" title="Copy email" (click)="copyEmail(user?.email)">
+            <mat-icon class="action-icon">content_copy</mat-icon>
+          </button>
+        </div>
       </div>
     </div>
-    <div class="user-info">
-      <p class="username">{{ (currentUser$ | async)?.username || 'User Name' }}</p>
-      <p class="email">{{ (currentUser$ | async)?.email || 'user@rewabank.com' }}</p>
+    </ng-container>
+
+    <!-- Divider -->
+    <div class="us-divider"></div>
+
+    <!-- Roles row -->
+    <div class="us-roles-header">
+      <span class="us-roles-label">Access Roles</span>
+      <span class="us-active">
+        <span class="us-active-dot"></span>Active now
+      </span>
     </div>
+    <div class="badge-row">
+      <span class="role-badge role--type" *ngIf="authService.isStaff()">
+        <mat-icon class="badge-icon">person</mat-icon>Staff
+      </span>
+      <span class="role-badge" [ngClass]="'role--' + authService.getRoleBadge().toLowerCase().replace('. ', '-').replace(' ', '-')">
+        <span class="badge-dot"></span>{{ authService.getRoleBadge() }}
+      </span>
+    </div>
+
+  </div><!-- /us-card -->
   </div>
 
   <!-- Navigation Menu -->
   <nav class="nav-menu">
-    <!-- Main Section -->
+
+    <!-- ── MAIN MENU (all roles) ── -->
     <div class="nav-section">
-      <div class="section-title">Main Menu</div>
-      
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">dashboard</mat-icon>
+      <div class="section-head">
+        <span class="section-title">Main Menu</span>
+        <div class="section-line"></div>
+      </div>
+
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" title="Dashboard">
+        <div class="nav-icon-box">
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>
+          </svg>
+        </div>
         <span class="nav-label">Dashboard</span>
       </a>
 
-      <a routerLink="/accounts" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
+      <!-- Accounts: all roles -->
+      <a routerLink="/accounts" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" title="Accounts">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
+        </div>
         <span class="nav-label">Accounts</span>
       </a>
 
-      <a routerLink="/transactions" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">receipt_long</mat-icon>
+      <!-- Transactions: CUSTOMER, TELLER, RELATIONSHIP_MANAGER, BRANCH_MANAGER, AUDITOR, SUPER_ADMIN -->
+      <a routerLink="/transactions/list" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" title="Transactions"
+         *ngIf="authService.isCustomer() || authService.isTeller() || authService.isRelationshipManager() || authService.isAuditor()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">swap_vert</mat-icon>
+        </div>
         <span class="nav-label">Transactions</span>
-      </a>
-
-      <a routerLink="/transfers" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">swap_horiz</mat-icon>
-        <span class="nav-label">Transfers</span>
       </a>
     </div>
 
-    <!-- Services Section -->
-    <div class="nav-section">
-      <div class="section-title">Services</div>
-      
+    <!-- ── CUSTOMER SERVICES (CUSTOMER only) ── -->
+    <div class="nav-section" *ngIf="authService.isCustomer()">
+      <div class="section-head">
+        <span class="section-title">Services</span>
+        <div class="section-line"></div>
+      </div>
+
+      <a routerLink="/transactions/transfer-funds" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">send</mat-icon>
+        </div>
+        <span class="nav-label">Transfer Money</span>
+      </a>
+
       <a routerLink="/cards" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">credit_card</mat-icon>
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">credit_card</mat-icon>
+        </div>
         <span class="nav-label">Cards</span>
       </a>
 
       <a routerLink="/loans" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">account_balance</mat-icon>
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">account_balance</mat-icon>
+        </div>
         <span class="nav-label">Loans</span>
       </a>
 
-      <a routerLink="/investments" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">trending_up</mat-icon>
-        <span class="nav-label">Investments</span>
+      <a routerLink="/accounts/fixed-deposits" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">savings</mat-icon>
+        </div>
+        <span class="nav-label">Fixed Deposits</span>
+      </a>
+
+      <a routerLink="/accounts/recurring-deposits" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">autorenew</mat-icon>
+        </div>
+        <span class="nav-label">Recurring Deposits</span>
+      </a>
+
+    </div>
+
+    <!-- ── TELLER SERVICES (TELLER, BRANCH_MANAGER, SUPER_ADMIN) ── -->
+    <div class="nav-section" *ngIf="authService.isTeller() && !authService.isCustomer()">
+      <div class="section-head">
+        <span class="section-title">Services</span>
+        <div class="section-line"></div>
+      </div>
+
+      <a routerLink="/loans" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">account_balance</mat-icon>
+        </div>
+        <span class="nav-label">Loans</span>
       </a>
     </div>
 
-    <!-- Account Section -->
-    <div class="nav-section">
-      <div class="section-title">Account</div>
-      
+    <!-- ── CREDIT OFFICER (loans only, no cards) ── -->
+    <div class="nav-section" *ngIf="authService.isCreditOfficer() && !authService.isTeller() && !authService.isCustomer()">
+      <div class="section-head">
+        <span class="section-title">Services</span>
+        <div class="section-line"></div>
+      </div>
+
+      <a routerLink="/loans" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">account_balance</mat-icon>
+        </div>
+        <span class="nav-label">Loans</span>
+      </a>
+    </div>
+
+    <!-- ── ACCOUNT (CUSTOMER only) ── -->
+    <div class="nav-section" *ngIf="authService.isCustomer()">
+      <div class="section-head">
+        <span class="section-title">Account</span>
+        <div class="section-line"></div>
+      </div>
+
+      <a routerLink="/kyc" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">verified_user</mat-icon>
+        </div>
+        <span class="nav-label">KYC Verification</span>
+      </a>
+
       <a routerLink="/profile" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">person</mat-icon>
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">person_outline</mat-icon>
+        </div>
         <span class="nav-label">Profile</span>
       </a>
+    </div>
 
-      <a routerLink="/settings" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">settings</mat-icon>
-        <span class="nav-label">Settings</span>
-      </a>
+    <!-- ── PROFILE (all staff) ── -->
+    <div class="nav-section" *ngIf="authService.isStaff()">
+      <div class="section-head">
+        <span class="section-title">Account</span>
+        <div class="section-line"></div>
+      </div>
 
-      <a routerLink="/help" routerLinkActive="active" class="nav-item">
-        <mat-icon class="nav-icon">help_outline</mat-icon>
-        <span class="nav-label">Help & Support</span>
+      <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">person_outline</mat-icon>
+        </div>
+        <span class="nav-label">Profile</span>
       </a>
     </div>
+
+    <!-- ── STAFF PANEL ── -->
+    <div class="nav-section" *ngIf="authService.isStaff()">
+      <div class="section-head">
+        <span class="section-title staff-title">Staff Panel</span>
+        <div class="section-line"></div>
+      </div>
+
+      <!-- Pending Accounts: TELLER, BRANCH_MANAGER, SUPER_ADMIN -->
+      <a routerLink="/staff/pending-accounts" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isTeller()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">pending_actions</mat-icon>
+        </div>
+        <span class="nav-label">Pending Accounts</span>
+      </a>
+
+      <!-- Card Management: TELLER, BRANCH_MANAGER, SUPER_ADMIN -->
+      <a routerLink="/staff/card-management" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isTeller()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">credit_card</mat-icon>
+        </div>
+        <span class="nav-label">Card Management</span>
+      </a>
+
+      <!-- Loan Management: CREDIT_OFFICER, BRANCH_MANAGER, SUPER_ADMIN -->
+      <a routerLink="/staff/loan-management" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isCreditOfficer()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">account_balance</mat-icon>
+        </div>
+        <span class="nav-label">Loan Management</span>
+      </a>
+
+      <!-- KYC Approvals: RELATIONSHIP_MANAGER, BRANCH_MANAGER, SUPER_ADMIN -->
+      <a routerLink="/staff/kyc-approvals" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isRelationshipManager()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">how_to_reg</mat-icon>
+        </div>
+        <span class="nav-label">KYC Approvals</span>
+      </a>
+
+      <!-- Fraud Alerts: BRANCH_MANAGER, SUPER_ADMIN -->
+      <a routerLink="/staff/fraud-alerts" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isBranchManager()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">gpp_bad</mat-icon>
+        </div>
+        <span class="nav-label">Fraud Alerts</span>
+      </a>
+
+      <!-- Audit Logs: AUDITOR, SUPER_ADMIN -->
+      <a routerLink="/staff/audit-logs" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isAuditor()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">manage_search</mat-icon>
+        </div>
+        <span class="nav-label">Audit Logs</span>
+      </a>
+
+      <!-- Staff Management: SUPER_ADMIN only -->
+      <a routerLink="/staff/staff-management" routerLinkActive="active" class="nav-item"
+         *ngIf="authService.isBranchManager()">
+        <div class="nav-icon-box">
+          <mat-icon class="nav-icon">manage_accounts</mat-icon>
+        </div>
+        <span class="nav-label">Staff Management</span>
+      </a>
+    </div>
+
   </nav>
 
-  <!-- Sidebar Footer -->
+  <!-- Footer -->
   <div class="sidebar-footer">
-    <button class="logout-btn" (click)="logout()" mat-button>
-      <mat-icon>logout</mat-icon>
-      <span>Logout</span>
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon class="logout-icon">logout</mat-icon>
+      <span class="logout-label">Logout</span>
     </button>
   </div>
+
 </div>

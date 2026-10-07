@@ -1,0 +1,276 @@
+<div class="lm-page">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Loan management</h2>
+      <p class="page-sub">Review, approve or reject loan applications · Disburse approved loans</p>
+    </div>
+    <button class="btn-refresh" (click)="loadLoans()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Underline tabs + search -->
+  <div class="lm-filter-row">
+    <div class="filter-tabs">
+      @for (f of filters; track f) {
+        <button class="filter-tab" [class.active]="activeFilter() === f" (click)="setFilter(f); clearSelection()" (mouseenter)="setFilter(f); clearSelection()">
+          <span class="tab-dot" [class]="'dot-' + f.toLowerCase()"></span>
+          {{ filterLabel(f) }}
+        </button>
+      }
+    </div>
+    <div class="sf-search-wrap lm-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6579" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="sf-search-icon">
+        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+      </svg>
+      <input class="sf-search-input" type="text" placeholder="Search by customer ID or loan type…" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+    </div>
+  </div>
+
+  <!-- Loans table -->
+  @if (loading()) {
+    <div class="lm-loading"><div class="lm-spinner"></div>Loading loans…</div>
+  } @else if (filteredLoans().length === 0) {
+    <div class="lm-empty">
+      <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+        <rect x="10" y="8" width="44" height="48" rx="6" stroke="rgba(242,179,61,0.3)" stroke-width="1.5" fill="rgba(242,179,61,0.05)"/>
+        <line x1="20" y1="22" x2="44" y2="22" stroke="rgba(242,179,61,0.3)" stroke-width="1.5"/>
+        <line x1="20" y1="30" x2="44" y2="30" stroke="rgba(242,179,61,0.2)" stroke-width="1.5"/>
+        <line x1="20" y1="38" x2="36" y2="38" stroke="rgba(242,179,61,0.15)" stroke-width="1.5"/>
+      </svg>
+      <p>No {{ activeFilter() === 'ALL' ? '' : filterLabel(activeFilter()).toLowerCase() + ' ' }}loans found</p>
+    </div>
+  } @else {
+    <div class="loan-table">
+      <div class="lt-header">
+        <!-- Select-all checkbox -->
+        <span class="lt-check-cell">
+          <span class="lt-checkbox"
+                [class.checked]="allApprovedSelected()"
+                [class.disabled]="selectableIds().length === 0"
+                (click)="toggleAll()">
+            @if (allApprovedSelected()) {
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1A1205" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            }
+          </span>
+        </span>
+        <span>Customer / Loan ID</span>
+        <span>Type</span>
+        <span class="col-right">Requested</span>
+        <span class="col-right">Approved</span>
+        <span class="col-right">Rate</span>
+        <span>Tenure</span>
+        <span>Fraud</span>
+        <span>Applied</span>
+        <span>Status / Actions</span>
+      </div>
+
+      @for (loan of pagedLoans(); track loan.id) {
+        <div class="lt-group" [class]="'border-' + loan.status.toLowerCase()">
+          <div class="lt-row">
+
+            <!-- Checkbox -->
+            <span class="lt-check-cell">
+              <span class="lt-checkbox"
+                    [class.checked]="selected().has(loan.id)"
+                    [class.disabled]="loan.status !== 'APPROVED'"
+                    (click)="toggleOne(loan.id, loan.status)">
+                @if (selected().has(loan.id)) {
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1A1205" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                }
+              </span>
+            </span>
+
+            <!-- Customer / Loan ID two-line cell -->
+            <div class="lt-customer-cell">
+              <span class="lt-customer-id">{{ loan.keycloakUserId | slice:0:13 }}…</span>
+              <span class="lt-loan-id-row">
+                <span class="lt-id">{{ loan.id | slice:0:8 }}…</span>
+                <button class="lt-copy-btn"
+                        [title]="copied() === loan.id ? 'Copied!' : 'Copy full ID'"
+                        (click)="copyId(loan.id)">
+                  @if (copied() === loan.id) {
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  } @else {
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  }
+                </button>
+              </span>
+            </div>
+
+            <span class="lt-type-badge">{{ loan.loanType }}</span>
+            <span class="lt-amount col-right">{{ formatCurrency(loan.requestedAmount) }}</span>
+            <span class="lt-amount col-right" [class.approved]="loan.approvedAmount">{{ loan.approvedAmount ? formatCurrency(loan.approvedAmount) : '—' }}</span>
+            <span class="lt-dim col-right">{{ loan.interestRate ? loan.interestRate + '%' : '—' }}</span>
+            <span class="lt-dim">{{ loan.tenureMonths ? loan.tenureMonths + 'm' : '—' }}</span>
+
+            <span class="lt-fraud-pill" [class]="fraudClass(loan.fraudAction)" [title]="'Fraud score: ' + (loan.fraudScore ?? 0) + '/100'">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z"/></svg>
+              {{ fraudLabel(loan.fraudScore, loan.fraudAction) }}
+            </span>
+
+            <span class="lt-date">{{ loan.appliedAt | date:'dd MMM yy' }}</span>
+
+            <div class="lt-status-actions">
+              <span class="lt-status-badge" [class]="'status-' + loan.status.toLowerCase()">
+                {{ statusLabel(loan.status) }}
+              </span>
+              @if (loan.status === 'APPLIED') {
+                <button class="btn-action review" [disabled]="actionLoading() === loan.id" (click)="startReview(loan)">
+                  {{ actionLoading() === loan.id ? '…' : 'Start Review' }}
+                </button>
+              }
+              @if (loan.status === 'UNDER_REVIEW') {
+                <button class="btn-action amber" [disabled]="actionLoading() === loan.id" (click)="openReviewModal(loan)">
+                  Review
+                </button>
+              }
+              @if (loan.status === 'APPROVED') {
+                <button class="btn-action disburse" [disabled]="actionLoading() === loan.id" (click)="openDisburseConfirm(loan)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                  {{ actionLoading() === loan.id ? '…' : 'Disburse' }}
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (loan.purpose || loan.rejectionReason || loan.reviewNotes) {
+            <div class="lt-detail-row">
+              @if (loan.purpose) {
+                <span class="lt-detail-item"><span class="lt-detail-label">Purpose</span>{{ loan.purpose }}</span>
+              }
+              @if (loan.reviewNotes) {
+                <span class="lt-detail-item"><span class="lt-detail-label">Notes</span>{{ loan.reviewNotes }}</span>
+              }
+              @if (loan.rejectionReason) {
+                <span class="lt-detail-item rejection"><span class="lt-detail-label">Reason</span>{{ loan.rejectionReason }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="lm-pagination">
+        <span class="lm-page-count">Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filteredLoans().length }} loans</span>
+        <div class="lm-page-btns">
+          <button class="lm-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(1)" title="First">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+          </button>
+          <button class="lm-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" title="Previous">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          @for (p of pageNumbers(); track p) {
+            <button class="lm-btn-page lm-btn-num" [class.lm-btn-page--active]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
+          }
+          <button class="lm-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" title="Next">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="lm-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())" title="Last">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="lt-footer">
+        Showing {{ filteredLoans().length }}{{ activeFilter() !== 'ALL' ? ' of ' + totalLoans() : '' }} loans
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ── Review Modal ── -->
+@if (reviewModal()) {
+  <div class="modal-backdrop" (click)="reviewModal.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">Review Loan Application</h3>
+      <p class="modal-sub">
+        {{ reviewModal().loanType }} loan · {{ formatCurrency(reviewModal().requestedAmount) }} ·
+        {{ reviewModal().tenureMonths }}m
+      </p>
+      <p class="modal-purpose">{{ reviewModal().purpose }}</p>
+
+      <div class="decision-toggle">
+        <button class="decision-btn" [class.approve]="reviewDecision === 'APPROVE'"
+                (click)="reviewDecision = 'APPROVE'">✓ Approve</button>
+        <button class="decision-btn" [class.reject]="reviewDecision === 'REJECT'"
+                (click)="reviewDecision = 'REJECT'">✕ Reject</button>
+      </div>
+
+      @if (reviewDecision === 'APPROVE') {
+        <div class="modal-fields">
+          <label class="modal-label">Approved Amount (₹) * <span class="modal-limit-hint">Max ₹50,00,000 for your role</span></label>
+          <input class="modal-input" type="number" placeholder="e.g. 45000" [(ngModel)]="approvedAmount"
+                 [class.input-error]="+approvedAmount > 5000000" />
+          @if (+approvedAmount > 5000000) {
+            <span class="modal-field-error">Exceeds your approval limit of ₹50,00,000</span>
+          }
+          <label class="modal-label">Interest Rate (% p.a.) *</label>
+          <input class="modal-input" type="number" step="0.1" placeholder="e.g. 12.5" [(ngModel)]="interestRate" />
+          <label class="modal-label">Review Notes</label>
+          <input class="modal-input" type="text" placeholder="Optional notes…" [(ngModel)]="reviewNotes" />
+        </div>
+      } @else {
+        <div class="modal-fields">
+          <label class="modal-label">Rejection Reason *</label>
+          <input class="modal-input" type="text" placeholder="e.g. Insufficient income, high debt ratio…" [(ngModel)]="rejectionReason" />
+          <label class="modal-label">Review Notes</label>
+          <input class="modal-input" type="text" placeholder="Optional notes…" [(ngModel)]="reviewNotes" />
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="reviewModal.set(null)">Cancel</button>
+        <button class="btn-modal-confirm"
+                [class.danger]="reviewDecision === 'REJECT'"
+                [class.success]="reviewDecision === 'APPROVE'"
+                [disabled]="actionLoading() !== null || (reviewDecision === 'APPROVE' && +approvedAmount > 5000000)"
+                (click)="confirmReview()">
+          {{ reviewDecision === 'APPROVE' ? 'Approve Loan' : 'Reject Loan' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Disburse Confirm Modal ── -->
+@if (disburseTarget()) {
+  <div class="modal-backdrop" (click)="disburseTarget.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">Disburse Loan</h3>
+      <p class="modal-sub">
+        Disburse <strong>{{ formatCurrency(disburseTarget().approvedAmount) }}</strong>
+        at <strong>{{ disburseTarget().interestRate }}% p.a.</strong>
+        for <strong>{{ disburseTarget().tenureMonths }} months</strong>
+        to account <strong>{{ disburseTarget().accountId | slice:0:8 }}…</strong>
+      </p>
+      <p class="modal-warn">This will credit the amount to the customer's account. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="disburseTarget.set(null)">Cancel</button>
+        <button class="btn-modal-confirm success" [disabled]="actionLoading() !== null" (click)="confirmDisburse()">
+          Confirm Disburse
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Bulk disburse bar ── -->
+@if (selected().size > 0) {
+  <div class="bulk-bar">
+    <span class="bulk-count"><strong>{{ selected().size }}</strong> loan{{ selected().size > 1 ? 's' : '' }} selected</span>
+    <button class="bulk-btn-clear" (click)="clearSelection()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      Clear
+    </button>
+    <button class="bulk-btn-disburse" [disabled]="actionLoading() !== null" (click)="disburseSelected()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      Disburse selected
+    </button>
+  </div>
+}

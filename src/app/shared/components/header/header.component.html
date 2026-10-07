@@ -1,165 +1,68 @@
 <header class="app-header">
   <div class="header-content">
 
-    <!-- Single async resolution for auth state -->
     @if (isAuthenticated$ | async; as isAuth) {
 
-      <!-- ═══ Left Section: Menu Toggle & Logo ═══ -->
-      <div class="header-left">
-        <button
-          mat-icon-button
-          class="menu-toggle"
-          (click)="toggleSidebar()"
-          matTooltip="Toggle Menu"
-          aria-label="Toggle sidebar menu"
-        >
-          <mat-icon>menu</mat-icon>
-        </button>
-
-        <a routerLink="/dashboard" class="logo" aria-label="Rewa Bank - Go to dashboard">
-          <mat-icon class="logo-icon">account_balance</mat-icon>
-          <span class="logo-text">Rewa Bank</span>
-        </a>
-      </div>
-
-      <!-- ═══ Center Section: Search ═══ -->
-      <div class="header-center-search">
-        <div class="search-box" role="search">
-          <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
-          <input
-            type="search"
-            placeholder="Search transactions…"
-            class="search-input"
-            aria-label="Search transactions"
-          />
+      <!-- Amber brand strip -->
+      <a routerLink="/dashboard" class="brand-strip" aria-label="Rewa Bank">
+        <div class="wordmark">
+          <span class="wm-R-bg"><span class="wm-R">R</span></span>
+          <div class="wm-right">
+            <span class="wm-ewa">ewa</span>
+            <span class="wm-bank">Bank</span>
+          </div>
         </div>
-      </div>
+        <div class="brand-text">
+          <span class="brand-name">
+            @for (letter of brandLetters; track $index) {
+              <span class="brand-letter" [class.visible]="letter.visible">{{ letter.char }}</span>
+            }
+          </span>
+          <span class="brand-tagline">
+            @for (letter of taglineLetters; track $index) {
+              <span class="tagline-letter" [class.visible]="letter.visible">{{ letter.char }}</span>
+            }
+          </span>
+        </div>
+      </a>
 
       <div class="spacer"></div>
 
-      <!-- ═══ Right Section ═══ -->
-      <div class="header-right">
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <button mat-button class="action-btn" matTooltip="Create Flow" aria-label="Create Flow">
-            <mat-icon>add_circle_outline</mat-icon>
-            <span>Create Flow</span>
-          </button>
-
-          <button mat-raised-button class="action-btn primary-btn" matTooltip="Add Funds" aria-label="Add Funds">
-            <mat-icon>add</mat-icon>
-            <span>Add Funds</span>
-          </button>
-
-          <button mat-raised-button class="action-btn secondary-btn" matTooltip="Move Money" aria-label="Move Money">
-            <mat-icon>send</mat-icon>
-            <span>Move Money</span>
-          </button>
-        </div>
-
-        <!-- Notifications -->
-        <button
-          mat-icon-button
-          class="notification-btn"
-          matTooltip="Notifications"
-          [attr.aria-label]="notificationCount > 0 ? notificationCount + ' notifications' : 'No notifications'"
-        >
-          <mat-icon
-            [matBadge]="notificationCount"
-            matBadgeColor="warn"
-            matBadgeSize="small"
-            [matBadgeHidden]="notificationCount === 0"
-          >
-            notifications
-          </mat-icon>
-        </button>
-
-        <!-- Theme Toggle -->
-        <button
-          mat-icon-button
-          class="theme-toggle-btn"
-          matTooltip="Toggle Theme"
-          aria-label="Toggle light/dark theme"
-          (click)="toggleTheme()"
-        >
-          <mat-icon>{{ isDarkMode ? 'brightness_7' : 'brightness_4' }}</mat-icon>
-        </button>
-
-        <!-- User Menu — single async resolution for user -->
-        @if (currentUser$ | async; as user) {
-          <div class="user-menu-wrapper">
-            <button
-              mat-button
-              [matMenuTriggerFor]="userMenu"
-              class="user-menu-btn"
-              [attr.aria-label]="'User menu for ' + (user.username || 'User')"
-            >
-              <div class="user-avatar" aria-hidden="true">
-                {{ user.username?.[0]?.toUpperCase() || 'U' }}
-              </div>
-              <span class="user-name">{{ user.username || 'User' }}</span>
-              <mat-icon class="dropdown-icon">expand_more</mat-icon>
-            </button>
-
-            <mat-menu #userMenu="matMenu" class="user-menu-dropdown">
-              <div class="menu-header">
-                <div class="menu-avatar" aria-hidden="true">
-                  {{ user.username?.[0]?.toUpperCase() || 'U' }}
-                </div>
-                <div class="menu-info">
-                  <p class="menu-username">{{ user.username }}</p>
-                  <p class="menu-email">{{ user.email }}</p>
-                </div>
-              </div>
-
-              <mat-divider></mat-divider>
-
-              <button mat-menu-item routerLink="/profile">
-                <mat-icon>person</mat-icon>
-                <span>Profile</span>
-              </button>
-
-              <button mat-menu-item routerLink="/settings">
-                <mat-icon>settings</mat-icon>
-                <span>Settings</span>
-              </button>
-
-              <mat-divider></mat-divider>
-
-              <button mat-menu-item (click)="logout()" class="logout-menu-item">
-                <mat-icon>logout</mat-icon>
-                <span>Logout</span>
-              </button>
-            </mat-menu>
-          </div>
-        }
-
-      </div><!-- /header-right -->
+      <!-- Theme toggle -->
+      <button mat-icon-button class="theme-toggle-btn" (click)="toggleTheme()" aria-label="Toggle theme">
+        <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
 
     } @else {
 
-      <!-- ═══ Unauthenticated State ═══ -->
-      <div class="header-left">
-        <a routerLink="/home" class="logo-auth" aria-label="Rewa Bank - Go to home">
-          <mat-icon class="logo-icon">account_balance</mat-icon>
-          <span class="logo-text">Rewa Bank</span>
-        </a>
-      </div>
+      <a routerLink="/home" class="brand-strip" aria-label="Rewa Bank">
+        <div class="wordmark">
+          <span class="wm-R-bg"><span class="wm-R">R</span></span>
+          <div class="wm-right">
+            <span class="wm-ewa">ewa</span>
+            <span class="wm-bank">Bank</span>
+          </div>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">
+            @for (letter of brandLetters; track $index) {
+              <span class="brand-letter" [class.visible]="letter.visible">{{ letter.char }}</span>
+            }
+          </span>
+          <span class="brand-tagline">
+            @for (letter of taglineLetters; track $index) {
+              <span class="tagline-letter" [class.visible]="letter.visible">{{ letter.char }}</span>
+            }
+          </span>
+        </div>
+      </a>
 
       <div class="spacer"></div>
 
-      <div class="header-right">
-        <button
-          mat-raised-button
-          class="login-btn"
-          (click)="login()"
-          aria-label="Sign in to your account"
-        >
-          <mat-icon>login</mat-icon>
-          Sign In
-        </button>
-      </div>
+      <button mat-raised-button class="login-btn" (click)="login()" aria-label="Sign in">
+        <mat-icon>login</mat-icon>
+        Sign In
+      </button>
 
     }
 

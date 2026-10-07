@@ -1,35 +1,26 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserDetails } from '../../../core/models/user.model';
-
-interface PasswordChangeRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-interface PasswordChangeResponse {
-  success: boolean;
-  message: string;
-}
+import { ApiService } from '../../../core/services/api.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserProfileService {
-  private apiUrl = 'https://api.example.com/user'; // Replace with your API URL
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
 
-  getUserDetails(): Observable<UserDetails> {
-    return this.http.get<UserDetails>(`${this.apiUrl}/details`);
+  getAuthProfile(): Observable<any> {
+    return this.api.getProfile();
   }
 
-  updateUserDetails(user: UserDetails): Observable<UserDetails> {
-    return this.http.put<UserDetails>(`${this.apiUrl}/details`, user);
+  getCustomerProfile(): Observable<any> {
+    return this.api.getMyCustomerProfile();
   }
 
-  changePassword(passwordData: PasswordChangeRequest): Observable<PasswordChangeResponse> {
-    return this.http.post<PasswordChangeResponse>(`${this.apiUrl}/change-password`, passwordData);
+  updateName(data: { firstName?: string; lastName?: string }): Observable<any> {
+    return this.api.updateProfile(data);
+  }
+
+  updateAddress(data: { addressLine1?: string; addressLine2?: string; city?: string; state?: string; pincode?: string; country?: string }): Observable<any> {
+    return this.api.updateCustomerAddress(data);
   }
 }

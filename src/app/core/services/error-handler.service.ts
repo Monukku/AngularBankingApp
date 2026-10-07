@@ -66,6 +66,14 @@ export class ErrorHandlerService {
         // Not found
         appError = new NotFoundError(`The requested resource was not found (${error.url}).`);
         break;
+      case 409:
+        // Conflict — e.g. duplicate email/mobile on registration
+        appError = new HttpError(
+          error.error?.message || 'A conflict occurred. The resource may already exist.',
+          409,
+          'CONFLICT'
+        );
+        break;
       case 408:
         // Timeout
         appError = new TimeoutError('The request took too long. Please try again.');
@@ -74,8 +82,10 @@ export class ErrorHandlerService {
       case 502:
       case 503:
       case 504:
-        // Server error
-        appError = new ServerError(`Server error: ${error.status}. Please try again later.`);
+        // Prefer backend message if present (e.g. ACCT_KYC_001 from Feign fallback)
+        appError = new ServerError(
+          error.error?.message || `Server error: ${error.status}. Please try again later.`
+        );
         break;
       default:
         // Unknown error

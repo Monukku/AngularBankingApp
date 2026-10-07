@@ -11,7 +11,7 @@ export const environment = {
   
   api: {
     baseUrl: 'https://api.rewabank.com',
-    timeout: 30000,
+    timeout: 60000,
     endpoints: {
       accounts: '/accounts',
       transactions: '/transactions',

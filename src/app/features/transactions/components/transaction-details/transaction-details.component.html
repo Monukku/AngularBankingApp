@@ -1,9 +1,105 @@
-<!-- transaction-details.component.html -->
-@if (transaction) {
-  <div>
-    <p>Transaction ID: {{ transaction.id }}</p>
-    <p>Amount: {{ transaction.amount }}</p>
-    <p>Date: {{ transaction.date }}</p>
-  </div>
-}
-  
+<div class="details-container">
+  <a routerLink="/transactions/list" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Transactions
+  </a>
+
+  @if (loading()) {
+    <app-loader [fullscreen]="false" message="Loading transaction…" />
+  }
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  @if (transaction()) {
+    <div class="receipt-wrap">
+
+      <!-- Header: status + amount -->
+      <div class="receipt-header">
+        <div class="rh-left">
+          <span class="rh-type">{{ transaction().transactionType }}</span>
+          <span class="status-badge" [class]="(transaction().transactionStatus ?? transaction().status ?? '').toLowerCase()">
+            {{ transaction().transactionStatus ?? transaction().status }}
+          </span>
+        </div>
+        <span class="rh-amount">{{ transaction().amount | currency:'INR':'symbol':'1.2-2' }}</span>
+      </div>
+
+      <!-- Reference row -->
+      @if (transaction().referenceNumber) {
+        <div class="ref-row">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Ref: <span class="mono">{{ transaction().referenceNumber }}</span>
+        </div>
+      }
+
+      <!-- Detail rows -->
+      <div class="detail-rows">
+
+        @if (transaction().createdAt ?? transaction().date) {
+          <div class="dr">
+            <span class="dr-label">Date &amp; Time</span>
+            <span class="dr-val">{{ (transaction().createdAt ?? transaction().date) | date:'dd MMM yyyy, HH:mm:ss' }}</span>
+          </div>
+        }
+
+        @if (transaction().sourceAccountNumber) {
+          <div class="dr">
+            <span class="dr-label">From Account</span>
+            <span class="dr-val mono">{{ transaction().sourceAccountNumber }}</span>
+          </div>
+        }
+
+        @if (transaction().destinationAccountNumber) {
+          <div class="dr">
+            <span class="dr-label">To Account</span>
+            <span class="dr-val mono">{{ transaction().destinationAccountNumber }}</span>
+          </div>
+        }
+
+        @if (transaction().paymentMethod) {
+          <div class="dr">
+            <span class="dr-label">Payment Mode</span>
+            <span class="method-chip">{{ transaction().paymentMethod }}</span>
+          </div>
+        }
+
+        @if (transaction().description) {
+          <div class="dr">
+            <span class="dr-label">Remarks</span>
+            <span class="dr-val">{{ transaction().description }}</span>
+          </div>
+        }
+
+        @if (transaction().charges != null) {
+          <div class="dr">
+            <span class="dr-label">Charges</span>
+            <span class="dr-val">{{ transaction().charges | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+        }
+
+        @if (transaction().reversedAt) {
+          <div class="dr">
+            <span class="dr-label">Reversed At</span>
+            <span class="dr-val">{{ transaction().reversedAt | date:'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+        }
+
+        @if (transaction().reversalReason) {
+          <div class="dr">
+            <span class="dr-label">Reversal Reason</span>
+            <span class="dr-val">{{ transaction().reversalReason }}</span>
+          </div>
+        }
+
+        <div class="dr">
+          <span class="dr-label">Transaction ID</span>
+          <span class="dr-val mono small">{{ transaction().id }}</span>
+        </div>
+
+      </div>
+
+    </div>
+  }
+</div>

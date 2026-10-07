@@ -1,0 +1,186 @@
+<div class="al-page">
+
+  <!-- Gold top bar -->
+  <div class="al-topbar"></div>
+
+  <div class="al-inner">
+
+    <!-- Header -->
+    <div class="al-header">
+      <div class="al-header-left">
+        <div class="al-title-row">
+          <h2 class="al-title">Audit logs</h2>
+          <span class="al-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5l8-3z"/></svg>
+            Read-only · Compliance
+          </span>
+        </div>
+        <p class="al-sub">System audit trail — RBI compliance</p>
+      </div>
+      <button class="al-btn-refresh" (click)="load()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Filter mode tabs (underline style) -->
+    <div class="al-tabs">
+      <span class="al-tab" [class.al-tab--active]="filterMode() === 'date-range'" (click)="setMode('date-range')">Date range</span>
+      <span class="al-tab" [class.al-tab--active]="filterMode() === 'user'"       (click)="setMode('user')">By user ID</span>
+      <span class="al-tab" [class.al-tab--active]="filterMode() === 'aggregate'"  (click)="setMode('aggregate')">By entity ID</span>
+      <span class="al-tab" [class.al-tab--active]="filterMode() === 'event-type'" (click)="setMode('event-type')">By event type</span>
+    </div>
+
+    <!-- Filter inputs -->
+    <div class="al-filters">
+
+      @if (filterMode() === 'date-range') {
+        <div class="al-filter-row">
+          <div class="al-field">
+            <label class="al-label">From</label>
+            <input class="al-input al-input--date" type="datetime-local" [(ngModel)]="fromDate" />
+          </div>
+          <div class="al-field">
+            <label class="al-label">To</label>
+            <input class="al-input al-input--date" type="datetime-local" [(ngModel)]="toDate" />
+          </div>
+          <button class="al-btn-search" (click)="search()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            Search
+          </button>
+        </div>
+      }
+
+      @if (filterMode() === 'user') {
+        <div class="al-filter-row">
+          <div class="al-field al-field--wide">
+            <label class="al-label">User ID</label>
+            <input class="al-input" [(ngModel)]="searchValue" placeholder="e.g. USR-10234" (keyup.enter)="search()" />
+          </div>
+          <button class="al-btn-search" (click)="search()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            Search
+          </button>
+        </div>
+      }
+
+      @if (filterMode() === 'aggregate') {
+        <div class="al-filter-row">
+          <div class="al-field al-field--wide">
+            <label class="al-label">Entity ID</label>
+            <input class="al-input" [(ngModel)]="searchValue" placeholder="e.g. ACC-559812" (keyup.enter)="search()" />
+          </div>
+          <button class="al-btn-search" (click)="search()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            Search
+          </button>
+        </div>
+      }
+
+      @if (filterMode() === 'event-type') {
+        <div class="al-filter-row">
+          <div class="al-field al-field--wide">
+            <label class="al-label">Event type</label>
+            <div class="rb-dd-wrap" (mouseenter)="openHoverDD('eventType')" (mouseleave)="closeHoverDD()">
+              <button class="rb-dd-trigger al-dd-trigger" [class.open]="openDropdown === 'eventType'">
+                <span [class.rb-dd-placeholder]="!searchValue">{{ searchValue || 'Select event type…' }}</span>
+                <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (openDropdown === 'eventType') {
+                <div class="rb-dd-menu">
+                  <div class="rb-dd-item" [class.selected]="searchValue === ''" (click)="selectEventType('')">
+                    All events
+                    @if (!searchValue) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                  </div>
+                  @for (ev of eventTypeOptions; track ev) {
+                    <div class="rb-dd-item" [class.selected]="searchValue === ev" (click)="selectEventType(ev)">
+                      {{ ev }}
+                      @if (searchValue === ev) { <svg class="rb-dd-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2B33D" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+          <button class="al-btn-search" (click)="search()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            Search
+          </button>
+        </div>
+      }
+
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <app-loader [fullscreen]="false" message="Loading audit logs…" />
+    }
+
+    <!-- Offline / service unavailable -->
+    @if (error() === 'service-unavailable') {
+      <div class="al-empty">
+        <div class="al-empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a5 5 0 00-6.6 6l-6 6 2.6 2.6 6-6a5 5 0 006-6.6l-3 3-2.3-2.3 3-3z"/></svg>
+        </div>
+        <p class="al-empty-title">Audit service is currently offline</p>
+        <p class="al-empty-desc">The audit-service is not deployed in this environment (disabled to conserve RAM). Deploy audit-service to enable this feature.</p>
+      </div>
+    }
+
+    <!-- Permission error -->
+    @if (error() && error() !== 'service-unavailable') {
+      <div class="al-error-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ error() }}
+      </div>
+    }
+
+    <!-- No results -->
+    @if (!loading() && !error() && logs().length === 0) {
+      <div class="al-empty">
+        <div class="al-empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <p class="al-empty-title">No audit logs found</p>
+        <p class="al-empty-desc">Try a different filter or date range</p>
+      </div>
+    }
+
+    <!-- Table -->
+    @if (!loading() && logs().length > 0) {
+      <div class="al-table-wrap">
+        <table class="al-table">
+          <thead>
+            <tr>
+              <th>Recorded At</th>
+              <th>Event Type</th>
+              <th>User ID</th>
+              <th>Entity ID</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (log of logs(); track log.id) {
+              <tr class="al-row">
+                <td class="al-cell al-cell--mono al-cell--dim">{{ log.recordedAt | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+                <td class="al-cell"><span class="al-event-badge">{{ log.eventType }}</span></td>
+                <td class="al-cell al-cell--mono al-cell--dim">{{ log.keycloakUserId | slice:0:12 }}…</td>
+                <td class="al-cell al-cell--mono al-cell--dim">{{ log.aggregateId ? ((log.aggregateId | slice:0:8) + '…') : '—' }}</td>
+                <td class="al-cell al-cell--detail">{{ log.details || log.description || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="al-pagination">
+          <button class="al-btn-page" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+          <span class="al-page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+          <button class="al-btn-page" [disabled]="page() >= totalPages() - 1" (click)="nextPage()">Next →</button>
+        </div>
+      }
+    }
+
+  </div>
+</div>

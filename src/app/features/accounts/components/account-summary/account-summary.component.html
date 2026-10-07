@@ -1,1 +1,375 @@
-<p>account-summary works!</p>
+﻿<!-- ═══════════════════════════════════════════════════════════
+     STAFF VIEW — all customer accounts with management actions
+     ═══════════════════════════════════════════════════════════ -->
+@if (isStaff) {
+  <div class="accounts-page">
+
+    <!-- Gold top bar -->
+    <div class="sa-topbar"></div>
+
+    <div class="sa-inner">
+
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">All customer accounts</h2>
+        <p class="page-sub">View and manage bank accounts across all customers</p>
+      </div>
+      <button class="btn-refresh" (click)="loadStaffAccounts()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="sa-stats">
+      <div class="sa-stat">
+        <div class="sa-stat-label">Total accounts</div>
+        <div class="sa-stat-value">{{ staffAccounts().length }}</div>
+      </div>
+      <div class="sa-stat">
+        <div class="sa-stat-label">Active</div>
+        <div class="sa-stat-value sa-stat-value--green">{{ staffActiveCount() }}</div>
+      </div>
+      <div class="sa-stat">
+        <div class="sa-stat-label">Frozen</div>
+        <div class="sa-stat-value sa-stat-value--amber">{{ staffFrozenCount() }}</div>
+      </div>
+      <div class="sa-stat">
+        <div class="sa-stat-label">Total balance</div>
+        <div class="sa-stat-value sa-stat-value--gold">{{ staffTotalBalance() | currency:'INR':'symbol':'1.2-2' }}</div>
+      </div>
+    </div>
+
+    <!-- Filter tabs + search row -->
+    <div class="sa-filter-row">
+      @for (s of statusOptions; track s) {
+        <button class="sa-pill" [class.sa-pill--active]="staffStatusFilter() === s"
+                (mouseenter)="staffStatusFilter.set(s); currentPage.set(1)" (click)="staffStatusFilter.set(s); currentPage.set(1)">
+          {{ s === 'ALL' ? 'All' : (s | titlecase) }}
+        </button>
+      }
+      <div class="sa-search-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="sa-search" [ngModel]="staffSearch()" (ngModelChange)="staffSearch.set($event); currentPage.set(1)"
+               placeholder="Search by account number, customer ID or type…" />
+      </div>
+    </div>
+
+    <!-- Global action feedback -->
+    @if (actionMsg() && !processing()) {
+      <div [class]="actionMsg()!.ok ? 'msg-banner ok' : 'msg-banner err'">
+        {{ actionMsg()!.msg }}
+      </div>
+    }
+
+    @if (staffLoading()) {
+      <app-loader [fullscreen]="false" message="Loading accounts…" />
+    }
+
+    @if (staffError()) {
+      <div class="error-box">⚠ {{ staffError() }}</div>
+    }
+
+    @if (!staffLoading() && filteredStaffAccounts().length === 0 && !staffError()) {
+      <div class="state-box">
+        <div class="empty-icon">🏦</div>
+        <h3>No accounts found</h3>
+        <p>Try a different status filter or search term</p>
+      </div>
+    }
+
+    @if (filteredStaffAccounts().length > 0) {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Account Number</th>
+              <th>Type</th>
+              <th>Customer ID</th>
+              <th>Balance</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (acc of pagedStaffAccounts(); track acc.id) {
+              <tr>
+                <td class="mono">{{ acc.accountNumber }}</td>
+                <td><span class="type-badge">{{ acc.accountType }}</span></td>
+                <td class="mono small">{{ acc.customerId | slice:0:12 }}…</td>
+                <td class="amount sa-amount-gold">{{ acc.balance | currency:'INR':'symbol':'1.2-2' }}</td>
+                <td>
+                  <span class="status-badge" [class]="(acc.status || acc.accountStatus || '').toLowerCase()">
+                    {{ acc.status || acc.accountStatus }}
+                  </span>
+                </td>
+                <td class="small">{{ acc.createdAt | date:'dd MMM yyyy' }}</td>
+                <td>
+                  @if (actionMsg()?.id === acc.id && !processing()) {
+                    <span [class]="actionMsg()!.ok ? 'msg-ok' : 'msg-err'">{{ actionMsg()!.msg }}</span>
+                  } @else {
+                    <div class="action-btns">
+                      <button class="btn-action view" (click)="viewAccount.set(acc)" title="View details">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                      @if ((acc.status || acc.accountStatus) === 'PENDING') {
+                        <button class="btn-action activate"
+                                [disabled]="processing() === acc.id"
+                                (click)="staffActivate(acc.id)">
+                          {{ processing() === acc.id ? '…' : 'Activate' }}
+                        </button>
+                      }
+                      @if ((acc.status || acc.accountStatus) === 'ACTIVE') {
+                        @if (staffConfirmFreezeId() !== acc.id) {
+                          <button class="btn-action freeze"
+                                  [disabled]="processing() === acc.id"
+                                  (click)="staffConfirmFreezeId.set(acc.id); staffConfirmCloseId.set(null)">Freeze</button>
+                        } @else {
+                          <input class="inline-reason-input" type="text" placeholder="Freeze reason…"
+                                 [value]="getStaffFreezeReason(acc.id)"
+                                 (input)="setStaffFreezeReason(acc.id, $any($event.target).value)"
+                                 (keydown.escape)="staffConfirmFreezeId.set(null)" />
+                          <button class="btn-action freeze"
+                                  [disabled]="processing() === acc.id"
+                                  (click)="staffFreeze(acc.id, getStaffFreezeReason(acc.id))">
+                            {{ processing() === acc.id ? '…' : 'Confirm' }}
+                          </button>
+                          <button class="btn-action unfreeze" (click)="staffConfirmFreezeId.set(null)">Cancel</button>
+                        }
+                        @if (staffConfirmCloseId() !== acc.id) {
+                          <button class="btn-action close"
+                                  [disabled]="processing() === acc.id"
+                                  (click)="staffConfirmCloseId.set(acc.id); staffConfirmFreezeId.set(null)">Close</button>
+                        } @else {
+                          <span class="confirm-text">⚠ Confirm close?</span>
+                          <button class="btn-action close"
+                                  [disabled]="processing() === acc.id"
+                                  (click)="staffClose(acc.id)">
+                            {{ processing() === acc.id ? '…' : 'Yes' }}
+                          </button>
+                          <button class="btn-action unfreeze" (click)="staffConfirmCloseId.set(null)">No</button>
+                        }
+                      }
+                      @if ((acc.status || acc.accountStatus) === 'FROZEN') {
+                        <button class="btn-action unfreeze"
+                                [disabled]="processing() === acc.id"
+                                (click)="staffUnfreeze(acc.id)">
+                          {{ processing() === acc.id ? '…' : 'Unfreeze' }}
+                        </button>
+                        @if (staffConfirmCloseId() !== acc.id) {
+                          <button class="btn-action close"
+                                  [disabled]="processing() === acc.id"
+                                  (click)="staffConfirmCloseId.set(acc.id)">Close</button>
+                        } @else {
+                          <span class="confirm-text">⚠ Confirm close?</span>
+                          <button class="btn-action close"
+                                  [disabled]="processing() === acc.id"
+                                  (click)="staffClose(acc.id)">
+                            {{ processing() === acc.id ? '…' : 'Yes' }}
+                          </button>
+                          <button class="btn-action unfreeze" (click)="staffConfirmCloseId.set(null)">No</button>
+                        }
+                      }
+                      @if ((acc.status || acc.accountStatus) === 'CLOSED') {
+                        <span class="closed-label">Closed</span>
+                      }
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="sa-pagination">
+          <span class="sa-page-count">Showing {{ showingFrom() }}–{{ showingTo() }} of {{ filteredStaffAccounts().length }} accounts</span>
+          <div class="sa-page-btns">
+            <button class="sa-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(1)" title="First">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+            </button>
+            <button class="sa-btn-page" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" title="Previous">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            @for (p of pageNumbers(); track p) {
+              <button class="sa-btn-page sa-btn-num" [class.sa-btn-page--active]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
+            }
+            <button class="sa-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" title="Next">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="sa-btn-page" [disabled]="currentPage() === totalPages()" (click)="goToPage(totalPages())" title="Last">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    </div><!-- /sa-inner -->
+  </div><!-- /accounts-page -->
+
+  <!-- Account detail modal -->
+  @if (viewAccount()) {
+    <div class="sa-modal-backdrop" (click)="viewAccount.set(null)">
+      <div class="sa-modal" (click)="$event.stopPropagation()">
+        <div class="sa-modal-title">Account detail</div>
+        <div class="sa-modal-rows">
+          <div class="sa-modal-row"><span class="sa-modal-lbl">Account number</span><span class="sa-modal-val mono">{{ viewAccount()!.accountNumber }}</span></div>
+          <div class="sa-modal-row"><span class="sa-modal-lbl">Type</span><span class="type-badge">{{ viewAccount()!.accountType }}</span></div>
+          <div class="sa-modal-row"><span class="sa-modal-lbl">Customer ID</span><span class="sa-modal-val mono small">{{ viewAccount()!.customerId }}</span></div>
+          <div class="sa-modal-row"><span class="sa-modal-lbl">Balance</span><span class="sa-modal-val sa-modal-val--gold">{{ viewAccount()!.balance | currency:'INR':'symbol':'1.2-2' }}</span></div>
+          <div class="sa-modal-row"><span class="sa-modal-lbl">Status</span>
+            <span class="status-badge" [class]="(viewAccount()!.status || viewAccount()!.accountStatus || '').toLowerCase()">
+              {{ viewAccount()!.status || viewAccount()!.accountStatus }}
+            </span>
+          </div>
+          <div class="sa-modal-row"><span class="sa-modal-lbl">Created</span><span class="sa-modal-val">{{ viewAccount()!.createdAt | date:'dd MMM yyyy' }}</span></div>
+        </div>
+        <div class="sa-modal-footer">
+          <button class="sa-modal-close" (click)="viewAccount.set(null)">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     CUSTOMER VIEW — own accounts + open new account
+     ═══════════════════════════════════════════════════════════ -->
+@if (!isStaff) {
+  <div class="accounts-page">
+
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">My Accounts</h2>
+        <p class="page-sub">Manage your bank accounts</p>
+      </div>
+      @if (customerId && (availableAccountTypes.length > 0 || showCreateForm())) {
+        <button class="btn-primary" (click)="toggleCreateForm()">
+          <span class="btn-icon">{{ showCreateForm() ? '✕' : '+' }}</span>
+          {{ showCreateForm() ? 'Cancel' : 'Open New Account' }}
+        </button>
+      }
+    </div>
+
+    <!-- KYC Status Banners -->
+    @if (kycBannerType === 'not_submitted') {
+      <div class="kyc-banner kyc-banner--warn">
+        <span class="kyc-banner__icon">⚠</span>
+        <div class="kyc-banner__body">
+          <strong>KYC verification required</strong>
+          <p>Your account is pending activation. Complete KYC verification to start using it.</p>
+        </div>
+        <a routerLink="/kyc" class="kyc-banner__cta">Complete KYC →</a>
+      </div>
+    }
+    @if (kycBannerType === 'submitted') {
+      <div class="kyc-banner kyc-banner--info">
+        <span class="kyc-banner__icon">🕐</span>
+        <div class="kyc-banner__body">
+          <strong>KYC submitted — awaiting review</strong>
+          <p>Our team will review your documents within 2 business days. Your account activates automatically once approved.</p>
+        </div>
+      </div>
+    }
+    @if (kycBannerType === 'under_review') {
+      <div class="kyc-banner kyc-banner--info">
+        <span class="kyc-banner__icon">🔍</span>
+        <div class="kyc-banner__body">
+          <strong>KYC under review</strong>
+          <p>Your documents are currently being reviewed. Your account will activate automatically once verified.</p>
+        </div>
+      </div>
+    }
+    @if (kycBannerType === 'rejected') {
+      <div class="kyc-banner kyc-banner--error">
+        <span class="kyc-banner__icon">✕</span>
+        <div class="kyc-banner__body">
+          <strong>KYC rejected — action required</strong>
+          <p>Your KYC was rejected. Please resubmit with correct documents to activate your account.</p>
+        </div>
+        <a routerLink="/kyc" class="kyc-banner__cta">Resubmit KYC →</a>
+      </div>
+    }
+
+    <!-- Create Account Form -->
+    @if (showCreateForm()) {
+      <div class="create-form-card">
+        <h3 class="form-title">Open a New Account</h3>
+        <p class="form-sub">Choose the account type that suits your needs</p>
+        <form [formGroup]="createForm" (ngSubmit)="createAccount()">
+          <div class="account-type-grid">
+            @for (type of availableAccountTypes; track type) {
+              <div class="type-option"
+                   [class.selected]="createForm.get('accountType')?.value === type"
+                   (click)="createForm.get('accountType')?.setValue(type)">
+                <div class="type-icon">
+                  @if (type === 'SAVINGS') { 💰 }
+                  @if (type === 'CURRENT') { 🏢 }
+                  @if (type === 'BUSINESS') { 📊 }
+                </div>
+                <div class="type-name">{{ type }}</div>
+                <div class="type-desc">
+                  @if (type === 'SAVINGS') { Earn interest on your balance }
+                  @if (type === 'CURRENT') { Day-to-day transactions }
+                  @if (type === 'BUSINESS') { For business operations }
+                </div>
+              </div>
+            }
+          </div>
+          @if (createError()) {
+            <div class="create-error">⚠ {{ createError() }}</div>
+          }
+          <button type="submit" class="btn-primary btn-submit"
+                  [disabled]="createForm.invalid || creating() || !customerId">
+            {{ creating() ? 'Creating…' : 'Create Account' }}
+          </button>
+        </form>
+      </div>
+    }
+
+    @if (loading()) {
+      <app-loader [fullscreen]="false" message="Loading your accounts…" />
+    }
+
+    @if (error()) {
+      <div class="error-box">⚠ {{ error() }}</div>
+    }
+
+    @if (!loading() && accounts().length === 0 && !showCreateForm()) {
+      <div class="state-box">
+        <div class="empty-icon">🏦</div>
+        <h3>No accounts yet</h3>
+        <p>Click "Open New Account" to create your first bank account</p>
+      </div>
+    }
+
+    @if (accounts().length > 0) {
+      <div class="accounts-grid">
+        @for (acc of accounts(); track acc.id) {
+          <div class="account-card">
+            <div class="account-card__top">
+              <div class="account-type-badge">{{ acc.accountType }}</div>
+              <div class="account-status" [class]="getStatusClass(acc.status)">{{ acc.status }}</div>
+            </div>
+            <div class="account-card__number">
+              <span class="label">Account Number</span>
+              <span class="value">{{ acc.accountNumber }}</span>
+            </div>
+            <div class="account-card__balance">
+              <span class="label">Available Balance</span>
+              <span class="amount">{{ acc.balance | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="account-card__actions">
+              <a [routerLink]="['/accounts/account-management']"
+                 [queryParams]="{ accountId: acc.id }" class="btn-manage">Manage →</a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+}

@@ -1,641 +1,412 @@
 <div class="dashboard-container">
 
-  <!-- ═══ Ambient Background ═══ -->
-  <div class="bg-texture"></div>
-  <div class="scan-line"></div>
-  <div class="orb orb-violet"></div>
-  <div class="orb orb-cyan"></div>
-  <div class="orb orb-rose"></div>
-  <div class="orb orb-emerald"></div>
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- STAFF OPERATIONS DASHBOARD                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+@if (isStaff) {
+  <div class="staff-dash">
 
-  <!-- ═══ Loading Overlay ═══ -->
-  @if (isLoading()) {
-    <div class="loading-overlay">
-      <mat-spinner></mat-spinner>
-      <p>Loading dashboard...</p>
+    <!-- Header -->
+    <div class="sd-header">
+      <div>
+        <div class="sd-title-row">
+          <h2 class="sd-title">Operations Dashboard</h2>
+          <span class="sd-role-badge">{{ authService.getRoleBadge() }}</span>
+        </div>
+        <div class="sd-sub">
+          <span class="sd-live-dot"></span>
+          Bank-wide overview · Real-time data
+        </div>
+      </div>
+      <div class="sd-header-right">
+        <span class="sd-live-pill">
+          <span class="sd-live-dot-pill"></span>LIVE
+        </span>
+        <button class="sd-btn-refresh" (click)="loadStaffDashboard()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>
+          Refresh
+        </button>
+      </div>
     </div>
-  }
 
-  <!-- ═══ Error Banner ═══ -->
-  @if (hasError()) {
-    <div class="error-banner">
-      <span>⚠️ Failed to load dashboard data.</span>
-      <button mat-button (click)="loadDashboardData()">Retry</button>
-    </div>
-  }
-
-  <!-- ═══ Stat Cards ═══ -->
-  <app-stats-cards
-    [statCards]="statCards()">
-  </app-stats-cards>
-
-  <!-- ═══ Main Grid ═══ -->
-  <div class="dashboard-grid" [class.loading]="isLoading()">
-
-    <!-- ══ LEFT SECTION ══ -->
-    <div class="left-section">
-
-      <!-- Balance Card -->
-      <app-balance-widget
-        [balanceData]="balanceData()">
-      </app-balance-widget>
-
-      <!-- Smart Insights -->
-      <div class="insights-card">
-        <div class="card-title-row">
-          <h3 class="card-title"><span class="card-title-icon">🧠</span> Smart Insights</h3>
-          <span class="ai-badge">AI Powered</span>
-        </div>
-        <div class="insights-list">
-          @for (insight of smartInsights(); track insight.id) {
-            <div class="insight-item" [attr.data-type]="insight.type">
-              <div class="insight-icon-wrap">{{ insight.icon }}</div>
-              <div class="insight-body">
-                <div class="insight-title">{{ insight.title }}</div>
-                <div class="insight-desc">{{ insight.description }}</div>
-              </div>
-              <span class="insight-tag" [attr.data-type]="insight.type">{{ insight.tag }}</span>
-            </div>
-          }
-        </div>
+    @if (staffError()) {
+      <div class="staff-error-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ staffError() }}
       </div>
+    }
 
-      <!-- Quick Transaction -->
-      <div class="quick-transaction-card">
-        <h3 class="card-title">
-          <span class="card-title-icon">⚡</span> Quick Transaction
-        </h3>
-        <div class="users-carousel">
-          @for (user of quickUsers(); track user.id) {
-            <div class="user-item" (click)="onUserClick(user)"
-                 [attr.aria-label]="'Send to ' + user.name" role="button" tabindex="0">
-              <div class="user-avatar">
-                @if (user.avatar) { <img [src]="user.avatar" [alt]="user.name" /> }
-                @else { <span>{{ user.name.charAt(0).toUpperCase() }}</span> }
-              </div>
-              <div class="user-name">{{ user.name.split(' ')[0] }}</div>
-              @if (user.amount) { <div class="user-amount">{{ user.amount }}</div> }
-            </div>
-          }
-          <button mat-icon-button class="scroll-btn" aria-label="Scroll users right">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
+    @if (staffLoading()) {
+      <app-loader [fullscreen]="false" message="Loading bank data…" />
+    }
+
+    @if (!staffLoading()) {
+
+      <!-- Stat Strip -->
+      <div class="sd-stat-strip">
+        <div class="sd-stat-col">
+          <div class="sd-stat-label">ACTIVE ACCOUNTS</div>
+          <div class="sd-stat-val">{{ staffAccountCounts().active }}</div>
+          <div class="sd-stat-sub">All healthy</div>
         </div>
-      </div>
-
-      <!-- ═══ Charts Row ═══ -->
-      <!-- CHANGED: replaced ngx-charts-area-chart with echarts directive -->
-      <div class="charts-row">
-
-        <!-- Income Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <div class="chart-info">
-              <div class="chart-label-row">
-                <span class="chart-dot-accent" style="background:#a78bfa"></span>
-                <h4 class="chart-label">Total Income</h4>
-              </div>
-              @if (incomeData(); as income) {
-                <div class="chart-value">
-                  ${{ income.total | number:'1.0-0' }}
-                  <span class="change-badge" [class.positive]="income.isPositive" [class.negative]="!income.isPositive">
-                    <mat-icon>{{ income.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
-                    {{ income.changePercentage }}%
-                  </span>
-                </div>
-              }
-            </div>
-            <!-- CHANGED: dynamic period options from service -->
-            <select class="period-select" (change)="onPeriodChange($event)">
-              @for (opt of periodOptions(); track opt) {
-                <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
-              }
-            </select>
-          </div>
-          <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart -->
-          <div class="chart-container">
-            <!-- Chart will be implemented later -->
-            <div class="chart-placeholder">Income Chart</div>
-          </div>
-        </div>
-
-        <!-- Spending Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <div class="chart-info">
-              <div class="chart-label-row">
-                <span class="chart-dot-accent" style="background:#06b6d4"></span>
-                <h4 class="chart-label">Total Spent</h4>
-              </div>
-              @if (spendingData(); as spending) {
-                <div class="chart-value">
-                  ${{ spending.total | number:'1.0-0' }}
-                  <span class="change-badge" [class.positive]="spending.isPositive" [class.negative]="!spending.isPositive">
-                    <mat-icon>{{ spending.isPositive ? 'trending_up' : 'trending_down' }}</mat-icon>
-                    {{ spending.changePercentage }}%
-                  </span>
-                </div>
-              }
-            </div>
-            <!-- CHANGED: dynamic period options from service -->
-            <select class="period-select" (change)="onPeriodChange($event)">
-              @for (opt of periodOptions(); track opt) {
-                <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
-              }
-            </select>
-          </div>
-          <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart -->
-          <div class="chart-container">
-            <!-- Chart will be implemented later -->
-            <div class="chart-placeholder">Spending Chart</div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Transaction History -->
-      <app-transaction-list-widget
-        [transactions]="filteredTransactions()"
-        [searchQuery]="searchQuery()"
-        [selectedPeriod]="selectedPeriod()"
-        [periodOptions]="periodOptions()"
-        (searchChange)="onSearchChange($event)"
-        (periodChange)="onPeriodChange($event)">
-      </app-transaction-list-widget>
-
-    </div><!-- /left-section -->
-
-    <!-- ══ RIGHT SIDEBAR ══ -->
-    <div class="right-sidebar">
-
-      <!-- My Cards -->
-      <div class="widget-card cards-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">💳</span> My Cards</h4>
-          <button mat-button class="add-btn" (click)="onAddCard()">
-            Add New <mat-icon>add_circle_outline</mat-icon>
-          </button>
-        </div>
-        @if (currentCard(); as card) {
-          <div class="credit-card">
-            <div class="cc-circles"></div>
-            <div class="card-top">
-              <span class="card-brand">▣ Fundwise</span>
-              <span class="card-type">{{ card.brand }}</span>
-            </div>
-            <div class="card-holder">{{ card.cardHolder }}</div>
-            <div class="card-number">{{ formatCardNumber(card.cardNumber) }}</div>
-            <div class="card-footer">
-              <div><span class="label">Exp</span><span class="value">{{ card.expiryMonth }}/{{ card.expiryYear }}</span></div>
-              <div><span class="label">CVV</span><span class="value">•••</span></div>
-            </div>
-            @if (cards().length > 1) {
-              <div class="card-navigation">
-                <button mat-icon-button (click)="previousCard()"><mat-icon>chevron_left</mat-icon></button>
-                <span>{{ selectedCard() + 1 }} / {{ cards().length }}</span>
-                <button mat-icon-button (click)="nextCard()"><mat-icon>chevron_right</mat-icon></button>
-              </div>
+        <div class="sd-stat-col">
+          <div class="sd-stat-label">PENDING APPROVAL</div>
+          <div class="sd-stat-val sd-val-amber">
+            @if (staffAccountCounts().pending > 0) {
+              <span class="sd-attn-dot"></span>
             }
+            {{ staffAccountCounts().pending }}
           </div>
-          <div class="card-limit-row">
-            <span class="card-limit-label">Available limit</span>
-            <span class="card-limit-val">${{ card.balance | number:'1.0-0' }} / ${{ card.limit | number:'1.0-0' }}</span>
+          <div class="sd-stat-sub">Needs review</div>
+        </div>
+        <div class="sd-stat-col">
+          <div class="sd-stat-label">PENDING KYC</div>
+          <div class="sd-stat-val" [class.sd-val-amber]="staffPendingKyc() > 0">
+            @if (staffPendingKyc() > 0) {
+              <span class="sd-attn-dot"></span>
+            }
+            {{ staffPendingKyc() }}
           </div>
-          <div class="limit-track"><div class="limit-fill" [style.width.%]="cardLimitPercent()"></div></div>
-        }
-      </div>
-
-      <!-- Activity Feed -->
-      <div class="widget-card activity-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">📡</span> Activity Feed</h4>
-          <div class="live-indicator-sm"><div class="live-dot-sm"></div> LIVE</div>
+          <div class="sd-stat-sub">Awaiting docs</div>
         </div>
-        <div class="activity-list">
-          @for (event of activityFeed(); track event.id) {
-            <div class="activity-item">
-              <div class="activity-dot" [attr.data-type]="event.type"></div>
-              <div class="activity-body">
-                <div class="activity-title">{{ event.title }}</div>
-                <div class="activity-time">{{ event.time }}</div>
-              </div>
-              <span class="activity-amount" [class.credit]="event.isCredit" [class.debit]="!event.isCredit">
-                {{ event.isCredit ? '+' : '−' }}${{ event.amount | number:'1.2-2' }}
-              </span>
-            </div>
-          }
+        <div class="sd-stat-col">
+          <div class="sd-stat-label">FROZEN</div>
+          <div class="sd-stat-val" [class.sd-val-amber]="staffAccountCounts().frozen > 0">
+            @if (staffAccountCounts().frozen > 0) {
+              <span class="sd-attn-dot"></span>
+            }
+            {{ staffAccountCounts().frozen }}
+          </div>
+          <div class="sd-stat-sub">Under review</div>
         </div>
-      </div>
-
-      <!-- Upcoming Bills -->
-      <div class="widget-card bills-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">📅</span> Upcoming Bills</h4>
-          <span class="bills-alert">{{ overdueCount() }} overdue</span>
+        <div class="sd-stat-col">
+          <div class="sd-stat-label">CLOSED</div>
+          <div class="sd-stat-val">{{ staffAccountCounts().closed }}</div>
+          <div class="sd-stat-sub">Archived</div>
         </div>
-        <div class="bills-list">
-          @for (bill of upcomingBills(); track bill.id) {
-            <div class="bill-item" [attr.data-urgency]="bill.urgency">
-              <div class="bill-icon">{{ bill.icon }}</div>
-              <div class="bill-info">
-                <div class="bill-name">{{ bill.name }}</div>
-                <div class="bill-due">Due {{ bill.dueDate | date:'dd MMM' }}</div>
-              </div>
-              <div class="bill-right">
-                <div class="bill-amount">${{ bill.amount | number:'1.0-0' }}</div>
-                <span class="bill-badge" [attr.data-urgency]="bill.urgency">{{ bill.urgency }}</span>
-              </div>
-            </div>
-          }
-        </div>
-        <button mat-button class="upcoming-btn">View All <mat-icon>arrow_forward</mat-icon></button>
-      </div>
-
-      <!-- Recurring Subscriptions -->
-      <div class="widget-card subscriptions-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">🔁</span> Subscriptions</h4>
-          <span class="subs-total">${{ subscriptionsTotal() | number:'1.0-0' }}/mo</span>
-        </div>
-        <div class="subs-list">
-          @for (sub of recurringSubscriptions(); track sub.id) {
-            <div class="sub-item">
-              <div class="sub-logo">{{ sub.icon }}</div>
-              <div class="sub-info">
-                <div class="sub-name">{{ sub.name }}</div>
-                <div class="sub-next">Next: {{ sub.nextDate | date:'dd MMM' }}</div>
-              </div>
-              <div class="sub-cost">${{ sub.amount | number:'1.2-2' }}</div>
-            </div>
-          }
+        <div class="sd-stat-col">
+          <div class="sd-stat-label">RECENT TXNS</div>
+          <div class="sd-stat-val">{{ staffRecentTxns().length }}</div>
+          <div class="sd-stat-sub">Bank-wide</div>
         </div>
       </div>
 
-      <!-- Rewards & Cashback -->
-      <div class="widget-card rewards-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">🏆</span> Rewards</h4>
-          <span class="rewards-tier" [attr.data-tier]="rewardsTier()">{{ rewardsTier() }}</span>
-        </div>
-        <div class="rewards-points-row">
-          <span class="rewards-points-val">{{ rewardsPoints() | number:'1.0-0' }}</span>
-          <span class="rewards-points-label">points</span>
-        </div>
-        <div class="rewards-progress-track">
-          <div class="rewards-progress-fill" [style.width.%]="rewardsTierPercent()"></div>
-        </div>
-        <div class="rewards-progress-labels">
-          <span>{{ rewardsTierCurrent() | number:'1.0-0' }}</span>
-          <span>{{ rewardsTierNext() | number:'1.0-0' }} pts to next tier</span>
-        </div>
-        <div class="cashback-row">
-          <div class="cashback-item">
-            <div class="cashback-val">${{ cashbackEarned() | number:'1.2-2' }}</div>
-            <div class="cashback-label">This Month</div>
-          </div>
-          <div class="cashback-divider"></div>
-          <div class="cashback-item">
-            <div class="cashback-val">${{ cashbackTotal() | number:'1.2-2' }}</div>
-            <div class="cashback-label">All Time</div>
-          </div>
-        </div>
-      </div>
+      <!-- Quick Actions -->
+      <div class="sd-section-label">Quick Actions</div>
+      <div class="sd-actions">
 
-      <!-- Security & Logins -->
-      <div class="widget-card security-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">🔐</span> Security</h4>
-          <span class="security-badge" [attr.data-level]="securityLevel()">{{ securityLevel() }}</span>
-        </div>
-        <div class="security-list">
-          @for (login of recentLogins(); track login.id) {
-            <div class="security-item">
-              <div class="security-device-icon">{{ login.deviceIcon }}</div>
-              <div class="security-info">
-                <div class="security-device">{{ login.device }}</div>
-                <div class="security-location">{{ login.location }} · {{ login.time }}</div>
-              </div>
-              <span class="security-status" [class.current]="login.isCurrent">
-                {{ login.isCurrent ? 'Now' : '✓' }}
-              </span>
-            </div>
-          }
-        </div>
-        <button mat-button class="upcoming-btn">Manage Devices <mat-icon>arrow_forward</mat-icon></button>
-      </div>
+        <a routerLink="/accounts" class="sd-action-row">
+          <div class="sd-action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+          </div>
+          <div class="sd-action-text">
+            <span class="sd-action-label">Manage Accounts</span>
+            <span class="sd-action-sub">Activate · Freeze · Close</span>
+          </div>
+          <svg class="sd-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
 
-      <!-- Conversion Rate -->
-      <div class="widget-card conversion-widget">
-        <h4 class="widget-title"><span class="widget-title-icon">🔄</span> Conversion Rate</h4>
-        <div class="conversion-form">
-          <div class="conversion-row">
-            <label>From</label>
-            <div class="input-group">
-              <input type="number" [value]="conversionAmount1()" (input)="onAmount1Change($event)" />
-              <!-- CHANGED: dynamic currencies from service -->
-              <select [value]="conversionCurrency1()" (change)="onCurrency1Change($event)">
-                @for (c of supportedCurrencies(); track c.code) {
-                  <option [value]="c.code" [selected]="c.code === conversionCurrency1()">{{ c.flag }} {{ c.label }}</option>
-                }
-              </select>
-            </div>
+        <a routerLink="/staff/kyc-approvals" class="sd-action-row">
+          <div class="sd-action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
           </div>
-          <div class="conversion-swap-row">
-            <div class="conversion-line"></div>
-            <div class="swap-icon" role="button">⇅</div>
-            <div class="conversion-line"></div>
-          </div>
-          <div class="conversion-row">
-            <label>To</label>
-            <div class="input-group">
-              <input type="number" [value]="conversionAmount2()" (input)="onAmount2Change($event)" />
-              <!-- CHANGED: dynamic currencies from service -->
-              <select [value]="conversionCurrency2()" (change)="onCurrency2Change($event)">
-                @for (c of supportedCurrencies(); track c.code) {
-                  <option [value]="c.code" [selected]="c.code === conversionCurrency2()">{{ c.flag }} {{ c.label }}</option>
-                }
-              </select>
-            </div>
-          </div>
-          <button mat-raised-button color="primary" class="convert-btn" (click)="convert()">
-            <mat-icon>swap_horiz</mat-icon>
-            Convert {{ conversionAmount1() }} {{ conversionCurrency1() }} = {{ conversionAmount2() | number:'1.2-2' }} {{ conversionCurrency2() }}
-          </button>
-        </div>
-        <div class="live-rates">
-          <div class="live-rates-header">
-            <span class="rates-label">Live Rates</span>
-            <div class="live-indicator-sm"><div class="live-dot-sm"></div> LIVE</div>
-          </div>
-          @for (rate of liveRates(); track rate.pair) {
-            <div class="rate-row">
-              <span class="rate-flag">{{ rate.flag }}</span>
-              <span class="rate-pair">{{ rate.pair }}</span>
-              <span class="rate-sparkline">{{ rate.sparkline }}</span>
-              <span class="rate-val" [class.up]="rate.isUp" [class.down]="!rate.isUp">
-                {{ rate.value }}<small>{{ rate.isUp ? '+' : '' }}{{ rate.change }}%</small>
-              </span>
-            </div>
-          }
-        </div>
-      </div>
-
-      <!-- Workflows + Budget -->
-      <div class="widget-card workflows-widget">
-        <div class="widget-header">
-          <h4 class="widget-title"><span class="widget-title-icon">⚙️</span> Workflows</h4>
-          <button mat-icon-button class="add-icon-btn"><mat-icon>add_circle_outline</mat-icon></button>
-        </div>
-        <div class="workflow-list">
-          @for (workflow of workflows(); track workflow.id) {
-            <div class="workflow-item" (click)="onWorkflowClick(workflow)" role="button" tabindex="0">
-              <div class="workflow-icon">{{ workflow.icon }}</div>
-              <div class="workflow-info">
-                <div class="workflow-title">{{ workflow.title }}</div>
-                <div class="workflow-status">{{ workflow.status }}</div>
-              </div>
-              <mat-icon class="workflow-chevron">chevron_right</mat-icon>
-            </div>
-          }
-        </div>
-        <div class="budget-tracker">
-          <div class="budget-header">
-            <span class="budget-label">📊 Budget Tracker</span>
-            <span class="budget-period">
-              {{ balanceData()?.lastUpdated ? (balanceData()!.lastUpdated | date:'MMM yyyy') : 'Current' }}
+          <div class="sd-action-text">
+            <span class="sd-action-label">KYC Approvals</span>
+            <span class="sd-action-sub">
+              @if (staffPendingKyc() > 0) {
+                <span class="sd-action-badge">{{ staffPendingKyc() }} pending</span>
+              } @else {
+                All clear
+              }
             </span>
           </div>
-          @for (cat of budgetCategories(); track cat.label) {
-            <div class="budget-item">
-              <div class="budget-row-top">
-                <span>{{ cat.icon }} {{ cat.label }}</span>
-                <span [class.over-budget]="budgetIsOver(cat)">
-                  ${{ cat.spent | number:'1.0-0' }} / ${{ cat.limit | number:'1.0-0' }}
-                  @if (budgetIsOver(cat)) { <span>⚠️</span> }
-                </span>
+          <svg class="sd-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+        <a routerLink="/transactions" class="sd-action-row">
+          <div class="sd-action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="sd-action-text">
+            <span class="sd-action-label">All Transactions</span>
+            <span class="sd-action-sub">View &amp; reverse</span>
+          </div>
+          <svg class="sd-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+        <a routerLink="/staff" class="sd-action-row">
+          <div class="sd-action-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <div class="sd-action-text">
+            <span class="sd-action-label">Staff Panel</span>
+            <span class="sd-action-sub">All staff tools</span>
+          </div>
+          <svg class="sd-action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+
+      </div>
+
+      <!-- Recent Transactions -->
+      @if (staffRecentTxns().length > 0) {
+        <div class="staff-recent-txns">
+          <div class="staff-txn-header">
+            <p class="staff-section-label">Recent Transactions</p>
+            <a routerLink="/transactions" class="staff-view-all-link">
+              View all
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+          <div class="staff-table-wrap">
+            <table class="staff-table">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Ref No.</th><th>From</th><th>To</th><th>Type</th><th>Amount</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of staffRecentTxns(); track t.id) {
+                  <tr class="staff-txn-row">
+                    <td class="small">{{ (t.createdAt ?? t.date) | date:'dd MMM, HH:mm' }}</td>
+                    <td class="mono">{{ t.referenceNumber || '—' }}</td>
+                    <td class="mono">{{ t.sourceAccountNumber || '—' }}</td>
+                    <td class="mono">{{ t.destinationAccountNumber || '—' }}</td>
+                    <td><span class="txn-type-badge" [class]="typeClass(t.transactionType)">{{ t.transactionType }}</span></td>
+                    <td class="txn-amount">{{ t.amount | currency:'INR':'symbol':'1.2-2' }}</td>
+                    <td><span class="txn-status-badge" [class]="statusClass(t.transactionStatus ?? t.status)">{{ t.transactionStatus ?? t.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+    }<!-- /!staffLoading -->
+  </div><!-- /staff-dash -->
+}
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- CUSTOMER DASHBOARD                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+@if (!isStaff) {
+  <div class="cust-dash">
+
+    @if (loading()) {
+      <app-loader [fullscreen]="true" message="Loading your dashboard…" />
+    }
+
+    @if (!loading()) {
+
+      <!-- ── Header ── -->
+      <div class="cd-header">
+        <div class="cd-header-left">
+          <div class="cd-greeting-row">
+            <span class="cd-greeting-text">{{ greeting }},</span>
+            <span class="cd-greeting-name">{{ displayName }}</span>
+          </div>
+          <span class="cd-date">{{ today | date:'EEEE, d MMMM yyyy' }}</span>
+        </div>
+        <button class="cd-refresh-btn" (click)="refresh()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <!-- ── Alerts ── -->
+      @if (hasKycAlert) {
+        <div class="cd-alert cd-alert--warn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>KYC pending — complete it to start transacting.</span>
+          <a routerLink="/kyc" class="cd-alert-link">Complete KYC →</a>
+        </div>
+      }
+      @if (hasFrozenAccount) {
+        <div class="cd-alert cd-alert--danger">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>One or more accounts is frozen. Contact your branch.</span>
+        </div>
+      }
+      @if (error()) {
+        <div class="cd-alert cd-alert--danger">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>{{ error() }}</span>
+          <button class="cd-alert-link" style="background:none;border:none;cursor:pointer;font:inherit;" (click)="refresh()">Retry →</button>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- ALL SERVICES                                                -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <div class="cd-services-section">
+
+        <!-- Section header -->
+        <div class="cd-svc-header">
+          <div class="cd-svc-header-left">
+            <span class="cd-svc-dot"></span>
+            <span class="cd-svc-title">All Services</span>
+          </div>
+          <span class="cd-svc-sub">Everything RewaBank offers</span>
+        </div>
+
+        <!-- Live services grid -->
+        <div class="cd-svc-grid">
+          <a routerLink="/transactions/transfer-funds" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">send</span></div>
+            <div class="cd-svc-name">Transfer Money</div>
+            <div class="cd-svc-desc">IMPS, NEFT &amp; RTGS transfers</div>
+          </a>
+          <a routerLink="/cards" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">credit_card</span></div>
+            <div class="cd-svc-name">Cards</div>
+            <div class="cd-svc-desc">Manage debit &amp; virtual cards</div>
+          </a>
+          <a routerLink="/loans" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">account_balance</span></div>
+            <div class="cd-svc-name">Loans</div>
+            <div class="cd-svc-desc">Apply, track &amp; review status</div>
+          </a>
+          <a routerLink="/accounts/fixed-deposits" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">savings</span></div>
+            <div class="cd-svc-name">Fixed Deposits</div>
+            <div class="cd-svc-desc">Lock in a fixed rate</div>
+          </a>
+          <a routerLink="/kyc" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">verified_user</span></div>
+            <div class="cd-svc-name">KYC Verification</div>
+            <div class="cd-svc-desc">Identity &amp; document checks</div>
+          </a>
+          <a routerLink="/transactions/list" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">swap_vert</span></div>
+            <div class="cd-svc-name">Transactions</div>
+            <div class="cd-svc-desc">History, filters &amp; export</div>
+          </a>
+          <a routerLink="/profile" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">person_outline</span></div>
+            <div class="cd-svc-name">Profile</div>
+            <div class="cd-svc-desc">Personal &amp; contact details</div>
+          </a>
+          <a routerLink="/staff/audit-logs" class="cd-svc-tile">
+            <div class="cd-svc-icon"><span class="material-icons">manage_search</span></div>
+            <div class="cd-svc-name">Audit Logs</div>
+            <div class="cd-svc-desc">Read-only compliance trail</div>
+          </a>
+        </div>
+
+        <!-- Coming soon -->
+        <div class="cd-svc-coming-header">
+          <span class="cd-svc-dot cd-svc-dot--dim"></span>
+          <span class="cd-svc-coming-label">Coming soon</span>
+        </div>
+
+        <div class="cd-svc-info-banner">
+          <span class="material-icons cd-svc-info-icon">info_outline</span>
+          <span class="cd-svc-info-text">These features are on the roadmap and will be enabled once the backing service is deployed.</span>
+        </div>
+
+        <div class="cd-svc-coming-groups">
+
+          <div class="cd-svc-group">
+            <div class="cd-svc-group-label">Payments &amp; Payees</div>
+            <div class="cd-svc-soon-grid">
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">group</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Beneficiary Management</div>
+                <div class="cd-svc-desc">Save &amp; manage payees, cooling period for new ones</div>
               </div>
-              <div class="progress-track">
-                <div class="progress-fill" [class]="'progress-fill ' + cat.colorClass" [style.width.%]="budgetPercent(cat)"></div>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">repeat</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Standing Instructions</div>
+                <div class="cd-svc-desc">Auto-pay recurring bills &amp; EMIs</div>
+              </div>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">speed</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Transaction Limits</div>
+                <div class="cd-svc-desc">Set daily transfer &amp; ATM caps yourself</div>
               </div>
             </div>
-          }
-        </div>
-        @if (accountHealth(); as health) {
-          <div class="health-score-row">
-            <span class="health-label">🏥 Financial Health</span>
-            <span class="health-badge" [class]="'health-badge health-' + health.level.toLowerCase()">
-              {{ health.score }}/100 · {{ health.level }}
-            </span>
           </div>
-        }
-        <button mat-button class="upcoming-btn">View Upcoming <mat-icon>arrow_forward</mat-icon></button>
-      </div>
 
-    </div><!-- /right-sidebar -->
-  </div><!-- /dashboard-grid -->
-
-  <!-- ═══ ANALYTICS GRID ═══ -->
-  <div class="analytics-grid">
-
-    <!-- Monthly Report -->
-    <div class="analytics-card monthly-report-card">
-      <div class="analytics-header">
-        <div>
-          <h3 class="analytics-title"><span>📊</span> Monthly Report</h3>
-          <p class="analytics-subtitle">Income vs Expenses — last 6 months</p>
-        </div>
-        <!-- CHANGED: dynamic period options from service -->
-        <select class="period-select" (change)="onPeriodChange($event)">
-          @for (opt of periodOptions(); track opt) {
-            <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
-          }
-        </select>
-      </div>
-      <div class="monthly-bars">
-        @for (month of monthlyReport(); track month.label) {
-          <div class="month-col">
-            <div class="month-bars-wrap">
-              <div class="month-bar income-bar" [style.height.%]="month.incomePercent">
-                <span class="bar-tooltip">${{ month.income | number:'1.0-0' }}</span>
+          <div class="cd-svc-group">
+            <div class="cd-svc-group-label">Savings &amp; Credit</div>
+            <div class="cd-svc-soon-grid">
+              <a routerLink="/accounts/recurring-deposits" class="cd-svc-tile">
+                <div class="cd-svc-icon"><span class="material-icons">autorenew</span></div>
+                <div class="cd-svc-name">Recurring Deposits</div>
+                <div class="cd-svc-desc">Save a fixed amount every month</div>
+              </a>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">trending_down</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Overdraft Facility</div>
+                <div class="cd-svc-desc">Short-term credit line on your account</div>
               </div>
-              <div class="month-bar expense-bar" [style.height.%]="month.expensePercent">
-                <span class="bar-tooltip">${{ month.expense | number:'1.0-0' }}</span>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">trending_up</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Pre-approved Credit</div>
+                <div class="cd-svc-desc">Instant personal loan offers</div>
               </div>
             </div>
-            <div class="month-label">{{ month.label }}</div>
           </div>
-        }
-      </div>
-      <div class="monthly-legend">
-        <span class="legend-item"><span class="legend-dot income-dot"></span>Income</span>
-        <span class="legend-item"><span class="legend-dot expense-dot"></span>Expenses</span>
-      </div>
-    </div>
 
-    <!-- Spending Breakdown Donut -->
-    <div class="analytics-card spending-breakdown-card">
-      <div class="analytics-header">
-        <div>
-          <h3 class="analytics-title"><span>🍩</span> Spending Breakdown</h3>
-          <p class="analytics-subtitle">By category this month</p>
-        </div>
-      </div>
-      <div class="breakdown-body">
-        <div class="donut-wrap">
-          <svg viewBox="0 0 120 120" class="donut-svg">
-            @for (seg of spendingBreakdown(); track seg.label) {
-              <circle class="donut-segment" cx="60" cy="60" r="45"
-                      fill="none" [attr.stroke]="seg.color" stroke-width="18"
-                      [attr.stroke-dasharray]="seg.dashArray"
-                      [attr.stroke-dashoffset]="seg.dashOffset"
-                      transform="rotate(-90 60 60)"/>
-            }
-            <text x="60" y="57" text-anchor="middle" fill="white" font-size="13" font-weight="800">
-              ${{ spendingBreakdownTotal() | number:'1.0-0' }}
-            </text>
-            <text x="60" y="70" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="8">total spent</text>
-          </svg>
-        </div>
-        <div class="breakdown-legend">
-          @for (seg of spendingBreakdown(); track seg.label) {
-            <div class="breakdown-item">
-              <span class="breakdown-dot" [style.background]="seg.color"></span>
-              <span class="breakdown-label">{{ seg.label }}</span>
-              <span class="breakdown-pct">{{ seg.percent }}%</span>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Savings Goals -->
-    <div class="analytics-card savings-goals-card">
-      <div class="analytics-header">
-        <div>
-          <h3 class="analytics-title"><span>🎯</span> Savings Goals</h3>
-          <p class="analytics-subtitle">Track your financial targets</p>
-        </div>
-        <button mat-icon-button class="add-icon-btn"><mat-icon>add_circle_outline</mat-icon></button>
-      </div>
-      <div class="goals-list">
-        @for (goal of savingsGoals(); track goal.id) {
-          <div class="goal-item">
-            <div class="goal-header-row">
-              <div class="goal-icon-name">
-                <span class="goal-icon">{{ goal.icon }}</span>
-                <div>
-                  <div class="goal-name">{{ goal.name }}</div>
-                  <div class="goal-deadline">Target: {{ goal.deadline | date:'MMM yyyy' }}</div>
-                </div>
+          <div class="cd-svc-group">
+            <div class="cd-svc-group-label">Account Controls</div>
+            <div class="cd-svc-soon-grid">
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">how_to_reg</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Account Nomination</div>
+                <div class="cd-svc-desc">Add or update a nominee</div>
               </div>
-              <div class="goal-amounts">
-                <span class="goal-saved">${{ goal.saved | number:'1.0-0' }}</span>
-                <span class="goal-target"> / ${{ goal.target | number:'1.0-0' }}</span>
+              <a routerLink="/cards" class="cd-svc-tile">
+                <div class="cd-svc-icon"><span class="material-icons">lock</span></div>
+                <div class="cd-svc-name">Card Freeze / Unfreeze</div>
+                <div class="cd-svc-desc">Instantly lock a lost or suspicious card</div>
+              </a>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">flag</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Dispute a Transaction</div>
+                <div class="cd-svc-desc">Raise a chargeback or complaint</div>
               </div>
             </div>
-            <div class="goal-track">
-              <div class="goal-fill" [attr.data-color]="goal.color"
-                   [style.width.%]="(goal.saved / goal.target) * 100"></div>
+          </div>
+
+          <div class="cd-svc-group">
+            <div class="cd-svc-group-label">More from RewaBank</div>
+            <div class="cd-svc-soon-grid">
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">lock_open</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Locker Facility</div>
+                <div class="cd-svc-desc">Rent a secure branch locker</div>
+              </div>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">security</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Insurance</div>
+                <div class="cd-svc-desc">Bundle health &amp; accident cover</div>
+              </div>
+              <div class="cd-svc-tile cd-svc-tile--disabled">
+                <span class="cd-svc-coming-badge"><span class="material-icons" style="font-size:10px;">lock</span> COMING SOON</span>
+                <div class="cd-svc-icon cd-svc-icon--dim"><span class="material-icons">location_on</span></div>
+                <div class="cd-svc-name cd-svc-name--dim">Branch &amp; ATM Locator</div>
+                <div class="cd-svc-desc">Find the nearest one to you</div>
+              </div>
             </div>
-            <div class="goal-footer-row">
-              <span class="goal-pct">{{ ((goal.saved / goal.target) * 100) | number:'1.0-0' }}% reached</span>
-              <span class="goal-remaining">${{ (goal.target - goal.saved) | number:'1.0-0' }} to go</span>
-            </div>
           </div>
-        }
-      </div>
-    </div>
 
-    <!-- ═══ Cash Flow Forecast ═══ -->
-    <!-- CHANGED: replaced ngx-charts-area-chart with echarts directive -->
-    <!-- CHANGED: cashflowData() → cashflowRawData() to match renamed signal -->
-    <div class="analytics-card cashflow-card">
-      <div class="analytics-header">
-        <div>
-          <h3 class="analytics-title"><span>📈</span> Cash Flow Forecast</h3>
-          <p class="analytics-subtitle">Projected balance — next 30 days</p>
         </div>
-        <!-- CHANGED: dynamic period options from service -->
-        <select class="period-select" (change)="onPeriodChange($event)">
-          @for (opt of periodOptions(); track opt) {
-            <option [value]="opt" [selected]="opt === selectedPeriod()">{{ opt }}</option>
-          }
-        </select>
-      </div>
-      <!-- CHANGED: div with echarts directive replaces ngx-charts-area-chart block -->
-      <div class="cashflow-chart-wrap">
-        <!-- Chart will be implemented later -->
-        <div class="chart-placeholder">Cash Flow Chart</div>
-      </div>
-      <div class="cashflow-summary">
-        @for (point of cashflowSummary(); track point.label) {
-          <div class="cashflow-point">
-            <div class="cashflow-point-val" [class.up]="point.isPositive" [class.down]="!point.isPositive">
-              ${{ point.value | number:'1.0-0' }}
-            </div>
-            <div class="cashflow-point-label">{{ point.label }}</div>
-          </div>
-        }
-      </div>
-    </div>
 
-    <!-- Net Worth -->
-    <div class="analytics-card networth-card">
-      <div class="analytics-header">
-        <div>
-          <h3 class="analytics-title"><span>💎</span> Net Worth</h3>
-          <p class="analytics-subtitle">Assets vs Liabilities</p>
-        </div>
-      </div>
-      <div class="networth-hero">
-        <div class="networth-val">${{ netWorth() | number:'1.0-0' }}</div>
-        <div class="networth-change" [class.up]="netWorthChange() > 0" [class.down]="netWorthChange() < 0">
-          {{ netWorthChange() > 0 ? '↑' : '↓' }}
-          ${{ (netWorthChange() < 0 ? netWorthChange() * -1 : netWorthChange()) | number:'1.0-0' }} this month
-        </div>
-      </div>
-      <div class="networth-breakdown">
-        <div class="nw-item">
-          <div class="nw-row">
-            <span class="nw-label">💚 Assets</span>
-            <span class="nw-val assets">${{ totalAssets() | number:'1.0-0' }}</span>
-          </div>
-          <div class="nw-track"><div class="nw-fill assets-fill" [style.width.%]="assetsPercent()"></div></div>
-        </div>
-        <div class="nw-item">
-          <div class="nw-row">
-            <span class="nw-label">🔴 Liabilities</span>
-            <span class="nw-val liabilities">${{ totalLiabilities() | number:'1.0-0' }}</span>
-          </div>
-          <div class="nw-track"><div class="nw-fill liabilities-fill" [style.width.%]="liabilitiesPercent()"></div></div>
-        </div>
-      </div>
-    </div>
+      </div><!-- /cd-services-section -->
 
-    <!-- Tax Summary -->
-    <div class="analytics-card tax-card">
-      <div class="analytics-header">
-        <div>
-          <h3 class="analytics-title"><span>📋</span> Tax Summary</h3>
-          <p class="analytics-subtitle">Year-to-date overview</p>
-        </div>
-        <span class="tax-year-badge">{{ currentYear() }}</span>
-      </div>
-      <div class="tax-grid">
-        @for (item of taxSummary(); track item.label) {
-          <div class="tax-item" [attr.data-color]="item.color">
-            <div class="tax-item-icon">{{ item.icon }}</div>
-            <div class="tax-item-val">${{ item.value | number:'1.0-0' }}</div>
-            <div class="tax-item-label">{{ item.label }}</div>
-          </div>
-        }
-      </div>
-      <div class="tax-notice">
-        <span class="tax-notice-icon">⚡</span>
-        Estimated tax due: <strong>${{ estimatedTax() | number:'1.0-0' }}</strong>
-      </div>
-    </div>
+    }<!-- /!loading -->
 
-  </div><!-- /analytics-grid -->
+  </div><!-- /cust-dash -->
+}
 
 </div><!-- /dashboard-container -->

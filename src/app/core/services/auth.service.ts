@@ -1,8 +1,7 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../store/auth/auth.actions';
@@ -17,10 +16,7 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  // ✅ All dependencies now use inject() pattern
   private platformId = inject(PLATFORM_ID);
-  private http = inject(HttpClient);
-  private router = inject(Router);
   private keycloakService = inject(KeycloakService);
   private store = inject(Store);
   private logger = inject(LoggerService);
@@ -99,8 +95,6 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       return this.keycloakService.logout(window.location.origin).then(() => {
         this.isAuthenticatedSubject.next(false);
-        this.store.dispatch(AuthActions.setAuthenticated({ authenticated: false }));
-        this.store.dispatch(AuthActions.logoutSuccess());
         if (typeof localStorage !== 'undefined') {
           localStorage.clear();
         }
@@ -146,6 +140,48 @@ export class AuthService {
 
   public getUserRoles(): string[] {
     return this.keycloakService.getUserRoles();
+  }
+
+  public isStaff(): boolean {
+    return this.hasRole(['TELLER', 'BRANCH_MANAGER', 'RELATIONSHIP_MANAGER', 'SUPER_ADMIN', 'AUDITOR', 'CREDIT_OFFICER']);
+  }
+
+  public isCustomer(): boolean {
+    return this.hasRole('CUSTOMER') && !this.isStaff();
+  }
+
+  public isTeller(): boolean {
+    return this.hasRole(['TELLER', 'BRANCH_MANAGER', 'SUPER_ADMIN']);
+  }
+
+  public isRelationshipManager(): boolean {
+    return this.hasRole(['RELATIONSHIP_MANAGER', 'BRANCH_MANAGER', 'SUPER_ADMIN']);
+  }
+
+  public isBranchManager(): boolean {
+    return this.hasRole(['BRANCH_MANAGER', 'SUPER_ADMIN']);
+  }
+
+  public isCreditOfficer(): boolean {
+    return this.hasRole(['CREDIT_OFFICER', 'BRANCH_MANAGER', 'SUPER_ADMIN']);
+  }
+
+  public isAuditor(): boolean {
+    return this.hasRole(['AUDITOR', 'SUPER_ADMIN']);
+  }
+
+  public isSuperAdmin(): boolean {
+    return this.hasRole('SUPER_ADMIN');
+  }
+
+  public getRoleBadge(): string {
+    if (this.isSuperAdmin())          return 'Super admin';
+    if (this.isBranchManager())       return 'Branch manager';
+    if (this.isRelationshipManager()) return 'Rel. manager';
+    if (this.isCreditOfficer())       return 'Credit officer';
+    if (this.isAuditor())             return 'Auditor';
+    if (this.isTeller())              return 'Teller';
+    return 'Customer';
   }
 
   public setRedirectUrl(redirectUrl: string): void {

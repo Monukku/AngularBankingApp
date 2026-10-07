@@ -1,51 +1,36 @@
-// src/app/authentication/components/change-password/change-password.component.ts
-import { Component } from '@angular/core';
-import { AuthService } from '../../../core/services/auth.service';
-import { ActivatedRoute } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { KeycloakService } from 'keycloak-angular';
 
+// Password management is handled by Keycloak account console.
+// There is no change-password endpoint on the backend.
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    FormsModule,
-    ReactiveFormsModule
-  ],
-  templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.scss']
+  imports: [CommonModule, MatCardModule, MatButtonModule],
+  template: `
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Change Password</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Password management is handled securely through your account portal.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="openAccountConsole()">
+          Manage Password
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  styleUrls: ['./change-password.component.scss'],
 })
 export class ChangePasswordComponent {
-  token: string = '';
-  newPassword: string = '';
-  confirmPassword: string = '';
-  message: string = '';
+  private keycloak = inject(KeycloakService);
 
-  constructor(private authService: AuthService, private route: ActivatedRoute) {
-    this.token = this.route.snapshot.queryParams['token'];
-  }
-
-  changePassword() {
-    if (this.newPassword !== this.confirmPassword) {
-      this.message = 'Passwords do not match';
-      return;
-    }
-    this.authService.changePassword(this.token, this.newPassword).subscribe(
-      () => {
-        this.message = 'Password changed successfully';
-      },
-      error => {
-        this.message = 'Failed to change password';
-      }
-    );
+  openAccountConsole(): void {
+    this.keycloak.getKeycloakInstance().accountManagement();
   }
 }
