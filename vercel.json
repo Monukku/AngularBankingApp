@@ -1,9 +1,8 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/angular"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
