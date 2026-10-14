@@ -10,8 +10,8 @@ export const noAuthGuard: CanActivateFn = async (): Promise<boolean> => {
   const keycloakService = inject(KeycloakService);
   const router = inject(Router);
 
-  const isLoggedIn = keycloakService.isLoggedIn();
-  
+  const isLoggedIn = await keycloakService.isLoggedIn();
+
   if (isLoggedIn) {
     // ✅ Redirect to dashboard if already logged in
     router.navigate(['/dashboard']);
