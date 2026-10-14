@@ -56,12 +56,10 @@ function initializeKeycloak(keycloak: KeycloakService, platformId: Object) {
     return keycloak.init({
       config: environment.keycloak,
       initOptions: {
-        onLoad: 'check-sso',  // Keep check-sso but don't auto-redirect
+        onLoad: 'check-sso',
         checkLoginIframe: false,
-        checkLoginIframeInterval: 0,
-        silentCheckSsoRedirectUri:
-          window.location.origin + '/assets/silent-check-sso.html',
-        // Don't redirect automatically - let guards handle it
+        // silentCheckSsoFallback disabled: Keycloak server blocks iframes via
+        // frame-ancestors CSP, causing 400s. Guards handle login redirects instead.
         redirectUri: window.location.origin + '/dashboard',
       },
       enableBearerInterceptor: true,
