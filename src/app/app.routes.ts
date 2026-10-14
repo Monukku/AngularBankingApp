@@ -1,17 +1,7 @@
 import { Routes } from '@angular/router';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { KeycloakService } from 'keycloak-angular';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { NotFoundComponent } from './shared/components/not-found/not-found.component';
-
-const rootRedirectGuard = async () => {
-  const keycloak = inject(KeycloakService);
-  const router = inject(Router);
-  const isLoggedIn = await keycloak.isLoggedIn();
-  return router.createUrlTree([isLoggedIn ? '/dashboard' : '/auth']);
-};
 
 
 export const routes: Routes = [
@@ -25,8 +15,8 @@ export const routes: Routes = [
 
   {
     path: '',
-    canActivate: [rootRedirectGuard],
-    component: NotFoundComponent, // never renders; guard always redirects
+    loadComponent: () =>
+      import('./features/auth/components/landing/landing.component').then(m => m.LandingComponent),
     pathMatch: 'full',
   },
   {
