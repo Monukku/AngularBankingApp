@@ -10,7 +10,7 @@ export const environment = {
   keycloak: keycloakConfig,
   
   api: {
-    baseUrl: 'https://api.rewabank.com',
+    baseUrl: 'https://api.rewarealm.com',
     timeout: 60000,
     endpoints: {
       accounts: '/accounts',
