@@ -10,9 +10,12 @@ export const environment = {
   keycloak: keycloakConfig,
   
   api: {
-    baseUrl: 'https://api.rewarealm.com',
+    baseUrl: 'https://api.rewarealm.com/api/v1',
     timeout: 60000,
     endpoints: {
+      auth: '/auth',
+      customers: '/customers',
+      fraud: '/fraud',
       accounts: '/accounts',
       transactions: '/transactions',
       cards: '/cards',
