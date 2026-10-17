@@ -54,7 +54,9 @@ export const authInterceptor: HttpInterceptorFn = (
       const authReq = addAuthHeader(req, token, logger);
       return next(authReq);
     }),
-    catchError((error) => handleAuthError(error, router, logger, config))
+    catchError((error) =>
+      handleAuthError(error, router, logger, config, keycloakService)
+    )
   );
 };
 
@@ -103,7 +105,9 @@ async function getValidToken(
     return token;
   } catch (error) {
     logger.error('Error getting valid token', error);
-    throw error;
+    const wrapped = error instanceof Error ? error : new Error(String(error));
+    (wrapped as Error & { tokenFailure?: boolean }).tokenFailure = true;
+    throw wrapped;
   }
 }
 
@@ -131,9 +135,19 @@ function handleAuthError(
   error: unknown,
   router: Router,
   logger: LoggerService,
-  config: AuthInterceptorConfig
+  config: AuthInterceptorConfig,
+  keycloakService: KeycloakService
 ): Observable<never> {
   logger.error('Error in auth interceptor', error);
+
+  if ((error as { tokenFailure?: boolean })?.tokenFailure) {
+    logger.warn('Session expired - redirecting to Keycloak login');
+    keycloakService.login({ redirectUri: window.location.href }).catch(() => {
+      router.navigate([config.loginRoute], {
+        queryParams: { returnUrl: router.url },
+      });
+    });
+  }
 
   if (error instanceof HttpErrorResponse) {
     if (error.status === 401) {
