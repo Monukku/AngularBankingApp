@@ -73,6 +73,12 @@
             <tr>
               <td class="name">
                 {{ c.fullName }}
+                <button class="btn-view-doc" type="button" (click)="toggleDetails(c.id)">
+                  {{ expandedId() === c.id ? 'Hide details' : 'Details' }}
+                </button>
+                @if (!c.documents?.length) {
+                  <div class="msg-err">No documents uploaded</div>
+                }
                 @if (c.documents?.length) {
                   <div class="doc-links">
                     @for (doc of c.documents; track doc.id) {
@@ -121,6 +127,27 @@
                 }
               </td>
             </tr>
+            @if (expandedId() === c.id) {
+              <tr>
+                <td colspan="6">
+                  <div class="kyc-details">
+                    <div><strong>Date of birth:</strong> {{ c.dateOfBirth || '—' }}</div>
+                    <div><strong>Aadhaar:</strong> {{ c.maskedAadhaar || c.aadhaarNumber || '—' }}</div>
+                    <div><strong>PAN:</strong> {{ c.maskedPan || c.panNumber || '—' }}</div>
+                    <div>
+                      <strong>Address:</strong>
+                      @if (c.address) {
+                        {{ c.address.addressLine1 }}{{ c.address.addressLine2 ? ', ' + c.address.addressLine2 : '' }},
+                        {{ c.address.city }}, {{ c.address.state }} {{ c.address.pincode }}
+                      } @else { — }
+                    </div>
+                    @if (c.rejectionReason) {
+                      <div><strong>Previous rejection:</strong> {{ c.rejectionReason }}</div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>

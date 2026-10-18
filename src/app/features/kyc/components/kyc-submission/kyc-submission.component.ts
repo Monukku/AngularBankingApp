@@ -50,6 +50,7 @@ export class KycSubmissionComponent implements OnInit {
 
   step = signal<WizardStep>('personal');
   existingKycStatus = signal<KycStatus | null>(null);
+  rejectionReason = signal<string | null>(null);
   statusLoading = signal(true);
   readonly todayDate = new Date().toISOString().split('T')[0];
   submitting = signal(false);
@@ -60,7 +61,8 @@ export class KycSubmissionComponent implements OnInit {
   readonly UPLOAD_SLOTS: { type: DocumentType; label: string; icon: string }[] = [
     { type: 'AADHAAR_FRONT', label: 'ID front',  icon: 'id' },
     { type: 'AADHAAR_BACK',  label: 'ID back',   icon: 'id' },
-    { type: 'SELFIE',        label: 'Selfie',     icon: 'selfie' },
+    { type: 'PAN_CARD',      label: 'PAN card',  icon: 'id' },
+    { type: 'SELFIE',       label: 'Selfie',     icon: 'selfie' },
   ];
 
   readonly REQUIRED_DOCS: { type: DocumentType; label: string }[] = [
@@ -130,6 +132,7 @@ export class KycSubmissionComponent implements OnInit {
       next: (profile) => {
         const status = profile?.kycStatus as KycStatus ?? null;
         this.existingKycStatus.set(status);
+        this.rejectionReason.set(profile?.rejectionReason ?? null);
         this.statusLoading.set(false);
         if (status === 'SUBMITTED' || status === 'UNDER_REVIEW' || status === 'VERIFIED') {
           this.step.set('done');
@@ -163,6 +166,10 @@ export class KycSubmissionComponent implements OnInit {
   }
 
   submitAll(): void {
+    if (!this.allRequiredUploaded()) {
+      this.notifications.error('Please upload all required documents before submitting.');
+      return;
+    }
     const p = this.personalForm.value;
     const id = this.identityForm.value;
     const a = this.addressForm.value;

@@ -77,7 +77,7 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
             Reason
           </div>
-          ID photo did not clearly show the document number. Please retake in good lighting.
+          {{ rejectionReason() || 'No reason was provided. Please contact support.' }}
         </div>
         <div class="ks-actions">
           <button class="ks-btn-primary" (click)="step.set('personal')">
@@ -367,9 +367,13 @@
           <span>I confirm the information provided is accurate and consent to RewaBank verifying it with the relevant authorities.</span>
         </label>
 
+        @if (!allRequiredUploaded()) {
+          <p class="kf-err">Upload all required documents (Aadhaar front and back, PAN card, selfie) before submitting. Go back to the Identity step.</p>
+        }
+
         <div class="kf-actions">
           <button type="button" class="kf-btn-ghost" (click)="goBack()">‹ Back</button>
-          <button class="kf-btn-primary" (click)="submitAll()" [disabled]="!consentChecked || submitting()">
+          <button class="kf-btn-primary" (click)="submitAll()" [disabled]="!consentChecked || submitting() || !allRequiredUploaded()">
             @if (submitting()) {
               <span class="kf-spinner"></span> Submitting…
             } @else {

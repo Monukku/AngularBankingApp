@@ -63,6 +63,7 @@ export interface CustomerProfile {
   email: string;
   mobileNumber?: string;
   kycStatus: string;
+  rejectionReason?: string | null;
   createdAt?: string;
 }
 

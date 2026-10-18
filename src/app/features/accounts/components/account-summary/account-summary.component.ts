@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
@@ -28,6 +28,7 @@ export class AccountSummaryComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   protected authService = inject(AuthService);
   private api = inject(ApiService);
+  private router = inject(Router);
 
   // ── Customer view state ──
   accounts = signal<any[]>([]);
@@ -142,9 +143,20 @@ export class AccountSummaryComponent implements OnInit {
     const payload = { ...this.createForm.value, customerId: this.customerId };
     this.accountService.createAccount(payload).subscribe({
       next: () => {
-        this.snackBar.open('Account created successfully!', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+        const needsKyc = ['NOT_SUBMITTED', 'REJECTED'].includes(this.kycStatus() ?? '');
+        this.snackBar.open(
+          needsKyc
+            ? 'Account created. Complete KYC to get it activated.'
+            : 'Account created successfully!',
+          'Close',
+          { duration: 4000, panelClass: ['success-snackbar'] }
+        );
         this.showCreateForm.set(false);
         this.creating.set(false);
+        if (needsKyc) {
+          this.router.navigate(['/kyc']);
+          return;
+        }
         this.loadAccounts();
       },
       error: (err) => {

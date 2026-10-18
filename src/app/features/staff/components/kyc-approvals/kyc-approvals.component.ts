@@ -178,7 +178,14 @@ export class KycApprovalsComponent implements OnInit {
           window.open(url, '_blank', 'noopener,noreferrer');
         }
       },
-      error: () => {},
+      error: (err) => {
+        this.error.set(err?.message || 'Could not open the document.');
+      },
     });
+  }
+
+  expandedId = signal<string | null>(null);
+  toggleDetails(id: string): void {
+    this.expandedId.set(this.expandedId() === id ? null : id);
   }
 }
