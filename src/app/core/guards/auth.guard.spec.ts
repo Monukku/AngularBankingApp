@@ -1,30 +1,49 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { KeycloakService } from 'keycloak-angular';
-import { AuthGuard } from './auth.guard';
+import { authGuard } from './auth.guard';
 
-describe('AppAuthGuard', () => {
-  let guard: AuthGuard;
-  let keycloakService: KeycloakService;
-  let router: Router;
+describe('authGuard', () => {
+  let keycloak: jasmine.SpyObj<KeycloakService>;
+  let store: jasmine.SpyObj<Store>;
 
-  beforeEach(() => {
+  const run = (url = '/transactions/list') =>
+    TestBed.runInInjectionContext(() => authGuard({} as any, { url } as any));
+
+  const configure = (platform: 'browser' | 'server') => {
+    keycloak = jasmine.createSpyObj('KeycloakService', ['isLoggedIn', 'login', 'loadUserProfile']);
+    store = jasmine.createSpyObj('Store', ['dispatch']);
     TestBed.configureTestingModule({
       providers: [
-        AuthGuard,
-        { provide: KeycloakService, useValue: jasmine.createSpyObj('KeycloakService', ['isLoggedIn', 'login']) },
+        { provide: KeycloakService, useValue: keycloak },
         { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate']) },
+        { provide: Store, useValue: store },
+        { provide: PLATFORM_ID, useValue: platform },
       ],
     });
+  };
 
-    guard = TestBed.inject(AuthGuard);
-    keycloakService = TestBed.inject(KeycloakService);
-    router = TestBed.inject(Router);
+  it('blocks during server-side rendering', async () => {
+    configure('server');
+    expect(await run()).toBeFalse();
+    expect(keycloak.isLoggedIn).not.toHaveBeenCalled();
   });
 
-  it('should be created', () => {
-    expect(guard).toBeTruthy();
+  it('sends anonymous users to the Keycloak login', async () => {
+    configure('browser');
+    (keycloak.isLoggedIn as jasmine.Spy).and.resolveTo(false);
+    keycloak.login.and.resolveTo();
+    expect(await run()).toBeFalse();
+    expect(keycloak.login).toHaveBeenCalled();
   });
 
-  // Add additional tests for your guard logic here
+  it('allows logged-in users and syncs the profile', async () => {
+    configure('browser');
+    (keycloak.isLoggedIn as jasmine.Spy).and.resolveTo(true);
+    keycloak.loadUserProfile.and.resolveTo({ username: 'user' } as any);
+    expect(await run()).toBeTrue();
+    expect(store.dispatch).toHaveBeenCalledTimes(2);
+  });
 });

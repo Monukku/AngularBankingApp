@@ -1,6 +1,5 @@
 // src/app/authentication/components/forgot-password/forgot-password.component.ts
 import { Component } from '@angular/core';
-import { AuthService } from '../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
@@ -27,22 +26,15 @@ export class ForgotPasswordComponent {
   email: string = '';
   message: string = '';
 
-  constructor(private authService: AuthService) { }
-
   sendResetLink() {
     if (!this.email) {
       this.message = 'Please enter your email address';
       return;
     }
 
-    this.authService.sendResetLink(this.email).subscribe(
-      () => {
-        this.message = 'Password reset link sent to your email';
-      },
-      error => {
-        this.message = 'Failed to send reset link';
-      }
-    );
+    // Passwords are managed by Keycloak and the backend has no reset endpoint,
+    // so point the user at the "Forgot password" link on the Keycloak sign-in page.
+    this.message = 'Use "Forgot password" on the sign-in page to reset your password';
   }
 }
 

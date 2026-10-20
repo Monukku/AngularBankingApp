@@ -1,19 +1,34 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { NoAuthGuard } from './no-auth.guard'; // Import the NoAuthGuard
+import { Router } from '@angular/router';
+import { KeycloakService } from 'keycloak-angular';
+import { noAuthGuard } from './no-auth.guard';
 
-describe('NoAuthGuard', () => {
-  let guard: NoAuthGuard;
+describe('noAuthGuard', () => {
+  let keycloak: jasmine.SpyObj<KeycloakService>;
+  let router: jasmine.SpyObj<Router>;
+
+  const run = () => TestBed.runInInjectionContext(() => noAuthGuard({} as any, {} as any));
 
   beforeEach(() => {
+    keycloak = jasmine.createSpyObj('KeycloakService', ['isLoggedIn']);
+    router = jasmine.createSpyObj('Router', ['navigate']);
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [NoAuthGuard] // Include NoAuthGuard as a provider
+      providers: [
+        { provide: KeycloakService, useValue: keycloak },
+        { provide: Router, useValue: router },
+      ],
     });
-    guard = TestBed.inject(NoAuthGuard);
   });
 
-  it('should be created', () => {
-    expect(guard).toBeTruthy();
+  it('allows anonymous users', async () => {
+    (keycloak.isLoggedIn as jasmine.Spy).and.resolveTo(false);
+    expect(await run()).toBeTrue();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('redirects logged-in users to the dashboard', async () => {
+    (keycloak.isLoggedIn as jasmine.Spy).and.resolveTo(true);
+    expect(await run()).toBeFalse();
+    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
   });
 });

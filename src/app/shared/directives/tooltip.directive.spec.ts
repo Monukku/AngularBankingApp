@@ -28,9 +28,15 @@ describe('TooltipDirective', () => {
   });
 
   it('should show tooltip on mouseenter', () => {
-    const element = debugElement.nativeElement;
     debugElement.triggerEventHandler('mouseenter', null);
     fixture.detectChanges();
-    expect(element.title).toBeTruthy();
+
+    const tooltip = Array.from(document.body.querySelectorAll('span'))
+      .find(el => el.textContent === 'Test tooltip');
+    expect(tooltip).toBeTruthy();
+
+    debugElement.triggerEventHandler('mouseleave', null);
+    fixture.detectChanges(); // flushes the animation renderer's pending removal
+    expect(tooltip!.isConnected).toBeFalse();
   });
 });

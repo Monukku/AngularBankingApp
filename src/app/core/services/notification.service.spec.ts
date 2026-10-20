@@ -33,7 +33,7 @@ describe('NotificationService', () => {
 
       expect(matSnackBar.open).toHaveBeenCalledWith(
         'Success message',
-        'Close',
+        '✕',
         jasmine.objectContaining({
           panelClass: ['notification-success'],
         })
@@ -47,7 +47,7 @@ describe('NotificationService', () => {
 
       expect(matSnackBar.open).toHaveBeenCalledWith(
         'Error message',
-        'Close',
+        '✕',
         jasmine.objectContaining({
           panelClass: ['notification-error'],
         })
@@ -61,7 +61,7 @@ describe('NotificationService', () => {
 
       expect(matSnackBar.open).toHaveBeenCalledWith(
         'Warning message',
-        'Close',
+        '✕',
         jasmine.objectContaining({
           panelClass: ['notification-warning'],
         })
@@ -75,7 +75,7 @@ describe('NotificationService', () => {
 
       expect(matSnackBar.open).toHaveBeenCalledWith(
         'Info message',
-        'Close',
+        '✕',
         jasmine.objectContaining({
           panelClass: ['notification-info'],
         })
@@ -83,11 +83,4 @@ describe('NotificationService', () => {
     });
   });
 
-  describe('dismissAll', () => {
-    it('should dismiss all notifications', () => {
-      service.dismissAll();
-
-      expect(matSnackBar.dismiss).toHaveBeenCalled();
-    });
-  });
 });

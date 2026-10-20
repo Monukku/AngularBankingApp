@@ -20,7 +20,7 @@ describe('DateFormatPipe', () => {
 
   it('should format date correctly', () => {
     const testDate = new Date('2024-02-07');
-    const result = pipe.transform(testDate);
+    const result = pipe.transform(testDate, 'dd MMM yyyy');
     expect(result).toBeTruthy();
   });
 });

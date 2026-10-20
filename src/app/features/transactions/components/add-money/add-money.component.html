@@ -1,0 +1,126 @@
+<div class="am-page">
+
+  <div class="am-header">
+    <h2 class="am-title">Add money</h2>
+    <p class="am-sub">Top up your account instantly using UPI or card.</p>
+  </div>
+
+  @switch (stage()) {
+
+    @case ('form') {
+      <form [formGroup]="form" (ngSubmit)="pay()" class="am-card" novalidate>
+
+        <div class="am-field">
+          <label class="am-label">Add to account</label>
+          @if (accountsLoading()) {
+            <div class="am-muted">Loading accounts…</div>
+          } @else if (accounts().length === 0) {
+            <div class="am-muted">You have no active account to add money to.</div>
+          } @else {
+            <select class="am-input" formControlName="accountId">
+              @for (acc of accounts(); track acc.id || acc.accountId) {
+                <option [value]="acc.id || acc.accountId">{{ acc.accountType }} · {{ acc.accountNumber }}</option>
+              }
+            </select>
+            @if (selectedAccount()?.balance != null) {
+              <span class="am-hint">Current balance {{ formatInr(selectedAccount().balance) }}</span>
+            }
+          }
+        </div>
+
+        <div class="am-field">
+          <label class="am-label">Amount</label>
+          <input class="am-input am-amount" type="number" formControlName="amount" placeholder="₹ 0" min="1" />
+          <div class="am-quick">
+            @for (q of QUICK_AMOUNTS; track q) {
+              <button type="button" class="am-chip" (click)="setQuickAmount(q)">+ {{ formatInr(q) }}</button>
+            }
+          </div>
+          @if (hasError('amount', 'required')) { <span class="am-err">Enter an amount.</span> }
+          @if (hasError('amount', 'min')) { <span class="am-err">Minimum amount is ₹1.</span> }
+          @if (hasError('amount', 'max')) { <span class="am-err">Maximum amount per payment is ₹1,00,000.</span> }
+        </div>
+
+        <div class="am-field">
+          <label class="am-label">Pay using</label>
+          <div class="am-methods">
+            @for (m of methods; track m) {
+              <button type="button" class="am-method" [class.am-method--on]="method() === m" (click)="setMethod(m)">
+                {{ m === 'UPI' ? 'UPI' : 'Debit / Credit card' }}
+              </button>
+            }
+          </div>
+          <span class="am-hint">You'll complete the payment in Razorpay's secure window. We never see your card or UPI details.</span>
+        </div>
+
+        <button type="submit" class="am-btn-primary" [disabled]="submitting() || accounts().length === 0">
+          {{ submitting() ? 'Please wait…' : 'Proceed to pay' }}
+        </button>
+      </form>
+    }
+
+    @case ('processing') {
+      <div class="am-card am-center">
+        <div class="am-spinner"></div>
+        <h3 class="am-state-title">Confirming your payment…</h3>
+        <p class="am-muted">Please don't close or refresh this page.</p>
+      </div>
+    }
+
+    @case ('success') {
+      <div class="am-card am-center">
+        <div class="am-icon am-icon--ok">✓</div>
+        <h3 class="am-state-title">Money added</h3>
+        <p class="am-big">{{ formatInr(result()?.amount ?? 0) }}</p>
+        <p class="am-muted">{{ result()?.paymentMethod }} · added to your account</p>
+        <div class="am-actions">
+          <button class="am-btn-primary" (click)="reset()">Add more</button>
+          <a class="am-btn-ghost" routerLink="/transactions/list">View transactions</a>
+        </div>
+      </div>
+    }
+
+    @case ('pending') {
+      <div class="am-card am-center">
+        <div class="am-icon am-icon--wait">…</div>
+        <h3 class="am-state-title">Payment is still processing</h3>
+        <p class="am-muted">The bank is taking longer than usual. Your balance will update automatically once it is confirmed — you don't need to pay again.</p>
+        <div class="am-actions">
+          <a class="am-btn-primary" routerLink="/transactions/list">View transactions</a>
+          <button class="am-btn-ghost" (click)="reset()">Back</button>
+        </div>
+      </div>
+    }
+
+    @case ('failed') {
+      <div class="am-card am-center">
+        <div class="am-icon am-icon--bad">!</div>
+        <h3 class="am-state-title">Payment failed</h3>
+        <p class="am-muted">{{ failureMessage() }} No money has been added to your account.</p>
+        <div class="am-actions">
+          <button class="am-btn-primary" (click)="reset()">Try again</button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Recent payments -->
+  <div class="am-history">
+    <h3 class="am-hist-title">Recent payments</h3>
+    @if (historyLoading()) {
+      <div class="am-muted">Loading…</div>
+    } @else if (history().length === 0) {
+      <div class="am-muted">No payments yet.</div>
+    } @else {
+      @for (p of history(); track p.id) {
+        <div class="am-hist-row">
+          <div>
+            <div class="am-hist-amt">{{ formatInr(p.amount) }}</div>
+            <div class="am-hist-meta">{{ p.paymentMethod }} · {{ p.createdAt | date:'d MMM yyyy, h:mm a' }}</div>
+          </div>
+          <span class="am-status" [ngClass]="'am-status--' + p.status.toLowerCase()">{{ p.status }}</span>
+        </div>
+      }
+    }
+  </div>
+</div>

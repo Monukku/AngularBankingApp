@@ -6,6 +6,7 @@ import { Account } from '../../features/accounts/models/account.model';
 import { Card } from '../../features/cards/models/card.model';
 import { Loan } from '../../features/loans/models/loan.model';
 import { Transaction } from '../../features/transactions/models/transaction.model';
+import { PaymentOrder, PaymentOrderRequest } from '../../features/transactions/models/payment.model';
 
 // ── Shared response shapes ────────────────────────────────────────────────────
 
@@ -311,6 +312,21 @@ export class ApiService {
 
   reverseTransaction(transactionId: string, reason: string = 'Manual reversal'): Observable<Transaction> {
     return this.http.post<Transaction>(`${this.baseUrl}/transactions/${transactionId}/reverse`, { reason });
+  }
+
+  // ── PAYMENTS (Razorpay add-money) ─────────────────────────────────────────
+
+  createPaymentOrder(data: PaymentOrderRequest, idempotencyKey: string): Observable<PaymentOrder> {
+    const headers = new HttpHeaders({ 'X-Idempotency-Key': idempotencyKey });
+    return this.http.post<PaymentOrder>(`${this.baseUrl}/payments/order`, data, { headers });
+  }
+
+  getPaymentOrder(paymentId: string): Observable<PaymentOrder> {
+    return this.http.get<PaymentOrder>(`${this.baseUrl}/payments/${paymentId}`);
+  }
+
+  getMyPaymentOrders(params?: { page?: number; size?: number; sort?: string }): Observable<PagedResponse<PaymentOrder>> {
+    return this.http.get<PagedResponse<PaymentOrder>>(`${this.baseUrl}/payments/my-orders`, { params: params as Record<string, string | number> });
   }
 
   // ── CARDS ────────────────────────────────────────────────────────────────

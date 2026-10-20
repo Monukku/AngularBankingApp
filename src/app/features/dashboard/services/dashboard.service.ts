@@ -173,7 +173,7 @@ export class DashboardService {
     if (this.useMock) {
       return this.http.get<CreditCard[]>(this.url('cards')).pipe(this.withDelay(this.delays.cards));
     }
-    return this.api.getMyCards() as Observable<CreditCard[]>;
+    return this.api.getMyCards() as unknown as Observable<CreditCard[]>;
   }
 
   // No /workflows endpoint — return empty in real mode

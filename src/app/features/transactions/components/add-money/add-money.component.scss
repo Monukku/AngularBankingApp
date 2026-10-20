@@ -1,0 +1,140 @@
+:host { display: block; background: #0B0F1A; min-height: 100%; width: 100%; }
+
+$amber:  #F2B33D;
+$green:  #34d399;
+$red:    #f87171;
+$t1:     #f1f5f9;
+$t2:     #8A97AD;
+$t3:     #475569;
+$card:   #111827;
+$input:  #1A2234;
+
+.am-page {
+  padding: 32px 36px;
+  max-width: 640px;
+  color: $t1;
+  @media (max-width: 600px) { padding: 16px; }
+}
+
+.am-header { margin-bottom: 24px; }
+.am-title  { font-size: 28px; font-weight: 700; margin: 0 0 5px; letter-spacing: -0.5px; }
+.am-sub    { font-size: 13px; color: $t2; margin: 0; }
+
+.am-card {
+  background: $card;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.am-center { align-items: center; text-align: center; padding: 40px 24px; }
+
+.am-field  { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.am-label  { font-size: 12px; font-weight: 600; color: $t2; text-transform: uppercase; letter-spacing: 0.5px; }
+.am-input {
+  background: $input;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: $t1;
+  font-size: 15px;
+  outline: none;
+  &:focus { border-color: $amber; }
+}
+.am-amount { font-size: 22px; font-weight: 700; }
+.am-hint   { font-size: 12px; color: $t3; }
+.am-muted  { font-size: 13px; color: $t2; }
+.am-err    { font-size: 12px; color: $red; }
+
+.am-quick  { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.am-chip {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: $t2;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  &:hover { border-color: $amber; color: $amber; }
+}
+
+.am-methods { display: flex; gap: 10px; }
+.am-method {
+  flex: 1;
+  background: $input;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px;
+  color: $t2;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  &--on { border-color: $amber; color: $amber; background: rgba(242,179,61,0.08); }
+}
+
+.am-btn-primary {
+  background: $amber;
+  color: #0B0F1A;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+.am-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: $t1;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.am-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+
+.am-state-title { font-size: 20px; font-weight: 700; margin: 14px 0 6px; }
+.am-big { font-size: 36px; font-weight: 800; margin: 0 0 6px; letter-spacing: -1px; }
+
+.am-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 700;
+  &--ok   { background: rgba(52,211,153,0.12); color: $green; }
+  &--bad  { background: rgba(248,113,113,0.12); color: $red; }
+  &--wait { background: rgba(242,179,61,0.12); color: $amber; }
+}
+
+.am-spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: $amber;
+  animation: am-spin 0.9s linear infinite;
+}
+@keyframes am-spin { to { transform: rotate(360deg); } }
+
+.am-history { margin-top: 32px; }
+.am-hist-title { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+.am-hist-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.am-hist-amt  { font-size: 15px; font-weight: 700; }
+.am-hist-meta { font-size: 12px; color: $t3; margin-top: 2px; }
+
+.am-status {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+  padding: 4px 10px; border-radius: 20px;
+  background: rgba(255,255,255,0.06); color: $t2;
+  &--completed { background: rgba(52,211,153,0.12); color: $green; }
+  &--failed    { background: rgba(248,113,113,0.12); color: $red; }
+  &--created, &--processing { background: rgba(242,179,61,0.12); color: $amber; }
+}
