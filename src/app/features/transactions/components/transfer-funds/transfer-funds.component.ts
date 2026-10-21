@@ -5,6 +5,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, startWith } from 'rxjs';
 import { TransactionService } from '../../services/transaction.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AccountService } from '../../../accounts/services/account.service';
@@ -61,13 +63,21 @@ export class TransferFundsComponent implements OnInit {
     amount: [null as number | null, [Validators.required, Validators.min(1)]],
   });
 
+  // Form controls aren't signals, so bridge their values or the computeds below never update
+  private fromAccountId = toSignal(
+    this.recipientForm.controls.fromAccountId.valueChanges.pipe(startWith(this.recipientForm.controls.fromAccountId.value)),
+    { initialValue: this.recipientForm.controls.fromAccountId.value },
+  );
+  amountValue = toSignal(
+    this.amountForm.controls.amount.valueChanges.pipe(startWith(this.amountForm.controls.amount.value), map(v => v ?? 0)),
+    { initialValue: 0 },
+  );
+
   // ── computed
   fromAccount = computed(() => {
-    const id = this.recipientForm.get('fromAccountId')?.value;
+    const id = this.fromAccountId();
     return this.accounts().find(a => (a.id ?? a.accountId) === id) ?? null;
   });
-
-  amountValue = computed(() => this.amountForm.get('amount')?.value ?? 0);
 
   amountError = computed(() => {
     const amt = this.amountValue();
