@@ -3,7 +3,7 @@
     <h3>Recent Transactions</h3>
     <div class="filters">
       <div class="rb-dd-wrap" (mouseenter)="openHoverDD()" (mouseleave)="closeHoverDD()">
-        <button class="rb-dd-trigger period-dd-trigger" [class.open]="openDropdown">
+        <button class="rb-dd-trigger period-dd-trigger" [class.open]="openDropdown" (click)="openHoverDD(); $event.stopPropagation()">
           <span>{{ selectedPeriod() }}</span>
           <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>

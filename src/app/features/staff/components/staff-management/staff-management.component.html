@@ -34,7 +34,7 @@
       </div>
       <!-- Custom role filter dropdown -->
       <div class="dd-wrap" (mouseenter)="openHoverDD('filter')" (mouseleave)="closeHoverDD()">
-        <button class="dd-trigger" [class.open]="openDropdown === 'filter'">
+        <button class="dd-trigger" [class.open]="openDropdown === 'filter'" (click)="openHoverDD('filter'); $event.stopPropagation()">
           <span>{{ filterRole || 'All roles' }}</span>
           <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -154,7 +154,7 @@
 
       <label class="modal-label mt">Role *</label>
       <div class="dd-wrap" (mouseenter)="openHoverDD('create')" (mouseleave)="closeHoverDD()">
-        <button class="dd-trigger dd-trigger--modal" [class.open]="openDropdown === 'create'">
+        <button class="dd-trigger dd-trigger--modal" [class.open]="openDropdown === 'create'" (click)="openHoverDD('create'); $event.stopPropagation()">
           <span [class.placeholder]="!createForm.role">{{ createForm.role || 'Select role…' }}</span>
           <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -202,7 +202,7 @@
       </p>
       <label class="modal-label">New Role *</label>
       <div class="dd-wrap" (mouseenter)="openHoverDD('roleModal')" (mouseleave)="closeHoverDD()">
-        <button class="dd-trigger dd-trigger--modal" [class.open]="openDropdown === 'roleModal'">
+        <button class="dd-trigger dd-trigger--modal" [class.open]="openDropdown === 'roleModal'" (click)="openHoverDD('roleModal'); $event.stopPropagation()">
           <span [class.placeholder]="!newRole">{{ newRole || 'Select role…' }}</span>
           <svg class="dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

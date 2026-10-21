@@ -30,7 +30,7 @@
         <div class="form-field">
           <label>Account Type</label>
           <div class="rb-dd-wrap" (mouseenter)="openHoverDD('accountType')" (mouseleave)="closeHoverDD()">
-            <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'accountType'">
+            <button type="button" class="rb-dd-trigger" [class.open]="openDropdown === 'accountType'" (click)="openHoverDD('accountType'); $event.stopPropagation()">
               <span>{{ createForm.get('accountType')?.value || 'Select type…' }}</span>
               <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>

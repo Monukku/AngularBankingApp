@@ -1,4 +1,6 @@
-<div class="sidebar-container" *ngIf="isAuthenticated$ | async" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+<div class="mobile-backdrop" *ngIf="nav.open()" (click)="nav.close()"></div>
+
+<div class="sidebar-container" *ngIf="isAuthenticated$ | async" [class.mobile-open]="nav.open()" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
 
   <!-- User Section -->
   <div class="user-section">

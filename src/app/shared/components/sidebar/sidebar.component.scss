@@ -545,9 +545,19 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
     z-index: 1000;
     transition: left 0.3s $ease;
 
-    &.mobile-open { left: 0; box-shadow: 0 0 0 100vw rgba(0,0,0,0.4); }
+    &.mobile-open { left: 0; }
+  }
+
+  .mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.4);
   }
 }
+
+.mobile-backdrop { display: none; }
+@media (max-width: 768px) { .mobile-backdrop { display: block; } }
 
 @media (prefers-reduced-motion: reduce) {
   .nav-item, .logout-btn, .nav-icon-box { transition: none; }

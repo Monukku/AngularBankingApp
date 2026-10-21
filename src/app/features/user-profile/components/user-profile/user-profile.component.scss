@@ -247,6 +247,9 @@
   border: 1px solid rgba(245,160,0,0.2);
   border-radius: 6px;
   padding: 3px 5px;
+  min-width: 32px;
+  min-height: 32px;
+  touch-action: manipulation;
   cursor: pointer;
   color: #f5a000;
   flex-shrink: 0;

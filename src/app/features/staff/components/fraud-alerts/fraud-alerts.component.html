@@ -16,7 +16,7 @@
       <input class="sf-search-input" type="text" placeholder="Search by account or alert ID…" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
     </div>
     <div class="rb-dd-wrap sf-dd" (mouseenter)="openHoverDD('severity')" (mouseleave)="closeHoverDD()">
-      <button class="rb-dd-trigger" [class.open]="openDropdown() === 'severity'">
+      <button class="rb-dd-trigger" [class.open]="openDropdown() === 'severity'" (click)="openHoverDD('severity'); $event.stopPropagation()">
         <span>{{ severityLabel }}</span>
         <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>

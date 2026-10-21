@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit } from '@angular/core';
+import { Component, HostListener, input, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -31,6 +31,9 @@ export class TransactionListWidgetComponent implements OnInit {
   openDropdown = false;
 
   ngOnInit(): void {}
+
+  @HostListener('document:click')
+  onDocumentClick(): void { this.openDropdown = false; }
 
   openHoverDD() { this.openDropdown = true; }
   closeHoverDD() { this.openDropdown = false; }

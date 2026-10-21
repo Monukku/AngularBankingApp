@@ -14,6 +14,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrandAnimationService } from '../../../core/services/brand-animation.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-header',
@@ -38,6 +39,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private brandAnim = inject(BrandAnimationService);
   public themeService = inject(ThemeService);
+  public nav = inject(MobileNavService);
 
   isAuthenticated$: Observable<boolean> = this.store.select(selectIsAuthenticated);
   currentUser$: Observable<any> = this.store.select(selectCurrentUser);

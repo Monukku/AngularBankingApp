@@ -3,6 +3,11 @@
 
     @if (isAuthenticated$ | async; as isAuth) {
 
+      <!-- Menu button (phones only) -->
+      <button mat-icon-button class="menu-toggle" (click)="nav.toggle()" aria-label="Open menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+
       <!-- Amber brand strip -->
       <a routerLink="/dashboard" class="brand-strip" aria-label="Rewa Bank">
         <div class="wordmark">

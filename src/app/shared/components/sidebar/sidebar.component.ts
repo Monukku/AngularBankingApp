@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { BrandAnimationService } from '../../../core/services/brand-animation.service';
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -30,6 +31,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   public themeService = inject(ThemeService);
   public authService = inject(AuthService);
+  public nav = inject(MobileNavService);
 
   isAuthenticated$: Observable<boolean> = this.store.select(selectIsAuthenticated);
   currentUser$: Observable<any> = this.store.select(selectCurrentUser);
@@ -37,7 +39,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   collapsed = signal(true);
   @Output() collapsedChange = new EventEmitter<boolean>();
 
-  @HostBinding('class.sidebar-collapsed') get isCollapsed() { return this.collapsed(); }
+  @HostBinding('class.sidebar-collapsed') get isCollapsed() { return this.collapsed() && !this.nav.open(); }
 
   onMouseEnter(): void {
     this.collapsed.set(false);

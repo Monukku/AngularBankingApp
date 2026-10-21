@@ -36,7 +36,7 @@
     </div>
     <div class="th-filters-right">
       <div class="rb-dd-wrap th-filter-select" (mouseenter)="openHoverDD('status')" (mouseleave)="closeHoverDD()">
-        <button class="rb-dd-trigger" [class.open]="openDropdown === 'status'">
+        <button class="rb-dd-trigger" [class.open]="openDropdown === 'status'" (click)="openHoverDD('status'); $event.stopPropagation()">
           <span>{{ statusLabel }}</span>
           <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>

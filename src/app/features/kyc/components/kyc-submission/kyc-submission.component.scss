@@ -244,13 +244,15 @@ $t3:    #475569;
   gap: 12px;
   padding: 16px 0 24px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 
   input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
     accent-color: $amber;
-    margin-top: 2px;
+    margin: 0;
     cursor: pointer;
   }
 
