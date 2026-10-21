@@ -164,7 +164,7 @@
           <div class="kf-field">
             <label class="kf-label">Gender</label>
             <div class="rb-dd-wrap" (mouseenter)="openHoverDD('gender')" (mouseleave)="closeHoverDD()">
-              <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'gender'">
+              <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'gender'" (click)="openHoverDD('gender'); $event.stopPropagation()">
                 <span [class.rb-dd-placeholder]="!personalForm.get('gender')?.value">{{ genderLabel }}</span>
                 <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
@@ -188,7 +188,7 @@
         <div class="kf-field kf-half">
           <label class="kf-label">Nationality</label>
           <div class="rb-dd-wrap" (mouseenter)="openHoverDD('nationality')" (mouseleave)="closeHoverDD()">
-            <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'nationality'">
+            <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'nationality'" (click)="openHoverDD('nationality'); $event.stopPropagation()">
               <span>{{ personalForm.get('nationality')?.value || 'Select…' }}</span>
               <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -293,7 +293,7 @@
           <div class="kf-field">
             <label class="kf-label">State</label>
             <div class="rb-dd-wrap" (mouseenter)="openHoverDD('state')" (mouseleave)="closeHoverDD()">
-              <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'state'">
+              <button type="button" class="rb-dd-trigger kf-dd-trigger" [class.open]="openDropdown === 'state'" (click)="openHoverDD('state'); $event.stopPropagation()">
                 <span [class.rb-dd-placeholder]="!addressForm.get('state')?.value">{{ addressForm.get('state')?.value || 'Select state…' }}</span>
                 <svg class="rb-dd-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
