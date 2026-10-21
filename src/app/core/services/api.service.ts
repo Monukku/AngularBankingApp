@@ -229,7 +229,7 @@ export class ApiService {
 
   createAccount(data: { accountType: string; customerId: string }): Observable<Account> {
     const headers = new HttpHeaders({ 'X-Customer-Id': data.customerId });
-    const { customerId, ...body } = data;
+    const { customerId: _customerId, ...body } = data;
     return this.http.post<Account>(`${this.baseUrl}/accounts`, body, { headers });
   }
 

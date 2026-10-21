@@ -72,7 +72,7 @@
           </div>
         }
 
-        @if (transaction().charges != null) {
+        @if (transaction().charges !== null && transaction().charges !== undefined) {
           <div class="dr">
             <span class="dr-label">Charges</span>
             <span class="dr-val">{{ transaction().charges | currency:'INR':'symbol':'1.2-2' }}</span>

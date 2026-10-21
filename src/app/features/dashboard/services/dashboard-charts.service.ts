@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import type { EChartsOption } from 'echarts';
 import * as echarts from 'echarts';
 import { IncomeData, SpendingData } from '../models/dashboard.model';

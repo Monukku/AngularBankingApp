@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
 export class AuditService {
   constructor() {}
 
-  logAction(action: string): void {
+  logAction(_action: string): void {
     // Implement audit logging logic here
   }
 }

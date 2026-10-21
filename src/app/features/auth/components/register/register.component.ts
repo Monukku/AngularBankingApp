@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { LoggerService } from '../../../../core/services/logger.service';
-import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
+import { trigger, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-register',
@@ -128,7 +128,7 @@ export class RegisterComponent {
   /**
    * Custom validator to check if passwords match
    */
-  private passwordMatchValidator(form: FormGroup): { [key: string]: boolean } | null {
+  private passwordMatchValidator(form: FormGroup): Record<string, boolean> | null {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
 

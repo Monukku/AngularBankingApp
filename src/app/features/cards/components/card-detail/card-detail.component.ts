@@ -2,7 +2,7 @@ import {
   Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CardService } from '../../service/card.service';
 import { AuthService } from '../../../../core/services/auth.service';

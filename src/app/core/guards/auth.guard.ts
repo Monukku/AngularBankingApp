@@ -3,7 +3,6 @@ import { isPlatformBrowser } from '@angular/common';
 import {
   CanActivateFn,
   ActivatedRouteSnapshot,
-  Router,
   RouterStateSnapshot,
 } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
@@ -22,7 +21,6 @@ export const authGuard: CanActivateFn = async (
   state: RouterStateSnapshot
 ): Promise<boolean> => {
   const keycloakService = inject(KeycloakService);
-  const router = inject(Router);
   const store = inject(Store);
   const platformId = inject(PLATFORM_ID);
 
@@ -37,7 +35,7 @@ export const authGuard: CanActivateFn = async (
       if (localStorage.getItem('CYPRESS_E2E') === 'true') {
         return true;
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }

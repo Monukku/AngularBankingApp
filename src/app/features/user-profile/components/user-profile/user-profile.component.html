@@ -94,7 +94,7 @@
             <span class="info-label">First Name</span>
             @if (editing === 'firstName') {
               <div class="edit-inline">
-                <input class="edit-input" [(ngModel)]="editValue" (keyup.enter)="saveField('firstName')" (keyup.escape)="cancelEdit()" placeholder="First name" autofocus />
+                <input class="edit-input" [(ngModel)]="editValue" (keyup.enter)="saveField('firstName')" (keyup.escape)="cancelEdit()" placeholder="First name" appAutoFocus />
                 <button class="btn-save" (click)="saveField('firstName')" [disabled]="saving">
                   @if (saving) { <span class="btn-spinner"></span> } @else { ✓ }
                 </button>
@@ -115,7 +115,7 @@
             <span class="info-label">Last Name</span>
             @if (editing === 'lastName') {
               <div class="edit-inline">
-                <input class="edit-input" [(ngModel)]="editValue" (keyup.enter)="saveField('lastName')" (keyup.escape)="cancelEdit()" placeholder="Last name" autofocus />
+                <input class="edit-input" [(ngModel)]="editValue" (keyup.enter)="saveField('lastName')" (keyup.escape)="cancelEdit()" placeholder="Last name" appAutoFocus />
                 <button class="btn-save" (click)="saveField('lastName')" [disabled]="saving">
                   @if (saving) { <span class="btn-spinner"></span> } @else { ✓ }
                 </button>

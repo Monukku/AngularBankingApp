@@ -1,4 +1,4 @@
-import { Observable, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../services/error-handler.service';
 

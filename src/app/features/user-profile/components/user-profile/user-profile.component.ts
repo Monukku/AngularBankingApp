@@ -6,11 +6,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { KeycloakService } from 'keycloak-angular';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { catchError, of } from 'rxjs';
+import { AutoFocusDirective } from '../../../../shared/directives/auto-focus.directive';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatSnackBarModule, AutoFocusDirective],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,7 +110,7 @@ export class UserProfileComponent implements OnInit {
     if (!val) return;
     this.saving = true;
     this.userProfileService.updateName({ [field]: val }).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.authProfile = { ...this.authProfile, [field]: val };
         this.editing = null;
         this.saving  = false;

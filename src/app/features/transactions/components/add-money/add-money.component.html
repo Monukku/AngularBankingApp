@@ -22,7 +22,7 @@
                 <option [value]="acc.id || acc.accountId">{{ acc.accountType }} · {{ acc.accountNumber }}</option>
               }
             </select>
-            @if (selectedAccount()?.balance != null) {
+            @if (selectedAccount()?.balance !== null && selectedAccount()?.balance !== undefined) {
               <span class="am-hint">Current balance {{ formatInr(selectedAccount().balance) }}</span>
             }
           }

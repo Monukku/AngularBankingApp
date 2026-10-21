@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit, HostListener } from '@angular/core';
+import { Component, input, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';

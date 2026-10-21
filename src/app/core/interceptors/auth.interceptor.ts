@@ -12,6 +12,7 @@ import { switchMap, catchError } from 'rxjs/operators';
 
 import { KeycloakService } from 'keycloak-angular';
 import { LoggerService } from '../services/logger.service';
+import { environment } from '../../../environments/environment';
 
 /**
  * Configuration for auth interceptor
@@ -49,6 +50,11 @@ export const authInterceptor: HttpInterceptorFn = (
     return next(req);
   }
 
+  // E2E test bypass (non-production builds only), mirrors authGuard
+  if (!environment.production && isE2EBypassEnabled()) {
+    return next(req);
+  }
+
   return from(getValidToken(keycloakService, config, logger)).pipe(
     switchMap((token) => {
       const authReq = addAuthHeader(req, token, logger);
@@ -59,6 +65,14 @@ export const authInterceptor: HttpInterceptorFn = (
     )
   );
 };
+
+function isE2EBypassEnabled(): boolean {
+  try {
+    return localStorage.getItem('CYPRESS_E2E') === 'true';
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Check if request should be excluded from auth
