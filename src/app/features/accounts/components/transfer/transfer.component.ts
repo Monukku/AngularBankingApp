@@ -76,12 +76,15 @@ export class TransferFundsComponent implements OnInit {
   transfer(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const v = this.form.value;
+    const from = this.accounts().find(a => (a.id ?? a.accountId) === v.fromAccountId);
+    if (!from) { this.notifications.error('Select an account to send from.'); return; }
     this.transferring.set(true);
     this.transactionService.transferFunds({
-      fromAccountId:   v.fromAccountId!,
-      toAccountNumber: v.toAccountNumber!,
-      amount:          v.amount!,
-      description:     v.description || undefined,
+      sourceAccountId:          v.fromAccountId!,
+      sourceAccountNumber:      from.accountNumber,
+      destinationAccountNumber: v.toAccountNumber!,
+      amount:                   v.amount!,
+      description:              v.description || undefined,
     }).subscribe({
       next: () => {
         this.transferring.set(false);

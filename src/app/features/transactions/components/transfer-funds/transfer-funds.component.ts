@@ -159,12 +159,20 @@ export class TransferFundsComponent implements OnInit {
     const v  = this.recipientForm.value;
     const amt = this.amountForm.value.amount!;
 
+    const from = this.fromAccount();
+    if (!from) {
+      this.transferring.set(false);
+      this.notifications.error('Select an account to send from.');
+      return;
+    }
+
     this.transactionService.transferFunds({
-      fromAccountId:   v.fromAccountId!,
-      toAccountNumber: v.toAccountNumber ?? '',
-      amount:          amt,
-      description:     this.noteText || undefined,
-      paymentMethod:   this.selectedMethod(),
+      sourceAccountId:          v.fromAccountId!,
+      sourceAccountNumber:      from.accountNumber,
+      destinationAccountNumber: v.toAccountNumber ?? '',
+      amount:                   amt,
+      description:              this.noteText || undefined,
+      paymentMethod:            this.selectedMethod(),
     }).subscribe({
       next: (txn: any) => {
         this.transferring.set(false);

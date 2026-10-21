@@ -18,6 +18,16 @@ export interface PagedResponse<T> {
   size: number;
 }
 
+/** Body of POST /transactions/transfer. The backend resolves destinationAccountId itself. */
+export interface TransferRequest {
+  sourceAccountId: string;
+  sourceAccountNumber: string;
+  destinationAccountNumber: string;
+  amount: number;
+  description?: string;
+  paymentMethod?: string;
+}
+
 export interface BalanceResponse {
   accountNumber: string;
   balance: number;
@@ -301,7 +311,7 @@ export class ApiService {
     return this.http.get<Transaction>(`${this.baseUrl}/transactions/${transactionId}`);
   }
 
-  transfer(data: Record<string, unknown>, idempotencyKey: string): Observable<Transaction> {
+  transfer(data: TransferRequest, idempotencyKey: string): Observable<Transaction> {
     const headers = new HttpHeaders({ 'X-Idempotency-Key': idempotencyKey });
     return this.http.post<Transaction>(`${this.baseUrl}/transactions/transfer`, data, { headers });
   }

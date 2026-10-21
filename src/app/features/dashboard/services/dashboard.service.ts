@@ -237,13 +237,18 @@ export class DashboardService {
   // ─── Mutations (unchanged) ────────────────────────────────────
 
   // POST /api/v1/transactions/transfer
-  sendMoney(toAccountNumber: string, amount: number, fromAccountId: string, idempotencyKey: string): Observable<any> {
+  sendMoney(toAccountNumber: string, amount: number, fromAccountId: string, fromAccountNumber: string, idempotencyKey: string): Observable<any> {
     if (this.useMock) {
       return new Observable(o => {
         setTimeout(() => { o.next({ success: true, message: 'Transfer successful' }); o.complete(); }, 1000);
       });
     }
-    return this.api.transfer({ fromAccountId, toAccountNumber, amount }, idempotencyKey);
+    return this.api.transfer({
+      sourceAccountId: fromAccountId,
+      sourceAccountNumber: fromAccountNumber,
+      destinationAccountNumber: toAccountNumber,
+      amount,
+    }, idempotencyKey);
   }
 
   // requestMoney and topUp have no backend endpoints — mock only

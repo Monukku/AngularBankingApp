@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService, PagedResponse } from '../../../core/services/api.service';
+import { ApiService, PagedResponse, TransferRequest } from '../../../core/services/api.service';
 import { Transaction } from '../models/transaction.model';
 
 @Injectable({ providedIn: 'root' })
@@ -19,13 +19,7 @@ export class TransactionService {
     return this.api.getTransaction(id);
   }
 
-  transferFunds(data: {
-    fromAccountId: string;
-    toAccountNumber: string;
-    amount: number;
-    description?: string;
-    paymentMethod?: string;
-  }): Observable<Transaction> {
+  transferFunds(data: TransferRequest): Observable<Transaction> {
     return this.api.transfer(data, crypto.randomUUID());
   }
 }

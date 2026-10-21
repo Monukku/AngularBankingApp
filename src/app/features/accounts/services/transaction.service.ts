@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../../core/services/api.service';
+import { ApiService, TransferRequest } from '../../../core/services/api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,12 +14,7 @@ export class TransactionService {
   }
 
   // POST /api/v1/transactions/transfer  (X-Idempotency-Key auto-generated)
-  transferFunds(data: {
-    fromAccountId: string;
-    toAccountNumber: string;
-    amount: number;
-    description?: string;
-  }): Observable<any> {
+  transferFunds(data: TransferRequest): Observable<any> {
     return this.api.transfer(data, crypto.randomUUID());
   }
 
