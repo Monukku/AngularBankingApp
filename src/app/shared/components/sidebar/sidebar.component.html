@@ -16,7 +16,8 @@
       <div class="user-info">
         <div class="username-row">
           <p class="username">{{ getDisplayName(user) }}</p>
-          <button class="icon-btn" title="Edit profile" (click)="goToProfile()">
+          <mat-icon class="verified-icon" title="Verified">verified</mat-icon>
+          <button class="icon-btn icon-btn--edit" title="Edit profile" (click)="goToProfile()">
             <mat-icon class="action-icon">edit</mat-icon>
           </button>
         </div>
@@ -33,22 +34,24 @@
     </div>
     </ng-container>
 
-    <!-- Divider -->
-    <div class="us-divider"></div>
+    <!-- Role row -->
+    <div class="us-row">
+      <span class="us-row-label">Role</span>
+      <div class="badge-row">
+        <span class="role-badge role--type" *ngIf="authService.isStaff()">
+          <mat-icon class="badge-icon">person</mat-icon>Staff
+        </span>
+        <span class="role-badge" [ngClass]="'role--' + authService.getRoleBadge().toLowerCase().replace('. ', '-').replace(' ', '-')">
+          <span class="badge-dot"></span>{{ authService.getRoleBadge() }}
+        </span>
+      </div>
+    </div>
 
-    <!-- Roles row -->
-    <div class="us-roles-header">
-      <span class="us-roles-label">Access Roles</span>
+    <!-- Status row -->
+    <div class="us-row">
+      <span class="us-row-label">Status</span>
       <span class="us-active">
         <span class="us-active-dot"></span>Active now
-      </span>
-    </div>
-    <div class="badge-row">
-      <span class="role-badge role--type" *ngIf="authService.isStaff()">
-        <mat-icon class="badge-icon">person</mat-icon>Staff
-      </span>
-      <span class="role-badge" [ngClass]="'role--' + authService.getRoleBadge().toLowerCase().replace('. ', '-').replace(' ', '-')">
-        <span class="badge-dot"></span>{{ authService.getRoleBadge() }}
       </span>
     </div>
 

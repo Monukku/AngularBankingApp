@@ -58,9 +58,9 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
 .us-top {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
 }
 
 .avatar-wrap {
@@ -69,8 +69,8 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
 }
 
 .avatar-circle {
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, #f5c842, #e09000);
   border: none;
@@ -124,10 +124,9 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
 .username-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 6px;
-  .username { margin: 0; }
+  gap: 5px;
+  margin-bottom: 4px;
+  .username { margin: 0; min-width: 0; }
 }
 
 .email-row {
@@ -157,36 +156,42 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
   height: 13px;
 }
 
-.us-divider {
-  height: 1px;
-  background: var(--sb-border);
-  margin-bottom: 8px;
+.verified-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: #22c55e;
 }
 
-.us-roles-header {
+.icon-btn--edit { margin-left: auto; }
+
+// Label (left) / value (right) rows, e.g. Role and Status
+.us-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
-  gap: 4px;
+  gap: 8px;
+  padding: 7px 10px;
+  margin-top: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
 }
 
-.us-roles-label {
-  font-size: 9px;
-  font-weight: 600;
+.us-row-label {
+  font-size: 11px;
+  font-weight: 500;
   color: #8fa0b8;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
   white-space: nowrap;
 }
 
 .us-active {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 9px;
+  gap: 4px;
+  font-size: 11px;
   color: #5fe8cb;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -205,6 +210,7 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
   gap: 5px;
   flex-wrap: nowrap;
   overflow: hidden;
+  font-size: 11px;
 }
 
 .role-badge {
@@ -315,7 +321,7 @@ $ease:         cubic-bezier(0.4,0,0.2,1);
 
 .username {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--sb-username);
   white-space: nowrap;
