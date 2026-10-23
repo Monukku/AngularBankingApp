@@ -291,11 +291,13 @@
             <div class="cd-svc-name">Profile</div>
             <div class="cd-svc-desc">Personal &amp; contact details</div>
           </a>
-          <a routerLink="/staff/audit-logs" class="cd-svc-tile">
-            <div class="cd-svc-icon"><span class="material-icons">manage_search</span></div>
-            <div class="cd-svc-name">Audit Logs</div>
-            <div class="cd-svc-desc">Read-only compliance trail</div>
-          </a>
+          @if (authService.isAuditor()) {
+            <a routerLink="/staff/audit-logs" class="cd-svc-tile">
+              <div class="cd-svc-icon"><span class="material-icons">manage_search</span></div>
+              <div class="cd-svc-name">Audit Logs</div>
+              <div class="cd-svc-desc">Read-only compliance trail</div>
+            </a>
+          }
         </div>
 
         <!-- Coming soon -->

@@ -68,7 +68,8 @@ export class DashboardComponent implements OnInit {
   get displayName(): string {
     try {
       const p = (this.authService as any).keycloakService?.getKeycloakInstance?.()?.idTokenParsed;
-      return p?.given_name || p?.name || p?.preferred_username || 'there';
+      const name: string = p?.given_name || p?.name || p?.preferred_username || 'there';
+      return name.charAt(0).toUpperCase() + name.slice(1);
     } catch { return 'there'; }
   }
 

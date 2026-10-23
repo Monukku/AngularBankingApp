@@ -89,17 +89,17 @@ body {
 
   // Dashboard surfaces
   --dash-bg:         #0d0f1a;
-  --dash-s1:         #141626;
+  --dash-s1:         #141c2e;
   --dash-s2:         #1c1f35;
   --dash-s3:         #232640;
 
   // Dashboard text
   --dash-t1:         #f0f2ff;
-  --dash-t2:         #8b8fa8;
-  --dash-t3:         #5a5e78;
+  --dash-t2:         #cbd5e1;
+  --dash-t3:         #94a3b8;
 
   // Dashboard borders
-  --dash-border:     rgba(255, 255, 255, 0.07);
+  --dash-border:     #24304a;
   --dash-border-h:   rgba(124, 58, 237, 0.35);
   --dash-hover-bg:   rgba(245, 166, 35, 0.04);
 
@@ -126,7 +126,7 @@ body {
   --sb-item-color:   #5a6080;
   --sb-item-hover-bg:#232640;
   --sb-item-hover-c: #7080a8;
-  --sb-tile-bg:      #1c1f30;
+  --sb-tile-bg:      transparent;
   --sb-tile-color:   #4a5270;
   --sb-foot-border:  #161929;
 }
