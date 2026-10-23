@@ -843,8 +843,8 @@ $cd-blue:     #60a5fa;
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: $cd-green;
-  box-shadow: 0 0 6px rgba(52,211,153,0.6);
+  background: $cd-amber;
+  box-shadow: 0 0 6px rgba(245,166,35,0.6);
 
   &--dim { background: var(--dash-t3); box-shadow: none; }
 }
@@ -879,14 +879,14 @@ $cd-blue:     #60a5fa;
   position: relative;
   display: block;
   text-decoration: none;
-  background: var(--dash-s2);
+  background: var(--dash-s1);
   transition: border-color 0.2s, transform 0.2s, background 0.2s;
 
   &:not(.cd-svc-tile--disabled) {
     cursor: pointer;
     &:hover {
-      border-color: rgba(245,166,35,0.35);
-      background: rgba(245,166,35,0.04);
+      border-color: #f59e0b;
+      background: var(--dash-hover-bg);
       transform: translateY(-2px);
     }
   }

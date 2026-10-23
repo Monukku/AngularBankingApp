@@ -101,6 +101,7 @@ body {
   // Dashboard borders
   --dash-border:     rgba(255, 255, 255, 0.07);
   --dash-border-h:   rgba(124, 58, 237, 0.35);
+  --dash-hover-bg:   rgba(245, 166, 35, 0.04);
 
   // Shadows
   --card-shadow:     0 1px 4px rgba(0,0,0,.4), 0 4px 18px rgba(0,0,0,.25);
@@ -134,35 +135,37 @@ body {
 // LIGHT MODE — .light class on <html>
 // ═══════════════════════════════════════════
 :root.light {
-  --bg-page:         #f0f2ff;
+  // Warm neutral family (stone greys) to sit with the amber accent
+  --bg-page:         #faf8f5;
   --bg-surface:      #ffffff;
-  --bg-surface-2:    #f9fafb;
-  --bg-surface-3:    #f3f4f6;
-  --bg-input:        #f3f4f6;
+  --bg-surface-2:    #fbf9f6;
+  --bg-surface-3:    #f5f1ea;
+  --bg-input:        #f5f1ea;
 
   --header-bg:       #ffffff;
-  --header-border:   #e5e7eb;
-  --search-bg:       #f3f4f6;
+  --header-border:   #ece7df;
+  --search-bg:       #f5f1ea;
   --search-bg-focus: #ffffff;
 
-  --text-primary:    #111827;
-  --text-secondary:  #6b7280;
-  --text-tertiary:   #9ca3af;
+  --text-primary:    #1c1917;
+  --text-secondary:  #78716c;
+  --text-tertiary:   #a8a29e;
 
-  --border-color:    #e5e7eb;
-  --border-hover:    rgba(99, 102, 241, 0.35);
+  --border-color:    #ece7df;
+  --border-hover:    rgba(245, 158, 11, 0.4);
 
-  --dash-bg:         #f0f2ff;
+  --dash-bg:         #faf8f5;
   --dash-s1:         #ffffff;
-  --dash-s2:         #f9fafb;
-  --dash-s3:         #f3f4f6;
+  --dash-s2:         #fbf9f6;
+  --dash-s3:         #f5f1ea;
 
-  --dash-t1:         #111827;
-  --dash-t2:         #4b5563;
-  --dash-t3:         #6b7280;
+  --dash-t1:         #1c1917;
+  --dash-t2:         #57534e;
+  --dash-t3:         #78716c;
 
-  --dash-border:     rgba(0, 0, 0, 0.07);
-  --dash-border-h:   rgba(124, 58, 237, 0.25);
+  --dash-border:     #ece7df;
+  --dash-border-h:   rgba(245, 158, 11, 0.4);
+  --dash-hover-bg:   #fffbf2;
 
   --card-shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 18px rgba(0,0,0,.04);
   --card-shadow-h:   0 10px 36px rgba(0,0,0,.10), 0 0 0 1px rgba(99,102,241,.15);
@@ -170,7 +173,7 @@ body {
   --menu-item-color:    #111827;
   --menu-item-bg-hover: rgba(99, 102, 241, 0.08);
 
-  --sb-bg:           #f0f2f8;
+  --sb-bg:           #f5f1ea;
   --sb-user-bg:      linear-gradient(160deg, #1a4a6e 0%, #0e2d45 100%);
   --sb-border:       rgba(0,0,0,0.08);
   --sb-avatar-bg:    linear-gradient(135deg, #5a6580 0%, #3e4a60 100%);
@@ -179,14 +182,14 @@ body {
   --sb-online-bdr:   #0e2d45;
   --sb-username:     #ffffff;
   --sb-email:        rgba(255,255,255,0.7);
-  --sb-section-line: #d0d4e8;
+  --sb-section-line: #e4ddd2;
   --sb-section-txt:  #c8861a;
-  --sb-item-color:   #4a5570;
-  --sb-item-hover-bg:#e2e6f2;
-  --sb-item-hover-c: #2a3a60;
-  --sb-tile-bg:      #dde2f0;
-  --sb-tile-color:   #5a6580;
-  --sb-foot-border:  #d0d4e8;
+  --sb-item-color:   #57534e;
+  --sb-item-hover-bg:#efe8dc;
+  --sb-item-hover-c: #1c1917;
+  --sb-tile-bg:      #ebe4d8;
+  --sb-tile-color:   #78716c;
+  --sb-foot-border:  #e4ddd2;
 }
 
 // ═══════════════════════════════════════════
