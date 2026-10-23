@@ -114,6 +114,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-top: 3px;
   font-size: 12px;
   color: #34D399;
   font-weight: 500;
@@ -125,7 +126,12 @@
   background: #34D399;
 }
 
-.ic-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.ic-badges {
+  display: flex; gap: 8px; flex-wrap: wrap;
+
+  // KYC badge sits inline with the role badge
+  .kyc-badge { margin-top: 0; padding: 6px 13px; font-size: 12.5px; }
+}
 
 .ic-badge {
   display: inline-flex;

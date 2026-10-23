@@ -20,14 +20,14 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
             <span>{{ authProfile?.email || '—' }}</span>
           </div>
+          <span class="ic-active-pill"><span class="ic-active-dot"></span> Active now</span>
         </div>
       </div>
 
       <div class="ic-divider"></div>
 
       <div class="ic-roles-header">
-        <span class="ic-roles-label">Access roles</span>
-        <span class="ic-active-pill"><span class="ic-active-dot"></span> Active now</span>
+        <span class="ic-roles-label">Roles &amp; status</span>
       </div>
 
       <div class="ic-badges">
@@ -49,14 +49,12 @@
             Customer
           </span>
         }
+        @if (customerProfile) {
+          <span class="kyc-badge" [class]="(customerProfile.kycStatus ?? '').toLowerCase()">
+            KYC: {{ customerProfile.kycStatus }}
+          </span>
+        }
       </div>
-
-      @if (customerProfile) {
-        <div class="ic-divider"></div>
-        <span class="kyc-badge" [class]="(customerProfile.kycStatus ?? '').toLowerCase()">
-          KYC: {{ customerProfile.kycStatus }}
-        </span>
-      }
     </div>
 
     <!-- Right: detail cards -->
